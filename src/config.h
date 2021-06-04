@@ -2,6 +2,10 @@
  * This is the configuration file for tuidoku.
  * Modify this file before installation to change
  * the appearance and behavior of the program
+ * 
+ * If there is anything that you would like to configure
+ * that you cannot do in this file please let me know at
+ * philipphuket AT gmail.
  */
 #pragma once
 
