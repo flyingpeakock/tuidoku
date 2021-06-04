@@ -4,9 +4,20 @@
  * the appearance and behavior of the program
  */
 #pragma once
-#include <ncurses.h>
 
 #define TITLE "Tuidoku"
+
+/*
+ * To set a key to a special character such as
+ * DEL please refer to these two sites to 
+ * set the correct value. Do not put this value inside
+ * of quotation marks.
+ * https://github.com/python/cpython/blob/main/Lib/curses/ascii.py
+ * https://docs.python.org/3/library/curses.ascii.html#module-curses.ascii
+ * 
+ *  For example to set the QUIT_KEY to delete:
+ *      #define QUIT_KEY 0x7f
+ */
 
 // Movement keys
 // These keys will work along side the arrow keys
