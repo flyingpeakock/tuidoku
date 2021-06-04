@@ -6,6 +6,7 @@ Window::Window(Board *g, char *navKeys){
     game = g;
 
     mode = "Insert mode";
+    title = "Tuidoku";
 
     checkColors = false;
     cursorRow = 0;
@@ -64,7 +65,6 @@ void Window::printBoard() {
         }
         if (windowRows - BoardRows > 3) {
             attron(A_BOLD | A_UNDERLINE);
-            char title[] = "Console Sudoku";
             mvprintw(boardTop - 3, (windowCols - strlen(title)) / 2, "%s", title);
             attroff(A_BOLD | A_UNDERLINE);
         }

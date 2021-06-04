@@ -6,7 +6,7 @@
 #include <random>
 
 void printHelp() {
-    const char *helptext = "usage: console_sodoku [OPTIONS] \n\n"
+    const char *helptext = "usage: tuidoku [OPTIONS] \n\n"
                            "Play Sudoku in the terminal.\n\n"
                            "Optional args:\n"
                            "-h, --help       View this page\n"
@@ -27,8 +27,7 @@ void printHelp() {
                            "https://en.wikipedia.org/wiki/Sudoku\n\n"
                            "See the readme for more information.\n"
                            "The readme can be read online at:\n"
-                           "https://github.com/flyingpeakock/Console_sudoku/blob/master/README.md\n"
-                           "https://philipj.ydns.eu/stagit/Console_sudoku/file/README.md.html\n";
+                           "https://github.com/flyingpeakock/tuidoku/blob/master/README.md\n";
     printf(helptext);
 }
 

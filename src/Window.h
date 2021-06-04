@@ -17,6 +17,8 @@ class Window {
         bool checkColors;
         int highlightNum;
 
+        const char *title;
+
         char leftKey;
         char downKey;
         char upKey;

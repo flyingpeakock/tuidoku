@@ -1,4 +1,4 @@
-# Console Sudoku
+# Tuidoku
 
 Simple ncurses program to play sudoku in the terminal
 written entirely in C++
@@ -31,30 +31,24 @@ clone this repository then compile using g++ or clang++
 
 ### Linux
 ```
-git clone https://github.com/flyingpeakock/Console_sudoku.git
-cd Console_sudoku/
-g++ -O3 -pthread ./src/*.cpp -lncursesw -o console_sudoku
+git clone https://github.com/flyingpeakock/tuidoku.git
+cd tuidoku/
+g++ -O3 -pthread ./src/*.cpp -lncursesw -o tuidoku
 ```
 ### OSX
 ```
-git clone https://github.com/flyingpeakock/Console_sudoku.git
-cd Console_sudoku/
-clang++ -O3 -pthread -std=c++11 -stdlib=libc++ ./src/*.cpp -lncursesw -o console_sudoku
-```
-
-### AUR
-This program is also located on the arch user repository.
-```
-yay -S console_sudoku
+git clone https://github.com/flyingpeakock/tuidoku.git
+cd tuidoku/
+clang++ -O3 -pthread -std=c++11 -stdlib=libc++ ./src/*.cpp -lncursesw -o tuidoku
 ```
 
 -lncursesw flag is required to link ncurses.h   
 -O3 is recommended to speed up puzzle generation but is not required.   
 
 To run this program from any directory move the generated
-console_sudoku file to anywhere in your $PATH.
+tuidoku file to anywhere in your $PATH.
 ```
-cp console_sudoku ~/.local/bin/console_sudoku
+cp tuidoku ~/.local/bin/tuidoku
 ```
 
 ### Troubleshooting
