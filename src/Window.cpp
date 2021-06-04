@@ -1,12 +1,12 @@
 #include "Window.h"
 #include <locale.h>
 #include <string.h>
+#include "config.h"
 
-Window::Window(Board *g, char *navKeys){
+Window::Window(Board *g){
     game = g;
 
     mode = "Insert mode";
-    title = "Tuidoku";
 
     checkColors = false;
     cursorRow = 0;
@@ -14,11 +14,6 @@ Window::Window(Board *g, char *navKeys){
     highlightNum = 0;
 
     auto keyidx = 0;
-    leftKey = navKeys[keyidx++];
-    downKey = navKeys[keyidx++];
-    upKey = navKeys[keyidx++];
-    rightKey = navKeys[keyidx++];
-
     setlocale(LC_ALL, "");
     
     initscr();
@@ -30,10 +25,10 @@ Window::Window(Board *g, char *navKeys){
     if (has_colors()) {
         use_default_colors();
         start_color();
-        init_pair(1, COLOR_RED, -1);
-        init_pair(2, COLOR_BLUE, -1);
-        init_pair(3, COLOR_YELLOW, -1);
-        init_pair(4, COLOR_CYAN, -1);
+        init_pair(1, ERROR_COLOR, -1);
+        init_pair(2, CORRECT_COLOR, -1);
+        init_pair(3, HIGHLIGHT_COLOR, -1);
+        init_pair(4, LOWLIGHT_COLOR, -1);
     }
 
     printBoard();
@@ -63,9 +58,9 @@ void Window::printBoard() {
             refresh();
             return;
         }
-        if (windowRows - BoardRows > 3) {
+        if (windowRows - BoardRows > 3 && PRINT_TITLE) {
             attron(A_BOLD | A_UNDERLINE);
-            mvprintw(boardTop - 3, (windowCols - strlen(title)) / 2, "%s", title);
+            mvprintw(boardTop - 3, (windowCols - strlen(TITLE)) / 2, "%s", TITLE);
             attroff(A_BOLD | A_UNDERLINE);
         }
         printBoxes();
@@ -133,7 +128,7 @@ void Window::printPencil() {
                move(row, col);
                for (auto k : idx) {
                    char c = marks[i][j][k];
-                   if (!checkColors && c - '0' == highlightNum){
+                   if (!checkColors && c - '0' == highlightNum && HIGHLIGHT_SELECTED){
                        attron(COLOR_PAIR(3));
                    }
                    addch(c);
@@ -164,13 +159,13 @@ void Window::printNumbs() {
 
             attron(A_BOLD);
 
-            if (!game->isRemaining(ch - '0')) {
+            if (!game->isRemaining(ch - '0') && DIM_COMPLETED) {
                 attron(COLOR_PAIR(4));
             }
             // Draw over potential pencilmarks
             mvprintw(row, col - 1, "   ");
 
-            if (!checkColors && ch - '0' == highlightNum) {
+            if (!checkColors && ch - '0' == highlightNum && HIGHLIGHT_SELECTED) {
                 attron(COLOR_PAIR(3));
             }
 
@@ -197,41 +192,66 @@ void Window::printNumbs() {
 }
 
 void Window::printInstructions() {
-    if (windowCols - BoardCols < 24) {
+    if (windowCols - BoardCols < 24 || !PRINT_HELP) {
         return;
     }
 
     int row = boardTop + 3;
     int col = boardLeft + BoardCols + 5;
 
-    mvaddch(row, col + 3, upKey);
-    mvaddch(row + 2, col, leftKey);
-    mvaddch(row + 2, col + 6, rightKey);
-    mvaddch(row + 4, col + 3, downKey);
+    mvaddch(row, col + 3, UP_KEY);
+    mvaddch(row + 2, col, LEFT_KEY);
+    mvaddch(row + 2, col + 6, RIGHT_KEY);
+    mvaddch(row + 4, col + 3, DOWN_KEY);
     attron(A_UNDERLINE);
-    mvaddch(row + 8, col, 'i');
+    mvaddch(row + 8, col, INSERT_KEY);
     attroff(A_UNDERLINE);
-    printw("nsert");
+    if (INSERT_KEY == 'i' || INSERT_KEY == 'I') {
+        printw("nsert");
+    }
+    else {
+        printw(" insert");
+    }
     attron(A_UNDERLINE);
-    mvaddch(row + 9, col, 'p');
+    mvaddch(row + 9, col, PENCIL_KEY);
     attroff(A_UNDERLINE);
-    printw("encil");
+    if (PENCIL_KEY == 'p' || PENCIL_KEY == 'P') {
+        printw("encil");
+    }
+    else {
+        printw(" pencil");
+    }
     attron(A_UNDERLINE);
-    mvaddch(row + 10, col, 'g');
+    mvaddch(row + 10, col, GO_KEY);
     attroff(A_UNDERLINE);
-    printw("o");
+    if (GO_KEY == 'g' || GO_KEY == 'G') {
+        printw("o");
+    }
+    else {
+        printw(" go");
+    }
     attron(A_UNDERLINE);
-    mvaddch(row+11, col, 'c');
+    mvaddch(row+11, col, CHECK_KEY);
     attroff(A_UNDERLINE);
-    printw("heck");
+    if (CHECK_KEY == 'c' || CHECK_KEY == 'C') {
+        printw("heck");
+    }
+    else {
+        printw(" check");
+    }
     attron(A_UNDERLINE);
-    mvaddch(row + 12, col, 'q');
+    mvaddch(row + 12, col, QUIT_KEY);
     attroff(A_UNDERLINE);
-    printw("uit");
+    if (QUIT_KEY == 'q' || QUIT_KEY == 'Q') {
+        printw("uit");
+    }
+    else {
+        printw(" quit");
+    }
 }
 
 void Window::printCoords() {
-    if (windowCols - BoardCols < 4) {
+    if (windowCols - BoardCols < 4 || !PRINT_COORDS) {
         return;
     }
 
@@ -252,7 +272,7 @@ void Window::printCoords() {
 }
 
 void Window::printMode() {
-    if (windowRows <= BoardRows) {
+    if (windowRows <= BoardRows || !PRINT_STATUS) {
         return;
     }
     move(boardTop + BoardRows, boardLeft);

@@ -2,9 +2,10 @@
 #include "Stopwatch.h"
 #include <ctime>
 #include <sstream>
+#include "config.h"
 
-Game::Game(Board b, char *navKeys): board(b), window(&board, navKeys) {
-    mode = 'i';
+Game::Game(Board b): board(b), window(&board) {
+    mode = INSERT_KEY;
     row = 0;
     col = 0;
 }
@@ -12,63 +13,60 @@ Game::Game(Board b, char *navKeys): board(b), window(&board, navKeys) {
 void Game::mainLoop() {
     board.startPlaying();
     Stopwatch timer;
-    timer.start();
+    if (START_TIMER)
+        timer.start();
     while (board.isPlaying()) {
         window.printBoard();
         wchar_t prevMode = mode;
         int ch = wgetch(stdscr);
         switch (ch) {
         case KEY_LEFT:
-        case 'a':
-        case 'h':
+        case LEFT_KEY:
             left();
             break;
         case KEY_DOWN:
-        case 's':
-        case 'j':
+        case DOWN_KEY:
             down();
             break;
         case KEY_UP:
-        case 'w':
-        case 'k':
+        case UP_KEY:
             up();
             break;
         case KEY_RIGHT:
-        case 'd':
-        case 'l':
+        case RIGHT_KEY:
             right();
             break;
-        case 'g':
+        case GO_KEY:
             changeMode(ch);
             window.printBoard();
             go();
             changeMode(prevMode);
             break;
-        case 'i':
-        case 'p':
+        case INSERT_KEY:
+        case PENCIL_KEY:
             changeMode(ch);
             break;
-        case 'q':
+        case QUIT_KEY:
             board.stopPlaying();
             break;
-        case 'c':
+        case CHECK_KEY:
             window.check();
             break;
-        case 27:
-            if (mode == 'i') {
-                changeMode('p');
+        case TOGGLE_KEY:
+            if (mode == INSERT_KEY) {
+                changeMode(PENCIL_KEY);
             }
             else {
-                changeMode('i');
+                changeMode(INSERT_KEY);
             }
             break;
         default:
             if ((ch > '0' && ch <= '9') || ch == ' ') {
                 window.select(ch);
-                if (mode == 'i') {
+                if (mode == INSERT_KEY) {
                     insert(ch);
                 }
-                else if (mode == 'p') {
+                else if (mode == PENCIL_KEY) {
                     pencil(ch);
                 }
             }
@@ -76,12 +74,14 @@ void Game::mainLoop() {
 
         board.isWon();
     }
-    timer.stop();
+    if (START_TIMER)
+        timer.stop();
     if (!board.isWon()) {
         return;
     }
 
-    window.changeMode(timer.timeTaken());
+    if (START_TIMER)
+        window.changeMode(timer.timeTaken());
     window.printBoard();
 
     getch();
@@ -98,15 +98,15 @@ void Game::pencil(char val) {
 void Game::changeMode(wchar_t c) {
     std::string s;
     switch (c) {
-    case L'i':
+    case INSERT_KEY:
         s = "Input mode";
         mode = c;
         break;
-    case L'p':
+    case PENCIL_KEY:
         s = "Pencil mode";
         mode = c;
         break;
-    case L'g':
+    case GO_KEY:
         s = "Go";
         mode = c;
         break;
@@ -148,7 +148,7 @@ void Game::go() {
     char c = 0;
     while (c < '1' || c > '9') {
         c = getch();
-        if (c == 'q') {
+        if (c == 'q' || c == 27) {
             return;
         }
     }

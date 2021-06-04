@@ -67,14 +67,10 @@ std::string getRandomSdmPuzzle(const char *fileName) {
 }
 
 int main(int argc, char *argv[]) {
-    char navKeys[] = "hjkl";
     Generator *gen = nullptr;
     for (auto i = 1; i < argc; i++) {
         if (atoi(argv[i]) > 0) {
             gen = new Generator(atoi(argv[i]));
-        }
-        if (strcmp(argv[i], "-w") == 0 || strcmp(argv[i], "--wasd") == 0) {
-            strcpy(navKeys, "aswd");
         }
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             printHelp();
@@ -90,7 +86,7 @@ int main(int argc, char *argv[]) {
     if (!gen)
         gen = new Generator();
     Board board(*gen);
-    Game game(board, navKeys);
+    Game game(board);
     game.mainLoop();
     delete gen;
 }

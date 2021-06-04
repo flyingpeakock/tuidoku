@@ -1,4 +1,5 @@
 #include "Board.h"
+#include "config.h"
 
 Board::Board(Generator gen): playGrid(gen.getGrid()), startGrid(playGrid), solutionGrid(gen.getSolution()) {
     for (auto &array : pencilMarks) {
@@ -116,6 +117,8 @@ void Board::pencil(char val, int row, int col) {
 }
 
 void Board::removeMarks(char val, int row, int col) {
+    if (!REMOVE_MARKS)
+        return;
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < pencilMarks[row][i].size(); j++) {
             auto &mark = pencilMarks[row][i];

@@ -17,13 +17,6 @@ class Window {
         bool checkColors;
         int highlightNum;
 
-        const char *title;
-
-        char leftKey;
-        char downKey;
-        char upKey;
-        char rightKey;
-
         void printBoxes();
         void printPencil();
         void printNumbs();
@@ -32,7 +25,7 @@ class Window {
         void printMode();
         void printCursor();
     public:
-        Window(Board *g, char *navKeys);
+        Window(Board *g);
         ~Window();
         void moveCursor(int row, int col);
         void printBoard();
