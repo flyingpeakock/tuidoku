@@ -75,15 +75,14 @@ void Board::insert(char val, int row, int col) {
     }
 
     if (val > '0' && val <= '9') {
+        restoreMarks(row, col);
         if (playGrid[row][col] != 0)
             count[playGrid[row][col]]--;
         count[val - '0']++;
         playGrid[row][col] = val - '0';
     }
 
-    if (playGrid[row][col] == solutionGrid[row][col]) {
-        removeMarks(val, row, col);
-    }
+    removeMarks(val, row, col);
 }
 
 void Board::pencil(char val, int row, int col) {
@@ -159,9 +158,11 @@ void Board::restoreMarks(int row, int col) {
     for (auto i = 0; i < 9; i++) {
         if (pencilHistory[row][i][cell{row, col}]) {
             pencil(pencilHistory[row][i][cell{row, col}], row, i);
+            pencilHistory[row][i][cell{row, col}] = 0;
         }
         if (pencilHistory[i][col][cell{row, col}]) {
             pencil(pencilHistory[i][col][cell{row, col}], i, col);
+            pencilHistory[i][col][cell{row, col}] = 0;
         }
     }
     int boxRow = (row / 3) * 3;
@@ -170,6 +171,7 @@ void Board::restoreMarks(int row, int col) {
         for (auto j = boxCol; j < boxCol + 3; j++){
             if (pencilHistory[i][j][cell{row, col}]) {
                 pencil(pencilHistory[i][j][cell{row, col}], i, j);
+                pencilHistory[i][j][cell{row, col}] = 0;
             }
         }
     }
