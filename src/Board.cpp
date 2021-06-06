@@ -1,5 +1,7 @@
 #include "Board.h"
 #include "config.h"
+#include <iostream>
+#include <sstream>
 
 Board::Board(Generator gen): playGrid(gen.getGrid()), startGrid(playGrid), solutionGrid(gen.getSolution()) {
     for (auto &array : pencilMarks) {
@@ -182,4 +184,34 @@ bool Board::isRemaining(int val) {
     if (val == 0)
         return true;
     return count[val] < 9;
+}
+
+void Board::printBoard(std::ostream &stream) {
+    std::stringstream boardStream;
+    boardStream << TOPROW << '\n';
+    for (auto i = 0; i < 3; i++) {
+        boardStream << ROW1 << '\n';
+        boardStream << ROW2 << '\n';
+        boardStream << ROW1 << '\n';
+        boardStream << ROW2 << '\n';
+        boardStream << ROW1 << '\n';
+        if (i != 2)
+            boardStream << ROW3 << '\n';
+    }
+    boardStream << BOTROW << '\n';
+    std::string boardString = boardStream.str();
+    int idx = 0;
+    for (auto i = 0; i < 9; i++) {
+        idx += std::string{TOPROW}.size() + 5;
+        for (auto j = 0; j < 9; j++) {
+            if (playGrid[i][j] != 0)
+                boardString[idx] = playGrid[i][j] + '0';
+            idx += 6;
+        }
+    }
+    stream << boardString;
+}
+
+void Board::printBoard() {
+    printBoard(std::cout);
 }

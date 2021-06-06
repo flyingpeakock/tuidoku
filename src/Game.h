@@ -12,7 +12,7 @@ class Game{
     public:
         Game(Board b);
         void mainLoop();
-        void changeMode(wchar_t c);
+        void changeMode(char c);
         void up();
         void down();
         void left();

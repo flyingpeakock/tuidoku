@@ -8,7 +8,9 @@
 
 #define SIZE 9
 
-Generator::Generator():Generator(81){};
+Generator::Generator(){
+    generate(0);
+};
 
 Generator::Generator(const char *gridString) {
     if (strlen(gridString) != 81)
@@ -24,8 +26,26 @@ Generator::Generator(const char *gridString) {
     solver.solve();
 }
 
-Generator::Generator(int maxUnknowns) {
+Generator::Generator(int unknowns) {
+    if (unknowns > 64)
+        unknowns = 64;
+    generateGiveEmpty(unknowns);
+}
 
+void Generator::generateGiveEmpty(int unknowns) {
+    generate(unknowns);
+    int empty = 0;
+    for (auto i = 0; i < grid.size(); i++) {
+        for (auto j = 0; j < grid[i].size(); j++) {
+            if (grid[i][j] == 0)
+                empty++;
+        }
+    }
+    if (empty != unknowns)
+        generateGiveEmpty(unknowns);
+}
+
+void Generator::generate(int unknown) {
     struct Cell
     {
         int row;
@@ -56,22 +76,24 @@ Generator::Generator(int maxUnknowns) {
     int unknowns = 0;
     for (auto cell: cells) {
         grid[cell.row][cell.col] = 0;
-        solver = Solver(grid);
+        solver.changeGrid(grid);
         solver.solve();
         if (!solver.isUnique()) {
             // Removal of value does not produce unique solution
             // Put it back
             grid[cell.row][cell.col] = cell.val;
         }
-        else
+        else {
             unknowns++;
-        if (unknowns == maxUnknowns)
+        }
+        if (unknown && unknowns >= unknown)
             break;
     }
 
     // Solve again incase last removal broke the puzzle
-    solver = Solver(grid);
+    solver.changeGrid(grid);
     solver.solve();
+
 }
 
 

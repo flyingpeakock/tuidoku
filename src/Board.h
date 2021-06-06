@@ -2,6 +2,7 @@
 #include "Generator.h"
 #include <vector>
 #include <map>
+#include <ostream>
 
 class Board {
     private:
@@ -44,4 +45,7 @@ class Board {
 
         void insert(char val, int row, int col);
         void pencil(char val, int row, int col);
+
+        void printBoard(std::ostream &stream);
+        void printBoard();
 };

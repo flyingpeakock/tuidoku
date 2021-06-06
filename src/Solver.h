@@ -17,5 +17,5 @@ class Solver {
         std::array<std::array<int, 9>, 9> getGrid();
         void solve();
         bool isUnique();
-        void changeGrid(int **board);
+        void changeGrid(std::array<std::array<int, 9>, 9> g);
 };

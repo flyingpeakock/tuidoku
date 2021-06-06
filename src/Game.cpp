@@ -95,7 +95,7 @@ void Game::pencil(char val) {
     board.pencil(val, row, col);
 }
 
-void Game::changeMode(wchar_t c) {
+void Game::changeMode(char c) {
     std::string s;
     switch (c) {
     case INSERT_KEY:

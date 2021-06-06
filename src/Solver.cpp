@@ -128,3 +128,8 @@ void Solver::solve() {
 bool Solver::isUnique() {
     return solutions == 1;
 }
+
+void Solver::changeGrid(std::array<std::array<int, 9>, 9> g) {
+    solutions = 0;
+    grid = g;
+}

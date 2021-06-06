@@ -4,6 +4,7 @@
 #include <fstream>
 #include <chrono>
 #include <random>
+#include <sstream>
 
 void printHelp() {
     const char *helptext = "usage: tuidoku [OPTIONS] \n\n"
@@ -50,6 +51,7 @@ std::string getRandomXMLPuzzle(const char *fileName) {
     }
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     srand(seed);
+    file.close();
     return puzzles[rand() % puzzles.size()];
 }
 
@@ -63,7 +65,24 @@ std::string getRandomSdmPuzzle(const char *fileName) {
     }
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     srand(seed);
+    file.close();
     return puzzles[rand() % puzzles.size()];
+}
+
+std::string getSSPuzzle(const char *fileName) {
+    std::ifstream file;
+    std::stringstream puzzle;
+    std::string line;
+    file.open(fileName);
+    while (file.good()) {
+        char c = file.get();
+        if ('1' <= c || '9' >= c) {
+            puzzle << c;
+        }
+        else if ('.' == c || 'X' == c) {
+            puzzle << '0';
+        }
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -84,9 +103,10 @@ int main(int argc, char *argv[]) {
         }
     }
     if (!gen)
-        gen = new Generator();
+        gen = new Generator(64);
     Board board(*gen);
-    Game game(board);
-    game.mainLoop();
+    board.printBoard();
+    /*Game game(board);
+    game.mainLoop();*/
     delete gen;
 }
