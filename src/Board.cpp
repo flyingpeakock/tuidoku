@@ -124,6 +124,7 @@ void Board::removeMarks(char val, int row, int col) {
             auto &mark = pencilMarks[row][i];
             if (val == mark[j] && mark[j] != ' ') {
                 mark.erase(mark.begin() + j);
+                pencilHistory[row][i][cell{row, col}] = val;
                 break;
             }
         }
@@ -131,6 +132,7 @@ void Board::removeMarks(char val, int row, int col) {
             auto &mark = pencilMarks[i][col];
             if (val == mark[j] && mark[j] != ' ') {
                 mark.erase(mark.begin() + j);
+                pencilHistory[i][col][cell{row, col}] = val;
                 break;
             }
         }
@@ -144,6 +146,7 @@ void Board::removeMarks(char val, int row, int col) {
             for (auto k = 0; k < mark.size(); k++) {
                 if (val == mark[k] && mark[k] != ' ') {
                     mark.erase(mark.begin() + k);
+                    pencilHistory[i][col][cell{row, col}] = val;
                     break;
                 }
             }

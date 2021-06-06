@@ -5,11 +5,17 @@
 
 class Board {
     private:
+        struct cell {
+            int row;
+            int col;
+        };
+
         std::array<std::array<int, 9>, 9> playGrid;
         std::array<std::array<int, 9>, 9> startGrid;
         std::array<std::array<int, 9>, 9> solutionGrid;
 
         std::array<std::array<std::vector<char>, 9>, 9> pencilMarks;
+        std::array<std::array<std::map<cell, char>, 9>, 9> pencilHistory;
 
         std::map<int, int> count;
 
