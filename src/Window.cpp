@@ -257,8 +257,22 @@ void Window::printCoords() {
 
     int col = boardLeft + 2;
 
+    char colCoord;
+    char rowCoord;
+    if (ALPHABETICAL_COL) {
+        colCoord = 'a';
+    }
+    else {
+        colCoord = '1';
+    }
+    if (ALPHABETICAL_ROW) {
+        rowCoord = 'a';
+    }
+    else {
+        rowCoord = '1';
+    }
     for (auto i = '1'; i <= '9'; i++) {
-        mvaddch(boardTop - 1, col, i);
+        mvaddch(boardTop - 1, col, colCoord++);
         col += 4;
     }
 
@@ -266,7 +280,7 @@ void Window::printCoords() {
 
     int row = boardTop + 1;
     for (auto i = '1'; i <= '9'; i++) {
-        mvaddch(row, col, i);
+        mvaddch(row, col, rowCoord++);
         row += 2;
     }
 }

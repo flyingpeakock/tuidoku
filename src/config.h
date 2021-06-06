@@ -63,9 +63,11 @@
 // Visual settings
 
 #define PRINT_TITLE true
-#define PRINT_HELP true
+#define PRINT_HELP false
 #define PRINT_COORDS true
 #define PRINT_STATUS true // If false time taken to solve a puzzle will not be shown.
+#define ALPHABETICAL_ROW false
+#define ALPHABETICAL_COL true
 
 // Behavioural settings
 

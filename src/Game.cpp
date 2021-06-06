@@ -146,20 +146,23 @@ void Game::right() {
 void Game::go() {
     char r = 0;
     char c = 0;
-    while (c < '1' || c > '9') {
+
+    const char rChar = ALPHABETICAL_ROW ? 'a' : '1';
+    const char cChar = ALPHABETICAL_COL ? 'a' : '1';
+    while (c < cChar || c > cChar + 8) {
         c = getch();
-        if (c == 'q' || c == 27) {
+        if (c == 'q' || c == TOGGLE_KEY) {
             return;
         }
     }
 
-    while (r < '1' || r > '9') {
+    while (r < rChar || r > rChar + 8) {
         r = getch();
-        if (r == 'q') {
+        if (r == 'q' || r == TOGGLE_KEY) {
             return;
         }
     }
-    window.moveCursor(r - '1', c - '1');
-    row = r - '1';
-    col = c - '1';
+    row = r - rChar;
+    col = c - cChar;
+    window.moveCursor(row, col);
 }
