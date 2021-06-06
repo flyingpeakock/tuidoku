@@ -25,10 +25,15 @@ Window::Window(Board *g){
     if (has_colors()) {
         use_default_colors();
         start_color();
-        init_pair(1, ERROR_COLOR, -1);
-        init_pair(2, CORRECT_COLOR, -1);
-        init_pair(3, HIGHLIGHT_COLOR, -1);
-        init_pair(4, LOWLIGHT_COLOR, -1);
+        init_pair(1, ERROR_COLOR, BACKGROUND_COLOR);
+        init_pair(2, CORRECT_COLOR, BACKGROUND_COLOR);
+        init_pair(3, HIGHLIGHT_COLOR, BACKGROUND_COLOR);
+        init_pair(4, LOWLIGHT_COLOR, BACKGROUND_COLOR);
+        init_pair(5, BOARD_COLOR, BACKGROUND_COLOR);
+        init_pair(6, GIVEN_COLOR, BACKGROUND_COLOR);
+        init_pair(7, PLACED_COLOR, BACKGROUND_COLOR);
+
+        init_pair(10, FOREGROUND_COLOR, BACKGROUND_COLOR);
     }
 
     printBoard();
@@ -54,13 +59,17 @@ void Window::printBoard() {
         clear();
         if (windowRows < BoardRows || windowCols < BoardCols) {
             char error[] = "Not enough space to draw board";
+            attron(COLOR_PAIR(10));
             mvprintw(windowRows / 2, (windowCols - strlen(error)) / 2, "%s", error);
+            attroff(COLOR_PAIR(10));
             refresh();
             return;
         }
         if (windowRows - BoardRows > 3 && PRINT_TITLE) {
             attron(A_BOLD | A_UNDERLINE);
+            attron(COLOR_PAIR(10));
             mvprintw(boardTop - 3, (windowCols - strlen(TITLE)) / 2, "%s", TITLE);
+            attroff(COLOR_PAIR(10));
             attroff(A_BOLD | A_UNDERLINE);
         }
         printBoxes();
@@ -101,6 +110,7 @@ void Window::printBoxes() {
     
     int startHeight = boardTop;
     attron(A_BOLD);
+    attron(COLOR_PAIR(5));
     mvprintw(startHeight, boardLeft, "%s", topRow);
     for (auto i = 0; i < 3; i++) {
         mvprintw(++startHeight, boardLeft, "%s", middleRow);
@@ -113,6 +123,7 @@ void Window::printBoxes() {
     }
     mvprintw(++startHeight, boardLeft, "%s", botRow);
     attroff(A_BOLD);
+    attroff(COLOR_PAIR(5));
 }
 
 void Window::printPencil() {
@@ -171,6 +182,7 @@ void Window::printNumbs() {
 
             if (ch - '0' == start[i][j]) {
                 attron(A_UNDERLINE);
+                attron(COLOR_PAIR(6));
             }
             else if (checkColors && grid[i][j] == solution[i][j]) {
                 attron(COLOR_PAIR(2));
@@ -178,8 +190,13 @@ void Window::printNumbs() {
             else if (checkColors && grid[i][j] != solution[i][j]) {
                 attron(COLOR_PAIR(1));
             }
+            else {
+                attron(COLOR_PAIR(7));
+            }
             mvaddch(row, col, ch);
             attroff(A_UNDERLINE);
+            attroff(COLOR_PAIR(7));
+            attroff(COLOR_PAIR(6));
             attroff(COLOR_PAIR(4));
             attroff(COLOR_PAIR(3));
             attroff(COLOR_PAIR(2));
@@ -199,6 +216,7 @@ void Window::printInstructions() {
     int row = boardTop + 3;
     int col = boardLeft + BoardCols + 5;
 
+    attron(COLOR_PAIR(10));
     mvaddch(row, col + 3, UP_KEY);
     mvaddch(row + 2, col, LEFT_KEY);
     mvaddch(row + 2, col + 6, RIGHT_KEY);
@@ -248,6 +266,7 @@ void Window::printInstructions() {
     else {
         printw(" quit");
     }
+    attroff(COLOR_PAIR(0));
 }
 
 void Window::printCoords() {
@@ -271,6 +290,9 @@ void Window::printCoords() {
     else {
         rowCoord = '1';
     }
+
+    attron(COLOR_PAIR(10));
+
     for (auto i = '1'; i <= '9'; i++) {
         mvaddch(boardTop - 1, col, colCoord++);
         col += 4;
@@ -283,15 +305,19 @@ void Window::printCoords() {
         mvaddch(row, col, rowCoord++);
         row += 2;
     }
+
+    attroff(COLOR_PAIR(10));
 }
 
 void Window::printMode() {
     if (windowRows <= BoardRows || !PRINT_STATUS) {
         return;
     }
+    attron(COLOR_PAIR(10));
     move(boardTop + BoardRows, boardLeft);
     clrtoeol();
     printw("%s", mode.c_str());
+    attroff(COLOR_PAIR(10));
 }
 
 void Window::printCursor() {

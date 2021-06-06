@@ -55,19 +55,27 @@
  * To disable any color set the value to -1
  */
 
+#define FOREGROUND_COLOR -1
+#define BACKGROUND_COLOR -1 // Changing this is experimental
+
 #define ERROR_COLOR COLOR_RED
 #define CORRECT_COLOR COLOR_BLUE
+
 #define HIGHLIGHT_COLOR COLOR_YELLOW
 #define LOWLIGHT_COLOR COLOR_CYAN
+
+#define BOARD_COLOR FOREGROUND_COLOR
+#define GIVEN_COLOR FOREGROUND_COLOR
+#define PLACED_COLOR FOREGROUND_COLOR
 
 // Visual settings
 
 #define PRINT_TITLE true
-#define PRINT_HELP false
+#define PRINT_HELP true
 #define PRINT_COORDS true
 #define PRINT_STATUS true // If false time taken to solve a puzzle will not be shown.
 #define ALPHABETICAL_ROW false
-#define ALPHABETICAL_COL true
+#define ALPHABETICAL_COL false
 
 // Behavioural settings
 
