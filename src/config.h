@@ -77,6 +77,16 @@
 #define ALPHABETICAL_ROW false
 #define ALPHABETICAL_COL false
 
+/*
+ * Check out https://en.wikipedia.org/wiki/Box-drawing_character#Unicode
+ * for other characters that you can use
+ */ 
+#define TOPROW "╔═══╤═══╤═══╦═══╤═══╤═══╦═══╤═══╤═══╗"
+#define ROW1   "║   │   │   ║   │   │   ║   │   │   ║"
+#define ROW2   "╟───┼───┼───╫───┼───┼───╫───┼───┼───╢"
+#define ROW3   "╠═══╪═══╪═══╬═══╪═══╪═══╬═══╪═══╪═══╣"
+#define BOTROW "╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝"
+
 // Behavioural settings
 
 #define START_TIMER true

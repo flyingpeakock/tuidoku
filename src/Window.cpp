@@ -85,43 +85,20 @@ void Window::printBoard() {
 }
 
 void Window::printBoxes() {
-
-    const char topRow[] = "\u2554\u2550\u2550\u2550\u2564\u2550\u2550\u2550\u2564"
-                          "\u2550\u2550\u2550\u2566\u2550\u2550\u2550\u2564\u2550"
-                          "\u2550\u2550\u2564\u2550\u2550\u2550\u2566\u2550\u2550"
-                          "\u2550\u2564\u2550\u2550\u2550\u2564\u2550\u2550\u2550\u2557";
-    const char middleRow[] = "\u2551   \u2502   \u2502   \u2551   \u2502"
-                             "   \u2502   \u2551   \u2502   \u2502   \u2551";
-    const char middleRow2[] = "\u255f\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u253c"
-                              "\u2500\u2500\u2500\u256b\u2500\u2500\u2500\u253c"
-                              "\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u256b"
-                              "\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u253c"
-                              "\u2500\u2500\u2500\u2562";
-    const char middleRow3[] = "\u2560\u2550\u2550\u2550\u256a\u2550\u2550\u2550\u256a"
-                              "\u2550\u2550\u2550\u256c\u2550\u2550\u2550\u256a"
-                              "\u2550\u2550\u2550\u256a\u2550\u2550\u2550\u256c"
-                              "\u2550\u2550\u2550\u256a\u2550\u2550\u2550\u256a"
-                              "\u2550\u2550\u2550\u2563";
-    const char botRow[] = "\u255a\u2550\u2550\u2550\u2567\u2550\u2550\u2550\u2567"
-                          "\u2550\u2550\u2550\u2569\u2550\u2550\u2550\u2567"
-                          "\u2550\u2550\u2550\u2567\u2550\u2550\u2550\u2569"
-                          "\u2550\u2550\u2550\u2567\u2550\u2550\u2550\u2567"
-                          "\u2550\u2550\u2550\u255d";
-    
     int startHeight = boardTop;
     attron(A_BOLD);
     attron(COLOR_PAIR(5));
-    mvprintw(startHeight, boardLeft, "%s", topRow);
+    mvprintw(startHeight, boardLeft, TOPROW);
     for (auto i = 0; i < 3; i++) {
-        mvprintw(++startHeight, boardLeft, "%s", middleRow);
-        mvprintw(++startHeight, boardLeft, "%s", middleRow2);
-        mvprintw(++startHeight, boardLeft, "%s", middleRow);
-        mvprintw(++startHeight, boardLeft, "%s", middleRow2);
-        mvprintw(++startHeight, boardLeft, "%s", middleRow);
+        mvprintw(++startHeight, boardLeft, ROW1);
+        mvprintw(++startHeight, boardLeft, ROW2);
+        mvprintw(++startHeight, boardLeft, ROW1);
+        mvprintw(++startHeight, boardLeft, ROW2);
+        mvprintw(++startHeight, boardLeft, ROW1);
         if (i != 2)
-            mvprintw(++startHeight, boardLeft, "%s", middleRow3);
+            mvprintw(++startHeight, boardLeft, ROW3);
     }
-    mvprintw(++startHeight, boardLeft, "%s", botRow);
+    mvprintw(++startHeight, boardLeft, BOTROW);
     attroff(A_BOLD);
     attroff(COLOR_PAIR(5));
 }
