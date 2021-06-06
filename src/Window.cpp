@@ -155,9 +155,11 @@ void Window::printNumbs() {
 
             if (!checkColors && ch - '0' == highlightNum && HIGHLIGHT_SELECTED) {
                 attron(COLOR_PAIR(3));
+                if (ch - '0' == start[i][j] && ch - '0') {
+                    attron(A_UNDERLINE);
+                }
             }
-
-            if (ch - '0' == start[i][j]) {
+            else if (ch - '0' == start[i][j] && ch - '0') {
                 attron(A_UNDERLINE);
                 attron(COLOR_PAIR(6));
             }
