@@ -7,6 +7,7 @@
  * that you cannot do in this file please let me know at
  * philipphuket AT gmail.
  */
+
 #pragma once
 
 #define TITLE "Tuidoku"
@@ -38,7 +39,7 @@
 #define CHECK_KEY 'c'
 #define ERASE_KEY ' '
 #define GO_KEY 'g'
-#define TOGGLE_KEY 27 // escape key. Switches between insert and pencil
+#define TOGGLE_KEY 27 // 27 = ESC. Switches between insert and pencil
 
 // Colors
 
@@ -85,7 +86,17 @@
 #define ROW1   "║   │   │   ║   │   │   ║   │   │   ║"
 #define ROW2   "╟───┼───┼───╫───┼───┼───╫───┼───┼───╢"
 #define ROW3   "╠═══╪═══╪═══╬═══╪═══╪═══╬═══╪═══╪═══╣"
-#define BOTROW "╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝"
+#define BOTROW "╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝" 
+
+/*
+// Example of alternate box drawing characters
+#define TOPROW "┏━━━┯━━━┯━━━┳━━━┯━━━┯━━━┳━━━┯━━━┯━━━┓"
+#define ROW1   "┃   │   │   ┃   │   │   ┃   │   │   ┃"
+#define ROW2   "┠───┼───┼───╂───┼───┼───╂───┼───┼───┨"
+#define ROW3   "┣━━━┿━━━┿━━━╋━━━┿━━━┿━━━╋━━━┿━━━┿━━━┫"
+#define BOTROW "┗━━━┷━━━┷━━━┻━━━┷━━━┷━━━┻━━━┷━━━┷━━━┛"
+*/
+
 
 // Behavioural settings
 
