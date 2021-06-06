@@ -207,7 +207,7 @@ void Board::printBoard(std::array<std::array<int, 9>, 9> grid, std::ostream &str
     for (auto i = 0; i < 9; i++) {
         idx += std::string{TOPROW}.size() + 5;
         for (auto j = 0; j < 9; j++) {
-            if (playGrid[i][j] != 0)
+            if (grid[i][j] != 0)
                 boardString[idx] = grid[i][j] + '0';
             idx += 6;
         }

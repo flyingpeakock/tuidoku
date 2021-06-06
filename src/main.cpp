@@ -34,28 +34,6 @@ void printHelp() {
 
 
 int main(int argc, char *argv[]) {
-    /*Generator *gen = nullptr;
-    /*for (auto i = 1; i < argc; i++) {
-        if (atoi(argv[i]) > 0) {
-            gen = new Generator(atoi(argv[i]));
-        }
-        if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
-            printHelp();
-            return 0;
-        }
-        if (strcmp(argv[i], "--opensudoku") == 0 && !gen) {
-            gen = new Generator(file::getRandomXMLPuzzle(argv[i+1]).c_str());
-        }
-        if (strcmp(argv[i], "--sdm") == 0 && !gen) {
-            gen = new Generator(file::getRandomSDMPuzzle(argv[i+1]).c_str());
-        }
-    }
-    if (!gen)
-        gen = new Generator(64);
-    gen->createBoard().printBoard();
-    /*Game game(board);
-    game.mainLoop();
-    delete gen;*/
     bool help = false;
     bool play = false;
     bool generate = false;
@@ -119,7 +97,7 @@ int main(int argc, char *argv[]) {
             }
         }
         else {
-            if (atoi(argv[i]) > 0) {
+            if (atoi(argv[i]) > 0 && atoi(argv[i]) < 81) {
                 argInt = atoi(argv[i]);
             }
             else {
@@ -172,7 +150,7 @@ int main(int argc, char *argv[]) {
         }
         Generator gen = (filled || empty) ? Generator(argInt) : Generator();
         if (file) {
-            std::fstream fileStream;
+            std::ofstream fileStream;
             fileStream.open(argStr);
             gen.createBoard().printBoard(fileStream);
             return 0;
