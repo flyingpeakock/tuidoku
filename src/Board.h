@@ -8,6 +8,12 @@ class Board {
         struct cell {
             int row;
             int col;
+            bool operator<(const cell &r) const {
+                return (row < r.row || (row == r.row && col < r.col));
+            }
+            bool operator==(const cell &r) const {
+                return row == r.row && col == r.col;
+            }
         };
 
         std::array<std::array<int, 9>, 9> playGrid;
@@ -20,6 +26,7 @@ class Board {
         std::map<int, int> count;
 
         void removeMarks(char val, int row, int col);
+        void restoreMarks(int row, int col);
 
         bool playing;
     public:

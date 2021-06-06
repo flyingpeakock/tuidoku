@@ -69,6 +69,7 @@ void Board::insert(char val, int row, int col) {
         if (playGrid[row][col] != 0) {
             count[playGrid[row][col]]--;
             playGrid[row][col] = 0;
+            restoreMarks(row, col);
         }
         return;
     }
@@ -146,12 +147,33 @@ void Board::removeMarks(char val, int row, int col) {
             for (auto k = 0; k < mark.size(); k++) {
                 if (val == mark[k] && mark[k] != ' ') {
                     mark.erase(mark.begin() + k);
-                    pencilHistory[i][col][cell{row, col}] = val;
+                    pencilHistory[i][j][cell{row, col}] = val;
                     break;
                 }
             }
         }
     }
+}
+
+void Board::restoreMarks(int row, int col) {
+    for (auto i = 0; i < 9; i++) {
+        if (pencilHistory[row][i][cell{row, col}]) {
+            pencil(pencilHistory[row][i][cell{row, col}], row, i);
+        }
+        if (pencilHistory[i][col][cell{row, col}]) {
+            pencil(pencilHistory[i][col][cell{row, col}], i, col);
+        }
+    }
+    int boxRow = (row / 3) * 3;
+    int boxCol = (col / 3) * 3;
+    for (auto i = boxRow; i < boxRow + 3; i++) {
+        for (auto j = boxCol; j < boxCol + 3; j++){
+            if (pencilHistory[i][j][cell{row, col}]) {
+                pencil(pencilHistory[i][j][cell{row, col}], i, j);
+            }
+        }
+    }
+
 }
 
 bool Board::isRemaining(int val) {
