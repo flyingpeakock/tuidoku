@@ -1,5 +1,4 @@
 #pragma once
-#include "Generator.h"
 #include <vector>
 #include <map>
 #include <ostream>
@@ -28,10 +27,11 @@ class Board {
 
         void removeMarks(char val, int row, int col);
         void restoreMarks(int row, int col);
+        void printBoard(std::array<std::array<int, 9>, 9> grid, std::ostream &stream);
 
         bool playing;
     public:
-        Board(Generator gen);
+        Board(std::array<std::array<int, 9>, 9> startGrid, std::array<std::array<int, 9>, 9> finishGrid);
         void startPlaying();
         void stopPlaying();
         bool isPlaying();
@@ -48,4 +48,6 @@ class Board {
 
         void printBoard(std::ostream &stream);
         void printBoard();
+        void printSolution(std::ostream &stream);
+        void printSolution();
 };

@@ -1,5 +1,6 @@
 #pragma once
 #include "Solver.h"
+#include "Board.h"
 
 class Generator {
     private:
@@ -14,4 +15,5 @@ class Generator {
         Generator(const char *gridString);
         std::array<std::array<int, 9>, 9> getGrid();
         std::array<std::array<int, 9>, 9> getSolution();
+        Board createBoard();
 };

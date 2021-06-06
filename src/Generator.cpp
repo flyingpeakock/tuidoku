@@ -104,3 +104,7 @@ std::array<std::array<int, 9>, 9> Generator::getGrid() {
 std::array<std::array<int, 9>, 9> Generator::getSolution() {
     return solver.getGrid();
 }
+
+Board Generator::createBoard() {
+    return Board(grid, solver.getGrid());
+}

@@ -3,7 +3,9 @@
 #include <iostream>
 #include <sstream>
 
-Board::Board(Generator gen): playGrid(gen.getGrid()), startGrid(playGrid), solutionGrid(gen.getSolution()) {
+Board::Board(std::array<std::array<int, 9>, 9> startGrid,
+             std::array<std::array<int, 9>, 9> finishGrid
+            ): playGrid(startGrid), startGrid(startGrid), solutionGrid(finishGrid) {
     for (auto &array : pencilMarks) {
         for (auto &vec : array) {
             for (auto i = 0; i < 3; i++) {
@@ -15,6 +17,7 @@ Board::Board(Generator gen): playGrid(gen.getGrid()), startGrid(playGrid), solut
     for (auto i = 1; i <= 9; i++) {
         count.insert({i, 0});
     }
+
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
             int val = startGrid[i][j];
@@ -186,7 +189,7 @@ bool Board::isRemaining(int val) {
     return count[val] < 9;
 }
 
-void Board::printBoard(std::ostream &stream) {
+void Board::printBoard(std::array<std::array<int, 9>, 9> grid, std::ostream &stream) {
     std::stringstream boardStream;
     boardStream << TOPROW << '\n';
     for (auto i = 0; i < 3; i++) {
@@ -205,7 +208,7 @@ void Board::printBoard(std::ostream &stream) {
         idx += std::string{TOPROW}.size() + 5;
         for (auto j = 0; j < 9; j++) {
             if (playGrid[i][j] != 0)
-                boardString[idx] = playGrid[i][j] + '0';
+                boardString[idx] = grid[i][j] + '0';
             idx += 6;
         }
     }
@@ -213,5 +216,17 @@ void Board::printBoard(std::ostream &stream) {
 }
 
 void Board::printBoard() {
-    printBoard(std::cout);
+    printBoard(playGrid, std::cout);
+}
+
+void Board::printBoard(std::ostream &stream) {
+    printBoard(playGrid, stream);
+}
+
+void Board::printSolution() {
+    printBoard(solutionGrid, std::cout);
+}
+
+void Board::printSolution(std::ostream &stream) {
+    printBoard(solutionGrid, stream);
 }
