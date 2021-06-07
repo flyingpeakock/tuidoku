@@ -76,25 +76,25 @@ int main(int argc, char *argv[]) {
         }
         else if (argv[i][0] == '-' && argv[i][1] == '-') {
             // Long form arguments
-            if (strcmp(argv[i]+2, "help")) {
+            if (strcmp(argv[i]+2, "help") == 0) {
                 help = true;
             }
-            else if (strcmp(argv[i]+2, "play")) {
+            else if (strcmp(argv[i]+2, "play") == 0) {
                 play = true;
             }
-            else if (strcmp(argv[i]+2, "generate")) {
+            else if (strcmp(argv[i]+2, "generate") == 0) {
                 generate = true;
             }
-            else if (strcmp(argv[i]+2, "solve")) {
+            else if (strcmp(argv[i]+2, "solve") == 0) {
                 solve = true;
             }
-            else if (strcmp(argv[i]+2, "file")) {
+            else if (strcmp(argv[i]+2, "file") == 0) {
                 file = true;
             }
-            else if (strcmp(argv[i]+2, "empty")) {
+            else if (strcmp(argv[i]+2, "empty") == 0) {
                 empty = true;
             }
-            else if (strcmp(argv[i]+2, "filled")) {
+            else if (strcmp(argv[i]+2, "filled") == 0) {
                 filled = true;
             }
         }
@@ -141,12 +141,12 @@ int main(int argc, char *argv[]) {
         std::cout << "Requires a numeric argument";
         return 1;
     }
+    if (filled) {
+        argInt = 81 - argInt;
+    }
     // Done parsing arguments
 
     if (generate) {
-        if (filled) {
-            argInt = 81 - argInt;
-        }
         if (argInt > 64) {
             std::cout << "No unique sudoku puzzle exists with fewer than 17 given digits.\n";
         }
