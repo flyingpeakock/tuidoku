@@ -22,8 +22,9 @@ Generator::Generator(const char *gridString) {
             grid[i][j] = gridString[idx++] - '0';
         }
     }
-    solver = Solver(gridString);
+    Solver solver(grid);
     solver.solve();
+    solution = solver.getGrid();
 }
 
 Generator::Generator(int unknowns) {
@@ -54,7 +55,7 @@ void Generator::generate(int unknown) {
     };
     
 
-    solver = Solver();
+    Solver solver = Solver();
     solver.solve();
     grid = solver.getGrid();
 
@@ -93,6 +94,7 @@ void Generator::generate(int unknown) {
     // Solve again incase last removal broke the puzzle
     solver.changeGrid(grid);
     solver.solve();
+    solution = solver.getGrid();
 
 }
 
@@ -102,9 +104,9 @@ std::array<std::array<int, 9>, 9> Generator::getGrid() {
 }
 
 std::array<std::array<int, 9>, 9> Generator::getSolution() {
-    return solver.getGrid();
+    return solution;
 }
 
 Board Generator::createBoard() {
-    return Board(grid, solver.getGrid());
+    return Board(grid, solution);
 }

@@ -5,7 +5,7 @@
 class Generator {
     private:
         std::array<std::array<int, 9>, 9> grid;
-        Solver solver;
+        std::array<std::array<int, 9>, 9> solution;
         void generate(int unknown);
         void generateGiveEmpty(int unknowns);
 
