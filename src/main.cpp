@@ -5,6 +5,8 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include "config.h"
 
 void printHelp() {
     const char *helptext = "usage: tuidoku [OPTIONS] \n\n"
@@ -41,7 +43,7 @@ int main(int argc, char *argv[]) {
     bool file = false;
     bool empty = false;
     bool filled = false;
-    char *argStr;
+    char *argStr = nullptr;
     int argInt = 0;
     for (auto i = 1; i < argc; i++) {
         if (argv[i][0] == '-' && argv[i][1] != '-') {
@@ -164,6 +166,10 @@ int main(int argc, char *argv[]) {
             Board b = file::getPuzzle(argStr);
             b.printSolution();
         }
+        else if (argStr) {
+            // Assume that the puzzle is argStr
+            file::getStringPuzzle(argStr).printSolution();
+        }
         else {
             std::cout << "TODO: create a way to interactively input puzzle";
         }
@@ -171,7 +177,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (play) {
-        Board b = file ? file::getPuzzle(argStr) : ((empty || filled) ? Generator(argInt).createBoard() : Generator().createBoard());
+        Board b = file ? file::getPuzzle(argStr) : (argStr ? file::getStringPuzzle(argStr) : (empty || filled) ? Generator(argInt).createBoard() : Generator().createBoard());
         Game game(b);
         game.mainLoop();
         return 0;

@@ -1,9 +1,11 @@
 #include "File.h"
+#include <iostream>
 #include "Generator.h"
 #include <fstream>
 #include <chrono>
 #include <random>
 #include <sstream>
+#include "config.h"
 
 Board file::getPuzzle(const char *fileName) {
     std::ifstream file;
@@ -31,7 +33,6 @@ Board file::getPuzzle(const char *fileName) {
         return getRandomXMLPuzzle(file);
     }
 
-
     // file does not end with regular file endings
     // checking for xml tags
     std::string line;
@@ -39,15 +40,37 @@ Board file::getPuzzle(const char *fileName) {
         char c = file.get();
         if (c == '<') {
             // assuming xml since it has <
-            file.close();
             return getRandomXMLPuzzle(file);
         }
     }
-    file.close();
+    file.clear();
+    
+    file.seekg(std::ios_base::beg);
+    while (file.good()) {
+        char c = file.get();
+        if (c == TOPROW[1]) {
+            return getTuidokuPuzzle(file);
+        }
+    }
+    file.clear();
     return getSDKPuzzle(file); // Attempting with this function
 }
 
+Board file::getStringPuzzle(const char *puzzleString) {
+    std::stringstream puzzle(puzzleString);
+
+    if (puzzle.str().find(TOPROW) != std::string::npos) {
+        return getTuidokuPuzzle(puzzle);
+    }
+    puzzle.seekg(std::ios_base::beg);
+    if (puzzle.str().find('<') != std::string::npos) {
+        return getRandomXMLPuzzle(puzzle);
+    }
+    return getSDKPuzzle(puzzle);
+}
+
 Board file::getSDKPuzzle(std::istream &file) {
+    file.seekg(std::ios_base::beg);
     std::stringstream stringStream;
     std::string line;
     while (getline(file, line)) {
@@ -66,6 +89,7 @@ Board file::getSDKPuzzle(std::istream &file) {
 }
 
 Board file::getRandomXMLPuzzle(std::istream &file) {
+    file.seekg(std::ios_base::beg);
     std::string line;
     std::vector<std::string> puzzles;
     while (getline(file, line)) {
@@ -86,6 +110,7 @@ Board file::getRandomXMLPuzzle(std::istream &file) {
 }
 
 Board file::getRandomSDMPuzzle(std::istream &file) {
+    file.seekg(std::ios_base::beg);
     std::vector<std::string> puzzles;
     std::string line;
     while(getline(file, line)) {
@@ -97,11 +122,11 @@ Board file::getRandomSDMPuzzle(std::istream &file) {
 }
 
 Board file::getSSPuzzle(std::istream &file) {
+    file.seekg(std::ios_base::beg);
     std::stringstream puzzle;
-    std::string line;
     while (file.good()) {
         char c = file.get();
-        if ('1' <= c || '9' >= c) {
+        if ('1' <= c && '9' >= c) {
             puzzle << c;
         }
         else if ('.' == c || 'X' == c || 'x' == c || '0' == c) {
@@ -109,4 +134,24 @@ Board file::getSSPuzzle(std::istream &file) {
         }
     }
     return Generator{puzzle.str().c_str()}.createBoard();
+}
+
+Board file::getTuidokuPuzzle(std::istream &file) {
+    file.seekg(std::ios_base::beg);
+    std::ostringstream sstr;
+    std::string rawPuzzle;
+    sstr << file.rdbuf();
+    rawPuzzle = sstr.str();
+    
+    std::ostringstream puzzleStream;
+    for (auto i = 0; i < rawPuzzle.length(); i++) {
+        char c = rawPuzzle[i];
+        if ('1' <= c && '9' >= c) {
+            puzzleStream << c;
+        }
+        else if (c == ' ' && rawPuzzle[i+1] == ' ' && rawPuzzle[i+2] == ' ') {
+            puzzleStream << '0';
+        }
+    }
+    return Generator{puzzleStream.str().c_str()}.createBoard();
 }

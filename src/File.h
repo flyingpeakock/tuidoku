@@ -7,4 +7,6 @@ namespace file {
     Board getRandomSDMPuzzle(std::istream &file);
     Board getSSPuzzle(std::istream &file);
     Board getPuzzle(const char *fileName);
+    Board getStringPuzzle(const char *puzzleString);
+    Board getTuidokuPuzzle(std::istream &file);
 }
