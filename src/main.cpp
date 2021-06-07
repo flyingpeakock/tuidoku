@@ -1,11 +1,11 @@
 #include "Game.h"
 #include "File.h"
+#include "Arguments.h"
 #include "Generator.h"
 #include <string.h>
 #include <string>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include "config.h"
 
 void printHelp() {
@@ -36,122 +36,41 @@ void printHelp() {
 
 
 int main(int argc, char *argv[]) {
-    bool help = false;
-    bool play = false;
-    bool generate = false;
-    bool solve = false;
-    bool file = false;
-    bool empty = false;
-    bool filled = false;
-    char *argStr = nullptr;
+
+    std::map<std::string, bool> args = arguments::parse(argc, argv);
     int argInt = 0;
-    for (auto i = 1; i < argc; i++) {
-        if (argv[i][0] == '-' && argv[i][1] != '-') {
-            // Single letter arguments, loop through every letter
-            for (auto j = 1; j < strlen(argv[i]); j++) {
-                char c = argv[i][j];
-                switch(c) {
-                    case 'h':
-                    help = true;
-                    break;
-                    case 'p':
-                    play = true;
-                    break;
-                    case 'g':
-                    generate = true;
-                    break;
-                    case 's':
-                    solve = true;
-                    break;
-                    case 'f':
-                    file = true;
-                    break;
-                    case 'e':
-                    empty = true;
-                    break;
-                    case 'F':
-                    filled = true;
-                }
-            }
-        }
-        else if (argv[i][0] == '-' && argv[i][1] == '-') {
-            // Long form arguments
-            if (strcmp(argv[i]+2, "help") == 0) {
-                help = true;
-            }
-            else if (strcmp(argv[i]+2, "play") == 0) {
-                play = true;
-            }
-            else if (strcmp(argv[i]+2, "generate") == 0) {
-                generate = true;
-            }
-            else if (strcmp(argv[i]+2, "solve") == 0) {
-                solve = true;
-            }
-            else if (strcmp(argv[i]+2, "file") == 0) {
-                file = true;
-            }
-            else if (strcmp(argv[i]+2, "empty") == 0) {
-                empty = true;
-            }
-            else if (strcmp(argv[i]+2, "filled") == 0) {
-                filled = true;
-            }
-        }
-        else {
-            if (atoi(argv[i]) > 0 && atoi(argv[i]) < 81) {
-                argInt = atoi(argv[i]);
-            }
-            else {
-                argStr = argv[i];
-            }
+    std::string argStr;
+    if (args["file"]) {
+        argStr = arguments::getFileName(argc, argv);
+        if (argStr == "404") {
+            std::cout << "No file name supplied.\n";
+            return 1;
         }
     }
+    if (args["empty"]) {
+        argInt = arguments::getInt(argc, argv);
+    }
+    else if (args["filled"]) {
+        argInt = 81 - arguments::getInt(argc, argv);
+    }
 
-    if (help) {
-        printHelp();
+    if ((args["empty"] || args["filled"]) && !argInt) {
+        std::cout << "No number supplied.\n";
+        return 1;
+    }
+
+    if (args["help"]) {
+        arguments::printHelp();
         return 0;
     }
 
-    // Set play to true if generate and solve are false
-    if (!generate && !solve)
-        play = true;
-
-    // Making sure incompatible arguments havent been given
-    if (generate && solve || generate && play || solve && play) {
-        std::cout << "Incompatible arguments sUpplied.\nEither generate, solve or play\n";
+    if (arguments::incompatible(args))
         return 1;
-    }
 
-    if (solve && empty || solve && filled) {
-        std::cout << "This program only supports completely solving puzzles\nAll squares will be filled.\n";
-    }
 
-    if (empty && filled) {
-        std::cout << "Either supply the number of empty squares or the number of squares to fill.\n";
-        return 1;
-    }
-
-    if (file && !argStr) {
-        std::cout << "No file name given.\n";
-        return 1;
-    }
-
-    if ((empty && !argInt) || (filled && !argInt)) {
-        std::cout << "Requires a numeric argument";
-        return 1;
-    }
-    if (filled) {
-        argInt = 81 - argInt;
-    }
-    // Done parsing arguments
-
-    if (generate) {
-        if (argInt > 64) {
-            std::cout << "No unique sudoku puzzle exists with fewer than 17 given digits.\n";
-        }
-        Generator gen = (filled || empty) ? Generator(argInt) : Generator();
-        if (file) {
+    if (args["generate"]) {
+        Generator gen = (args["filled"] || args["empty"]) ? Generator(argInt) : Generator();
+        if (args["file"]) {
             std::ofstream fileStream;
             fileStream.open(argStr);
             gen.createBoard().printBoard(fileStream);
@@ -161,14 +80,14 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    if (solve) {
-        if (file) {
-            Board b = file::getPuzzle(argStr);
+    if (args["solve"]) {
+        if (args["file"]) {
+            Board b = file::getPuzzle(argStr.c_str());
             b.printSolution();
         }
-        else if (argStr) {
+        else if (!argStr.empty()) {
             // Assume that the puzzle is argStr
-            file::getStringPuzzle(argStr).printSolution();
+            file::getStringPuzzle(argStr.c_str()).printSolution();
         }
         else {
             std::cout << "TODO: create a way to interactively input puzzle";
@@ -176,8 +95,9 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    if (play) {
-        Board b = file ? file::getPuzzle(argStr) : (argStr ? file::getStringPuzzle(argStr) : (empty || filled) ? Generator(argInt).createBoard() : Generator().createBoard());
+
+    if (args["play"]) {
+        Board b = args["file"] ? file::getPuzzle(argStr.c_str()) : (!argStr.empty() ? file::getStringPuzzle(argStr.c_str()) : (args["empty"] || args["filled"]) ? Generator(argInt).createBoard() : Generator().createBoard());
         Game game(b);
         game.mainLoop();
         return 0;
