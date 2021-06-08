@@ -3,12 +3,26 @@
 #include "Window.h"
 #include "Board.h"
 
-class Game{
-    private:
+class Controller {
+    protected:
         Board board;
+        BasicWindow window;
+        int row, col;
+    public:
+        Controller(Board b);
+        virtual void mainLoop();
+        virtual void up();
+        virtual void down();
+        virtual void left();
+        virtual void right();
+        virtual void insert(char val);
+        virtual void go();
+};
+
+class Game : public Controller {
+    private:
         Window window;
         wchar_t mode;
-        int row, col;
     public:
         Game(Board b);
         void mainLoop();
