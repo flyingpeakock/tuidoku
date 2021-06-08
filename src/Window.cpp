@@ -369,4 +369,5 @@ void Window::clear() {
             addch(' ');
         }
     }
+    attroff(COLOR_PAIR(10));
 }
