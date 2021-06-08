@@ -32,6 +32,10 @@ BasicWindow::~BasicWindow() {
     endwin();
 }
 
+Board *BasicWindow::getBoard() {
+    return game;
+}
+
 void BasicWindow::printInstructions() {
     return;
 }

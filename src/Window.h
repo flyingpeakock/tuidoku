@@ -24,6 +24,7 @@ class BasicWindow {
         BasicWindow(Board *g);
         ~BasicWindow();
 
+        Board *getBoard();
         void printBoard();
         void moveCursor(int row, int col);
 };

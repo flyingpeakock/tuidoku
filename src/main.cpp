@@ -87,7 +87,8 @@ void solve(bool file, std::string fileName) {
         gridString << '0';
     }
     Board b = Generator(gridString.str().c_str()).createBoard();;
-    Game game(b);
+    BasicWindow window = BasicWindow(&b);
+    Controller game(&window);
     game.mainLoop();
     return;
 }
@@ -108,6 +109,7 @@ Board createBoard(bool file, std::string fileName, int empty) {
 
 void play(bool file, std::string fileName, int empty) {
     Board b = createBoard(file, fileName, empty);
-    Game game(b);
+    Window win = Window(&b);
+    Game game(&win);
     game.mainLoop();
 }

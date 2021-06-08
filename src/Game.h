@@ -5,34 +5,29 @@
 
 class Controller {
     protected:
-        Board board;
-        BasicWindow window;
-        int row, col;
+        Board *board;
+        BasicWindow *window;
+        int row : 5;
+        int col : 5;
     public:
-        Controller(Board b);
+        Controller(BasicWindow *win);
         virtual void mainLoop();
-        virtual void up();
-        virtual void down();
-        virtual void left();
-        virtual void right();
-        virtual void insert(char val);
-        virtual void go();
-};
-
-class Game : public Controller {
-    private:
-        Window window;
-        wchar_t mode;
-    public:
-        Game(Board b);
-        void mainLoop();
-        void changeMode(char c);
         void up();
         void down();
         void left();
         void right();
         void insert(char val);
-        void pencil(char val);
         void go();
+};
+
+class Game : public Controller {
+    private:
+        Window *window;
+        wchar_t mode;
+    public:
+        Game(Window *win);
+        void mainLoop();
+        void changeMode(char c);
+        void pencil(char val);
         void check();
 };
