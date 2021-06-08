@@ -184,6 +184,30 @@ void BasicWindow::moveCursor(int row, int col) {
     cursorCol = col;
 }
 
+SolveWindow::SolveWindow(Board *g) : BasicWindow(g) {
+    solver.changeGrid(game->getPlayGrid());
+    printInstructions();
+}
+
+void SolveWindow::printInstructions() {
+    if (windowCols - BoardCols < 36 || !PRINT_HELP) {
+        return;
+    }
+    int row = boardTop + 3;
+    int col = boardLeft + BoardCols + 5;
+
+    attron(COLOR_PAIR(10));
+    mvaddch(row, col + 3, UP_KEY);
+    mvaddch(row + 2, col, LEFT_KEY);
+    mvaddch(row + 2, col + 6, RIGHT_KEY);
+    mvaddch(row + 4, col + 3, DOWN_KEY);
+    row += 8;
+    mvprintw(row, col, "Insert digits");
+    mvprintw(++row, col, "until the");
+    mvprintw(++row, col, "solution is");
+    mvprintw(++row, col, "unique.");
+}
+
 Window::Window(Board *g): BasicWindow(g){
     mode = "Insert mode";
     checkColors = false;

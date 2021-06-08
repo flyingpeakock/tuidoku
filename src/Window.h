@@ -3,6 +3,7 @@
 #include "Board.h"
 #include <ncurses.h>
 #include <string>
+#include "Solver.h"
 
 class BasicWindow {
     protected:
@@ -27,6 +28,14 @@ class BasicWindow {
         Board *getBoard();
         void printBoard();
         void moveCursor(int row, int col);
+};
+
+class SolveWindow : public BasicWindow {
+    private:
+        Solver solver;
+        void printInstructions();
+    public:
+        SolveWindow(Board *g);
 };
 
 class Window : public BasicWindow {
