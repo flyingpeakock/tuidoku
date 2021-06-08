@@ -3,45 +3,192 @@
 #include <string.h>
 #include "config.h"
 
-Window::Window(Board *g){
+BasicWindow::BasicWindow(Board *g) {
     game = g;
-
-    mode = "Insert mode";
-
-    checkColors = false;
     cursorRow = 0;
     cursorCol = 0;
-    highlightNum = 0;
-
-    auto keyidx = 0;
     setlocale(LC_ALL, "");
-    
+
     initscr();
 
-    cbreak(); // Get input before enter is pressed;
+    cbreak(); // Get input before enter is pressed
     noecho(); // Don't show keypresses
     keypad(stdscr, true); // Use arrow keys to move
 
     if (has_colors()) {
         use_default_colors();
         start_color();
+        init_pair(5, BOARD_COLOR, BACKGROUND_COLOR);
+        init_pair(7, PLACED_COLOR, BACKGROUND_COLOR);
+        init_pair(10, FOREGROUND_COLOR, BACKGROUND_COLOR);
+    }
+    printBoard();
+}
+
+BasicWindow::~BasicWindow() {
+    endwin();
+}
+
+void BasicWindow::printInstructions() {
+    return;
+}
+
+void BasicWindow::clear() {
+    move(0,0);
+    attron(COLOR_PAIR(10));
+    for (auto i = 0; i < windowRows; i++) {
+        for (auto j = 0; j < windowCols; j++) {
+            addch(' ');
+        }
+    }
+    attroff(COLOR_PAIR(10));
+}
+
+void BasicWindow::printBoxes() {
+    int startHeight = boardTop;
+    attron(A_BOLD);
+    attron(COLOR_PAIR(5));
+    mvprintw(startHeight, boardLeft, TOPROW);
+    for (auto i = 0; i < 3; i++) {
+        mvprintw(++startHeight, boardLeft, ROW1);
+        mvprintw(++startHeight, boardLeft, ROW2);
+        mvprintw(++startHeight, boardLeft, ROW1);
+        mvprintw(++startHeight, boardLeft, ROW2);
+        mvprintw(++startHeight, boardLeft, ROW1);
+        if (i != 2)
+            mvprintw(++startHeight, boardLeft, ROW3);
+    }
+    mvprintw(++startHeight, boardLeft, BOTROW);
+    attroff(A_BOLD);
+    attroff(COLOR_PAIR(5));
+}
+
+void BasicWindow::printNumbs() {
+    auto grid = game->getPlayGrid();
+    int row = boardTop + 1;
+    attron(A_BOLD);
+    attron(COLOR_PAIR(7));
+
+    for (auto i = 0; i < 9; i++) {
+        int col = boardLeft + 2;
+        for (auto j = 0; j < 9; j++) {
+            const char ch = grid[i][j] + '0';
+            if (ch < '1') {
+                col += 4;
+                continue;
+            }
+
+            mvaddch(row, col, ch);
+            col += 4;
+        }
+        row += 2;
+    }
+
+    attroff(A_BOLD);
+    attroff(COLOR_PAIR(7));
+}
+
+void BasicWindow::printCoords() {
+    if (windowCols - BoardCols < 4 || !PRINT_COORDS) {
+        return;
+    }
+
+    int col = boardLeft + 2;
+
+    char colCoord;
+    char rowCoord;
+    if (ALPHABETICAL_COL) {
+        colCoord = 'a';
+    }
+    else {
+        colCoord = '1';
+    }
+    if (ALPHABETICAL_ROW) {
+        rowCoord = 'a';
+    }
+    else {
+        rowCoord = '1';
+    }
+
+    attron(COLOR_PAIR(10));
+
+    for (auto i = '1'; i <= '9'; i++) {
+        mvaddch(boardTop - 1, col, colCoord++);
+        col += 4;
+    }
+
+    col = boardLeft - 2;
+
+    int row = boardTop + 1;
+    for (auto i = '1'; i <= '9'; i++) {
+        mvaddch(row, col, rowCoord++);
+        row += 2;
+    }
+
+    attroff(COLOR_PAIR(10));
+}
+
+void BasicWindow::printCursor() {
+    int row = cursorRow * 2 + boardTop + 1;
+    int col = cursorCol * 4 + boardLeft + 2;
+    move(row, col);
+}
+
+void BasicWindow::printBoard() {
+    int oldRows = windowRows;
+    int oldCols = windowCols;
+    getmaxyx(stdscr, windowRows, windowCols);
+    bool resize = (oldRows != windowRows || oldCols != windowCols);
+
+    boardTop = (windowRows - BoardRows) / 2;
+    boardLeft = (windowCols - BoardCols) / 2;
+    int gridTop = boardTop + 1;
+    int gridLeft = boardLeft + 2;
+
+    if (resize) {
+        clear();
+        if (windowRows < BoardRows || windowCols < BoardCols) {
+            char error[] = "Not enough space to draw board";
+            attron(COLOR_PAIR(10));
+            mvprintw(windowRows / 2, (windowCols - strlen(error)) / 2, "%s", error);
+            attroff(COLOR_PAIR(10));
+            refresh();
+            return;
+        }
+        if (windowRows - BoardRows > 3 && PRINT_TITLE) {
+            attron(A_BOLD | A_UNDERLINE);
+            attron(COLOR_PAIR(10));
+            mvprintw(boardTop - 3, (windowCols - strlen(TITLE)) / 2, "%s", TITLE);
+            attroff(COLOR_PAIR(10));
+            attroff(A_BOLD | A_UNDERLINE);
+        }
+        printBoxes();
+        printCoords();
+    }
+
+    printNumbs();
+    printCursor();
+    refresh();
+}
+
+void BasicWindow::moveCursor(int row, int col) {
+    cursorRow = row;
+    cursorCol = col;
+}
+
+Window::Window(Board *g): BasicWindow(g){
+    mode = "Insert mode";
+    checkColors = false;
+    highlightNum = 0;
+
+    if (has_colors()) {
         init_pair(1, ERROR_COLOR, BACKGROUND_COLOR);
         init_pair(2, CORRECT_COLOR, BACKGROUND_COLOR);
         init_pair(3, HIGHLIGHT_COLOR, BACKGROUND_COLOR);
         init_pair(4, LOWLIGHT_COLOR, BACKGROUND_COLOR);
-        init_pair(5, BOARD_COLOR, BACKGROUND_COLOR);
         init_pair(6, GIVEN_COLOR, BACKGROUND_COLOR);
-        init_pair(7, PLACED_COLOR, BACKGROUND_COLOR);
-
-        init_pair(10, FOREGROUND_COLOR, BACKGROUND_COLOR);
     }
-
     printBoard();
-
-}
-
-Window::~Window() {
-    endwin();
 }
 
 void Window::printBoard() {
@@ -84,24 +231,6 @@ void Window::printBoard() {
     refresh();
 }
 
-void Window::printBoxes() {
-    int startHeight = boardTop;
-    attron(A_BOLD);
-    attron(COLOR_PAIR(5));
-    mvprintw(startHeight, boardLeft, TOPROW);
-    for (auto i = 0; i < 3; i++) {
-        mvprintw(++startHeight, boardLeft, ROW1);
-        mvprintw(++startHeight, boardLeft, ROW2);
-        mvprintw(++startHeight, boardLeft, ROW1);
-        mvprintw(++startHeight, boardLeft, ROW2);
-        mvprintw(++startHeight, boardLeft, ROW1);
-        if (i != 2)
-            mvprintw(++startHeight, boardLeft, ROW3);
-    }
-    mvprintw(++startHeight, boardLeft, BOTROW);
-    attroff(A_BOLD);
-    attroff(COLOR_PAIR(5));
-}
 
 void Window::printPencil() {
     attron(A_DIM);
@@ -165,6 +294,7 @@ void Window::printNumbs() {
     attroff(A_BOLD);
 }
 
+
 void Window::printInstructions() {
     if (windowCols - BoardCols < 24 || !PRINT_HELP) {
         return;
@@ -226,45 +356,6 @@ void Window::printInstructions() {
     attroff(COLOR_PAIR(0));
 }
 
-void Window::printCoords() {
-    if (windowCols - BoardCols < 4 || !PRINT_COORDS) {
-        return;
-    }
-
-    int col = boardLeft + 2;
-
-    char colCoord;
-    char rowCoord;
-    if (ALPHABETICAL_COL) {
-        colCoord = 'a';
-    }
-    else {
-        colCoord = '1';
-    }
-    if (ALPHABETICAL_ROW) {
-        rowCoord = 'a';
-    }
-    else {
-        rowCoord = '1';
-    }
-
-    attron(COLOR_PAIR(10));
-
-    for (auto i = '1'; i <= '9'; i++) {
-        mvaddch(boardTop - 1, col, colCoord++);
-        col += 4;
-    }
-
-    col = boardLeft - 2;
-
-    int row = boardTop + 1;
-    for (auto i = '1'; i <= '9'; i++) {
-        mvaddch(row, col, rowCoord++);
-        row += 2;
-    }
-
-    attroff(COLOR_PAIR(10));
-}
 
 void Window::printMode() {
     if (windowRows <= BoardRows || !PRINT_STATUS) {
@@ -284,16 +375,6 @@ void Window::printMode() {
     attroff(COLOR_PAIR(10));
 }
 
-void Window::printCursor() {
-    int row = cursorRow * 2 + boardTop + 1;
-    int col = cursorCol * 4 + boardLeft + 2;
-    move(row, col);
-}
-
-void Window::moveCursor(int row, int col) {
-    cursorRow = row;
-    cursorCol = col;
-}
 
 void Window::changeMode(std::string s) {
     mode = s;
@@ -359,15 +440,4 @@ int Window::getColor(char c, int row, int col) {
 
     // Only remaining is placed numbers that aren't highlighted or checked
     return COLOR_PAIR(7) | ret;
-}
-
-void Window::clear() {
-    move(0,0);
-    attron(COLOR_PAIR(10));
-    for (auto i = 0; i < windowRows; i++) {
-        for (auto j = 0; j < windowCols; j++) {
-            addch(' ');
-        }
-    }
-    attroff(COLOR_PAIR(10));
 }

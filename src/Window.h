@@ -4,8 +4,8 @@
 #include <ncurses.h>
 #include <string>
 
-class Window {
-    private:
+class BasicWindow {
+    protected:
         Board *game;
         int cursorRow, cursorCol;
         int windowRows, windowCols;
@@ -13,24 +13,36 @@ class Window {
         const int BoardCols = 37;
         int boardTop;
         int boardLeft;
+        void printBoxes();
+        void printNumbs();
+        void printCoords();
+        void printCursor();
+        void clear();
+        virtual void printInstructions();
+    
+    public:
+        BasicWindow(Board *g);
+        ~BasicWindow();
+
+        void printBoard();
+        void moveCursor(int row, int col);
+};
+
+class Window : public BasicWindow {
+    private:
         std::string mode;
         bool checkColors;
         int highlightNum;
 
-        int getColor(char c, int row, int col);
-        void printBoxes();
-        void printPencil();
         void printNumbs();
         void printInstructions();
-        void printCoords();
-        void printMode();
-        void printCursor();
 
-        void clear();
+        int getColor(char c, int row, int col);
+        void printPencil();
+        void printMode();
+
     public:
         Window(Board *g);
-        ~Window();
-        void moveCursor(int row, int col);
         void printBoard();
         void changeMode(std::string s);
         void check();
