@@ -57,7 +57,7 @@
  */
 
 #define FOREGROUND_COLOR -1
-#define BACKGROUND_COLOR -1 // Changing this is experimental
+#define BACKGROUND_COLOR -1
 
 #define ERROR_COLOR COLOR_RED
 #define CORRECT_COLOR COLOR_BLUE

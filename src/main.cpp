@@ -8,33 +8,6 @@
 #include <iostream>
 #include "config.h"
 
-void printHelp() {
-    const char *helptext = "usage: tuidoku [OPTIONS] \n\n"
-                           "Play Sudoku in the terminal.\n\n"
-                           "Optional args:\n"
-                           "-h, --help       View this page\n"
-                           "-w,  --wasd      Display wasd instead of hjkl\n"
-                           "--opensudoku     Load a puzzle from an opensudoku file\n"
-                           "--sdm            Load a puzzle from an smd file\n"
-                           "INTEGER          Number of squares to leave empty\n\n"
-                           "Move with hjkl, wasd or the arrow keys.\n"
-                           "Enter pencil mode by pressing 'p'.\n"
-                           "Enter insert mode by pressing 'i'.\n"
-                           "Go to a specific square by pressing 'g' followed by the column then row.\n"
-                           "Check the board for mistakes by pressing 'c'.\n"
-                           "Quit the game by pressing 'q'.\n"
-                           "To highlight any occurence of a number insert the number in any mode or\n"
-                           "press spacebar on a prefilled box.\n"
-                           "Hint: pencilmarks do not show up on filled in boxes, use this to highlight.\n\n"
-                           "For information on Sudoku puzzles see the wikipedia entry:\n"
-                           "https://en.wikipedia.org/wiki/Sudoku\n\n"
-                           "See the readme for more information.\n"
-                           "The readme can be read online at:\n"
-                           "https://github.com/flyingpeakock/tuidoku/blob/master/README.md\n";
-    printf(helptext);
-}
-
-
 int main(int argc, char *argv[]) {
 
     std::map<std::string, bool> args = arguments::parse(argc, argv);
@@ -54,7 +27,7 @@ int main(int argc, char *argv[]) {
         argInt = 81 - arguments::getInt(argc, argv);
     }
 
-    if ((args["empty"] || args["filled"]) && !argInt) {
+    if ((args["empty"] || args["filled"]) && argInt == 0) {
         std::cout << "No number supplied.\n";
         return 1;
     }

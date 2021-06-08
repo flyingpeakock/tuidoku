@@ -17,6 +17,7 @@ class Window {
         bool checkColors;
         int highlightNum;
 
+        int getColor(char c, int row, int col);
         void printBoxes();
         void printPencil();
         void printNumbs();
@@ -24,6 +25,8 @@ class Window {
         void printCoords();
         void printMode();
         void printCursor();
+
+        void clear();
     public:
         Window(Board *g);
         ~Window();

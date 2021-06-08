@@ -119,8 +119,12 @@ void Window::printPencil() {
                    if (!checkColors && c - '0' == highlightNum && HIGHLIGHT_SELECTED){
                        attron(COLOR_PAIR(3));
                    }
+                   else {
+                       attron(COLOR_PAIR(10));
+                   }
                    addch(c);
                    attroff(COLOR_PAIR(3));
+                   attroff(COLOR_PAIR(10));
                }
            }
            col += 4;
@@ -136,6 +140,7 @@ void Window::printNumbs() {
     auto solution = game ->getSolution();
 
     int row = boardTop + 1;
+    attron(A_BOLD);
     for (auto i = 0; i < 9; i++) {
         int col = boardLeft + 2;
         for (auto j = 0; j < 9; j++) {
@@ -145,41 +150,14 @@ void Window::printNumbs() {
                 continue;
             }
 
-            attron(A_BOLD);
-
-            if (!game->isRemaining(ch - '0') && DIM_COMPLETED) {
-                attron(COLOR_PAIR(4));
-            }
             // Draw over potential pencilmarks
+            attron(COLOR_PAIR(10));
             mvprintw(row, col - 1, "   ");
+            attroff(COLOR_PAIR(10));
 
-            if (!checkColors && ch - '0' == highlightNum && HIGHLIGHT_SELECTED) {
-                attron(COLOR_PAIR(3));
-                if (ch - '0' == start[i][j] && ch - '0') {
-                    attron(A_UNDERLINE);
-                }
-            }
-            else if (ch - '0' == start[i][j] && ch - '0') {
-                attron(A_UNDERLINE);
-                attron(COLOR_PAIR(6));
-            }
-            else if (checkColors && grid[i][j] == solution[i][j]) {
-                attron(COLOR_PAIR(2));
-            }
-            else if (checkColors && grid[i][j] != solution[i][j]) {
-                attron(COLOR_PAIR(1));
-            }
-            else {
-                attron(COLOR_PAIR(7));
-            }
+            attron(getColor(ch, i, j));
             mvaddch(row, col, ch);
-            attroff(A_UNDERLINE);
-            attroff(COLOR_PAIR(7));
-            attroff(COLOR_PAIR(6));
-            attroff(COLOR_PAIR(4));
-            attroff(COLOR_PAIR(3));
-            attroff(COLOR_PAIR(2));
-            attroff(COLOR_PAIR(1));
+            attroff(getColor(ch, i, j));
             col += 4;
         }
         row += 2;
@@ -294,8 +272,15 @@ void Window::printMode() {
     }
     attron(COLOR_PAIR(10));
     move(boardTop + BoardRows, boardLeft);
+
+    int length;
+    std::string longMode = mode;
+    length = windowCols - boardLeft;
+    while (longMode.length() < length) {
+        longMode += ' ';
+    }
     clrtoeol();
-    printw("%s", mode.c_str());
+    printw("%s", longMode.c_str());
     attroff(COLOR_PAIR(10));
 }
 
@@ -329,5 +314,59 @@ void Window::select(int val) {
     }
     else {
         highlightNum = val - '0';
+    }
+}
+
+int Window::getColor(char c, int row, int col) {
+    c = c - '0';
+    if (!c) {
+        // Empty square, return default color pair
+        return COLOR_PAIR(10);
+    }
+
+    auto start = game->getStartGrid();
+    int ret = 0;
+    if (c == start[row][col] && c) {
+        // Given square, underline it
+        ret = A_UNDERLINE;
+    }
+
+    if (!game->isRemaining(c) && DIM_COMPLETED) {
+        // Dimming numbers that appear 9 times
+        return COLOR_PAIR(4) | ret;
+    }
+
+    if (!checkColors && c == highlightNum && HIGHLIGHT_SELECTED) {
+        // This number is currently selected
+        return COLOR_PAIR(3) | ret;
+    }
+
+    if (c == start[row][col] && c) {
+        // Given number that isn't selected or dimmed
+        return COLOR_PAIR(6) | ret;
+    }
+
+    auto grid = game->getPlayGrid();
+    auto solution = game->getSolution();
+    if (checkColors && grid[row][col] == solution[row][col]) {
+        // Check colors is on and this is correct
+        return COLOR_PAIR(2) | ret;
+    }
+    if (checkColors && grid[row][col] != solution[row][col]) {
+        // Check colors is on and this is incorrect
+        return COLOR_PAIR(1) | ret;
+    }
+
+    // Only remaining is placed numbers that aren't highlighted or checked
+    return COLOR_PAIR(7) | ret;
+}
+
+void Window::clear() {
+    move(0,0);
+    attron(COLOR_PAIR(10));
+    for (auto i = 0; i < windowRows; i++) {
+        for (auto j = 0; j < windowCols; j++) {
+            addch(' ');
+        }
     }
 }

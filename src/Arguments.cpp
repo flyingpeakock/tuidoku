@@ -15,7 +15,7 @@ void arguments::printHelp() {
                            "-e --empty\t\tNumber of empty squares in board. Requires a number.\n\t\t\tCannot be used with -F.\n"
                            "-F --filled\t\tNumber of filled squares in board. Requires a number.\n\t\t\tCannot be used with -e.\n\n"
                            "Configuration is done by editing the file config.h\n"
-                           "That file also contains all the keybinds.";
+                           "That file also contains all the keybinds.\n\n";
     std::cout << helpText << std::endl;
 }
 
@@ -101,7 +101,7 @@ int arguments::getInt(int argc, char *argv[]) {
         if (argv[i][0] == '-')
             continue;
         int ret = atoi(argv[i]);
-        if (ret > 0 && ret >= 81)
+        if (ret > 0 && ret <= 81)
             return ret;
     }
     return 0;
