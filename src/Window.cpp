@@ -22,6 +22,9 @@ BasicWindow::BasicWindow(Board *g) {
         init_pair(7, PLACED_COLOR, BACKGROUND_COLOR);
         init_pair(10, FOREGROUND_COLOR, BACKGROUND_COLOR);
     }
+    printInstructions();
+    printBoard();
+    printCoords();
     printBoard();
 }
 
@@ -163,6 +166,7 @@ void BasicWindow::printBoard() {
             attroff(A_BOLD | A_UNDERLINE);
         }
         printBoxes();
+        printInstructions();
         printCoords();
     }
 
@@ -188,6 +192,9 @@ Window::Window(Board *g): BasicWindow(g){
         init_pair(4, LOWLIGHT_COLOR, BACKGROUND_COLOR);
         init_pair(6, GIVEN_COLOR, BACKGROUND_COLOR);
     }
+    printBoxes();
+    printInstructions();
+    printCoords();
     printBoard();
 }
 
