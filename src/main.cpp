@@ -5,6 +5,7 @@
 #include <string.h>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include "config.h"
 
@@ -80,7 +81,14 @@ void solve(bool file, std::string fileName) {
         file::getStringPuzzle(fileName.c_str()).printSolution();
         return;
     }
-    std::cout << "TODO: create a way to interactively input a puzzle";
+    // std::cout << "TODO: create a way to interactively input a puzzle";
+    std::ostringstream gridString;
+    for (auto i = 0; i < 81; i++) {
+        gridString << '0';
+    }
+    Board b = Generator(gridString.str().c_str()).createBoard();;
+    Game game(b);
+    game.mainLoop();
     return;
 }
 
