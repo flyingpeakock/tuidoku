@@ -8,13 +8,20 @@
 #include <iostream>
 #include "config.h"
 
+void generate(int, bool, std::string);
+void solve(bool, std::string);
+void play(bool, std::string, int);
+
 int main(int argc, char *argv[]) {
 
     std::map<std::string, bool> args = arguments::parse(argc, argv);
+    if (args["help"]) {
+        arguments::printHelp();
+        return 0;
+    }
     int argInt = 0;
-    std::string argStr;
+    std::string argStr = arguments::getFileName(argc, argv);
     if (args["file"]) {
-        argStr = arguments::getFileName(argc, argv);
         if (argStr == "404") {
             std::cout << "No file name supplied.\n";
             return 1;
@@ -32,48 +39,67 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    if (args["help"]) {
-        arguments::printHelp();
-        return 0;
-    }
 
     if (arguments::incompatible(args))
         return 1;
 
-
     if (args["generate"]) {
-        Generator gen = (args["filled"] || args["empty"]) ? Generator(argInt) : Generator();
-        if (args["file"]) {
-            std::ofstream fileStream;
-            fileStream.open(argStr);
-            gen.createBoard().printBoard(fileStream);
-            return 0;
-        }
-        gen.createBoard().printBoard();
+        generate(argInt, args["file"], argStr);
         return 0;
     }
-
     if (args["solve"]) {
-        if (args["file"]) {
-            Board b = file::getPuzzle(argStr.c_str());
-            b.printSolution();
-        }
-        else if (!argStr.empty()) {
-            // Assume that the puzzle is argStr
-            file::getStringPuzzle(argStr.c_str()).printSolution();
-        }
-        else {
-            std::cout << "TODO: create a way to interactively input puzzle";
-        }
+        solve(args["file"], argStr);
         return 0;
     }
-
-
     if (args["play"]) {
-        Board b = args["file"] ? file::getPuzzle(argStr.c_str()) : (!argStr.empty() ? file::getStringPuzzle(argStr.c_str()) : (args["empty"] || args["filled"]) ? Generator(argInt).createBoard() : Generator().createBoard());
-        Game game(b);
-        game.mainLoop();
+        play(args["file"], argStr, argInt);
         return 0;
     }
     
+}
+
+
+void generate(int empty, bool file, std::string fileName) {
+    Generator gen = (empty) ? Generator(empty) : Generator();
+    if (file) {
+        std::ofstream fileStream;
+        fileStream.open(fileName);
+        gen.createBoard().printBoard(fileStream);
+        return;
+    }
+    gen.createBoard().printBoard();
+    return;
+}
+
+void solve(bool file, std::string fileName) {
+    if (file) {
+        file::getPuzzle(fileName.c_str()).printSolution();
+        return;
+    }
+    else if (fileName != "404" && !fileName.empty()) {
+        file::getStringPuzzle(fileName.c_str()).printSolution();
+        return;
+    }
+    std::cout << "TODO: create a way to interactively input a puzzle";
+    return;
+}
+
+Board createBoard(bool file, std::string fileName, int empty) {
+    if (file) {
+        return file::getPuzzle(fileName.c_str());
+    }
+    if (fileName != "404" && !fileName.empty()) {
+        // no file attempting to get string board from fileName
+        return file::getStringPuzzle(fileName.c_str());
+    }
+    if (empty) {
+        return Generator(empty).createBoard();
+    }
+    return Generator().createBoard();
+}
+
+void play(bool file, std::string fileName, int empty) {
+    Board b = createBoard(file, fileName, empty);
+    Game game(b);
+    game.mainLoop();
 }
