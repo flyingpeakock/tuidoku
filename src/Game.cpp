@@ -106,6 +106,7 @@ InteractiveSolver::InteractiveSolver(SolveWindow *win): Controller(win) {
 void InteractiveSolver::mainLoop() {
     board->startPlaying();
     while(board->isPlaying()) {
+        solver.changeGrid(board->getPlayGrid());
         window->printBoard();
         int ch = wgetch(stdscr);
         switch(ch) {
@@ -133,15 +134,17 @@ void InteractiveSolver::mainLoop() {
             break;
         default:
             if ((ch > '0' && ch <= '9') || ch == ' ') {
-                board->insert(ch, row, col);
-                solver.changeGrid(board->getPlayGrid());
-                solver.solve();
-                if (solver.isUnique()) {
-                    board->swapStartGrid(solver.getGrid());
-                    solve();
-                    window->printBoard();
-                    getch();
-                    return;
+                if (solver.isSafe(row, col, ch - '0')) {
+                    board->insert(ch, row, col);
+                    solver.changeGrid(board->getPlayGrid());
+                    solver.solve();
+                    if (solver.isUnique()) {
+                        board->swapStartGrid(solver.getGrid());
+                        solve();
+                        window->printBoard();
+                        getch();
+                        return;
+                    }
                 }
             }
         }
