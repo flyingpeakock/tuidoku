@@ -81,15 +81,20 @@ void solve(bool file, std::string fileName) {
         file::getStringPuzzle(fileName.c_str()).printSolution();
         return;
     }
-    // std::cout << "TODO: create a way to interactively input a puzzle";
     std::ostringstream gridString;
     for (auto i = 0; i < 81; i++) {
         gridString << '0';
     }
     Board b = Generator(gridString.str().c_str()).createBoard();;
     SolveWindow window = SolveWindow(&b);
-    Controller game(&window);
+    InteractiveSolver game(&window);
     game.mainLoop();
+    endwin();
+    std::cout << "Puzzle:\n";
+    b.printStart();
+    std::cout << "Solution:\n";
+    b.printSolution();
+    std::cout << std::endl;
     return;
 }
 

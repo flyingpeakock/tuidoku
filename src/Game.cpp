@@ -41,7 +41,7 @@ void Controller::mainLoop() {
                 break;
             default:
                 if ((ch > '0' && ch <= '9') || ch == ' ') {
-                    insert(ch);
+                    board->insert(ch, row, col);
                 }
         }
     }
@@ -75,10 +75,6 @@ void Controller::right() {
     window->moveCursor(row, ++col);
 }
 
-void Controller::insert(char val) {
-    board->insert(val, row, col);
-}
-
 void Controller::go() {
     char r = 0;
     char c = 0;
@@ -101,6 +97,67 @@ void Controller::go() {
     row = r - rChar;
     col = c - cChar;
     window->moveCursor(row, col);
+}
+
+InteractiveSolver::InteractiveSolver(SolveWindow *win): Controller(win) {
+    window = win;
+};
+
+void InteractiveSolver::mainLoop() {
+    board->startPlaying();
+    while(board->isPlaying()) {
+        window->printBoard();
+        int ch = wgetch(stdscr);
+        switch(ch) {
+        case KEY_LEFT:
+        case LEFT_KEY:
+            left();
+            break;
+        case KEY_DOWN:
+        case DOWN_KEY:
+            down();
+            break;
+        case KEY_UP:
+        case UP_KEY:
+            up();
+            break;
+        case KEY_RIGHT:
+        case RIGHT_KEY:
+            right();
+            break;
+        case GO_KEY:
+            go();
+            break;
+        case QUIT_KEY:
+            board->stopPlaying();
+            break;
+        default:
+            if ((ch > '0' && ch <= '9') || ch == ' ') {
+                board->insert(ch, row, col);
+                solver.changeGrid(board->getPlayGrid());
+                solver.solve();
+                if (solver.isUnique()) {
+                    board->swapStartGrid(solver.getGrid());
+                    solve();
+                    window->printBoard();
+                    getch();
+                    return;
+                }
+            }
+        }
+        board->isWon();
+    }
+    window->printBoard();
+    getch();
+}
+
+void InteractiveSolver::solve() {
+    auto solution = solver.getGrid();
+    for (auto i = 0; i < solution.size(); i++) {
+        for (auto j = 0; j < solution[i].size(); j++) {
+            board->insert(solution[i][j] + '0', i, j);
+        }
+    }
 }
 
 Game::Game(Window *win): Controller(win) {
@@ -148,25 +205,19 @@ void Game::mainLoop() {
             board->stopPlaying();
             break;
         case CHECK_KEY:
-            //window->check();
             window->check();
             break;
         case TOGGLE_KEY:
-            if (mode == INSERT_KEY) {
-                changeMode(PENCIL_KEY);
-            }
-            else {
-                changeMode(INSERT_KEY);
-            }
+            mode == INSERT_KEY ? changeMode(PENCIL_KEY) : changeMode(INSERT_KEY);
             break;
         default:
             if ((ch > '0' && ch <= '9') || ch == ' ') {
                 window->select(ch);
                 if (mode == INSERT_KEY) {
-                    insert(ch);
+                    board->insert(ch, row, col);
                 }
                 else if (mode == PENCIL_KEY) {
-                    pencil(ch);
+                    board->pencil(ch, row, col);
                 }
             }
         }
@@ -185,10 +236,6 @@ void Game::mainLoop() {
     window->printBoard();
 
     getch();
-}
-
-void Game::pencil(char val) {
-    board->pencil(val, row, col);
 }
 
 void Game::changeMode(char c) {

@@ -6,8 +6,8 @@
 class Board {
     private:
         struct cell {
-            int row;
-            int col;
+            int row:5;
+            int col:5;
             bool operator<(const cell &r) const {
                 return (row < r.row || (row == r.row && col < r.col));
             }
@@ -50,4 +50,9 @@ class Board {
         void printBoard();
         void printSolution(std::ostream &stream);
         void printSolution();
+        void printStart(std::ostream &stream);
+        void printStart();
+
+        void swapStartGrid();
+        void swapStartGrid(std::array<std::array<int, 9>, 9> solution);
 };

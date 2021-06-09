@@ -16,8 +16,17 @@ class Controller {
         void down();
         void left();
         void right();
-        void insert(char val);
         void go();
+};
+
+class InteractiveSolver : public Controller {
+    private:
+        SolveWindow *window;
+        Solver solver;
+        void solve();
+    public:
+        InteractiveSolver(SolveWindow *win);
+        void mainLoop();
 };
 
 class Game : public Controller {
@@ -28,6 +37,5 @@ class Game : public Controller {
         Game(Window *win);
         void mainLoop();
         void changeMode(char c);
-        void pencil(char val);
         void check();
 };

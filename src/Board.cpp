@@ -230,3 +230,20 @@ void Board::printSolution() {
 void Board::printSolution(std::ostream &stream) {
     printBoard(solutionGrid, stream);
 }
+
+void Board::printStart() {
+    printBoard(startGrid, std::cout);
+}
+
+void Board::printStart(std::ostream &stream) {
+    printBoard(startGrid, stream);
+}
+
+void Board::swapStartGrid() {
+    startGrid = playGrid;
+}
+
+void Board::swapStartGrid(std::array<std::array<int, 9>, 9> solution) {
+    startGrid = playGrid;
+    solutionGrid = solution;
+}

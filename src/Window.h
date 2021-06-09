@@ -32,7 +32,6 @@ class BasicWindow {
 
 class SolveWindow : public BasicWindow {
     private:
-        Solver solver;
         void printInstructions();
     public:
         SolveWindow(Board *g);

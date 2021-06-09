@@ -79,10 +79,9 @@ void BasicWindow::printNumbs() {
     for (auto i = 0; i < 9; i++) {
         int col = boardLeft + 2;
         for (auto j = 0; j < 9; j++) {
-            const char ch = grid[i][j] + '0';
-            if (ch < '1') {
-                col += 4;
-                continue;
+            char ch = grid[i][j] + '0';
+            if (ch == '0') {
+                ch = ' ';
             }
 
             mvaddch(row, col, ch);
@@ -185,7 +184,6 @@ void BasicWindow::moveCursor(int row, int col) {
 }
 
 SolveWindow::SolveWindow(Board *g) : BasicWindow(g) {
-    solver.changeGrid(game->getPlayGrid());
     printInstructions();
 }
 
@@ -202,6 +200,7 @@ void SolveWindow::printInstructions() {
     mvaddch(row + 2, col + 6, RIGHT_KEY);
     mvaddch(row + 4, col + 3, DOWN_KEY);
     row += 8;
+    col -= 2;
     mvprintw(row, col, "Insert digits");
     mvprintw(++row, col, "until the");
     mvprintw(++row, col, "solution is");
