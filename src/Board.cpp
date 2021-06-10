@@ -3,8 +3,8 @@
 #include <iostream>
 #include <sstream>
 
-Board::Board(std::array<std::array<int, 9>, 9> startGrid,
-             std::array<std::array<int, 9>, 9> finishGrid
+Board::Board(puzzle startGrid,
+             puzzle finishGrid
             ): playGrid(startGrid), startGrid(startGrid), solutionGrid(finishGrid) {
     for (auto &array : pencilMarks) {
         for (auto &vec : array) {
@@ -52,15 +52,15 @@ std::array<std::array<std::vector<char>, 9>, 9> &Board::getPencilMarks() {
     return pencilMarks;
 }
 
-std::array<std::array<int, 9>, 9> &Board::getPlayGrid() {
+puzzle &Board::getPlayGrid() {
     return playGrid;
 }
 
-std::array<std::array<int, 9>, 9> &Board::getStartGrid() {
+puzzle &Board::getStartGrid() {
     return startGrid;
 }
 
-std::array<std::array<int, 9>, 9> &Board::getSolution() {
+puzzle &Board::getSolution() {
     return solutionGrid;
 }
 
@@ -73,7 +73,7 @@ void Board::insert(char val, int row, int col) {
     if (val == ' ' || val == '0') {
         if (playGrid[row][col] != 0) {
             count[playGrid[row][col]]--;
-            playGrid[row][col] = 0;
+            playGrid[row].set(col, 0);
             restoreMarks(row, col);
         }
         return;
@@ -84,7 +84,7 @@ void Board::insert(char val, int row, int col) {
         if (playGrid[row][col] != 0)
             count[playGrid[row][col]]--;
         count[val - '0']++;
-        playGrid[row][col] = val - '0';
+        playGrid[row].set(col, val - '0');
     }
 
     removeMarks(val, row, col);
@@ -189,7 +189,7 @@ bool Board::isRemaining(int val) {
     return count[val] < 9;
 }
 
-void Board::printBoard(std::array<std::array<int, 9>, 9> grid, std::ostream &stream) {
+void Board::printBoard(puzzle grid, std::ostream &stream) {
     std::stringstream boardStream;
     boardStream << TOPROW << '\n';
     for (auto i = 0; i < 3; i++) {
@@ -243,7 +243,7 @@ void Board::swapStartGrid() {
     startGrid = playGrid;
 }
 
-void Board::swapStartGrid(std::array<std::array<int, 9>, 9> solution) {
+void Board::swapStartGrid(puzzle solution) {
     startGrid = playGrid;
     solutionGrid = solution;
 }

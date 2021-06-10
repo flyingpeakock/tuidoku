@@ -19,7 +19,7 @@ Generator::Generator(const char *gridString) {
     auto idx = 0;
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
-            grid[i][j] = gridString[idx++] - '0';
+            grid[i].set(j, gridString[idx++] - '0');
         }
     }
     Solver solver(grid);
@@ -76,13 +76,13 @@ void Generator::generate(int unknown) {
 
     int unknowns = 0;
     for (auto cell: cells) {
-        grid[cell.row][cell.col] = 0;
+        grid[cell.row].set(cell.col, 0);
         solver.changeGrid(grid);
         solver.solve();
         if (!solver.isUnique()) {
             // Removal of value does not produce unique solution
             // Put it back
-            grid[cell.row][cell.col] = cell.val;
+            grid[cell.row].set(cell.col, cell.val);
         }
         else {
             unknowns++;
@@ -99,11 +99,11 @@ void Generator::generate(int unknown) {
 }
 
 
-std::array<std::array<int, 9>, 9> Generator::getGrid() {
+puzzle Generator::getGrid() {
     return grid;
 }
 
-std::array<std::array<int, 9>, 9> Generator::getSolution() {
+puzzle Generator::getSolution() {
     return solution;
 }
 

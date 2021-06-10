@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <ostream>
+#include "Solver.h"
 
 class Board {
     private:
@@ -16,9 +17,9 @@ class Board {
             }
         };
 
-        std::array<std::array<int, 9>, 9> playGrid;
-        std::array<std::array<int, 9>, 9> startGrid;
-        std::array<std::array<int, 9>, 9> solutionGrid;
+        puzzle playGrid;
+        puzzle startGrid;
+        puzzle solutionGrid;
 
         std::array<std::array<std::vector<char>, 9>, 9> pencilMarks;
         std::array<std::array<std::map<cell, char>, 9>, 9> pencilHistory;
@@ -27,11 +28,11 @@ class Board {
 
         void removeMarks(char val, int row, int col);
         void restoreMarks(int row, int col);
-        void printBoard(std::array<std::array<int, 9>, 9> grid, std::ostream &stream);
+        void printBoard(puzzle grid, std::ostream &stream);
 
         bool playing;
     public:
-        Board(std::array<std::array<int, 9>, 9> startGrid, std::array<std::array<int, 9>, 9> finishGrid);
+        Board(puzzle startGrid, puzzle finishGrid);
         void startPlaying();
         void stopPlaying();
         bool isPlaying();
@@ -39,9 +40,9 @@ class Board {
         bool isRemaining(int val);
 
         std::array<std::array<std::vector<char>, 9>, 9> &getPencilMarks();
-        std::array<std::array<int, 9>, 9> &getPlayGrid();
-        std::array<std::array<int, 9>, 9> &getStartGrid();
-        std::array<std::array<int, 9>, 9> &getSolution();
+        puzzle &getPlayGrid();
+        puzzle &getStartGrid();
+        puzzle &getSolution();
 
         void insert(char val, int row, int col);
         void pencil(char val, int row, int col);
@@ -54,5 +55,5 @@ class Board {
         void printStart();
 
         void swapStartGrid();
-        void swapStartGrid(std::array<std::array<int, 9>, 9> solution);
+        void swapStartGrid(puzzle solution);
 };

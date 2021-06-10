@@ -4,8 +4,8 @@
 
 class Generator {
     private:
-        std::array<std::array<int, 9>, 9> grid;
-        std::array<std::array<int, 9>, 9> solution;
+        puzzle grid;
+        puzzle solution;
         void generate(int unknown);
         void generateGiveEmpty(int unknowns);
 
@@ -13,7 +13,7 @@ class Generator {
         Generator();
         Generator(int unknowns);
         Generator(const char *gridString);
-        std::array<std::array<int, 9>, 9> getGrid();
-        std::array<std::array<int, 9>, 9> getSolution();
+        puzzle getGrid();
+        puzzle getSolution();
         Board createBoard();
 };
