@@ -13,36 +13,16 @@ void play(bool, std::string, int);
 
 int main(int argc, char *argv[]) {
 
-    std::map<std::string, bool> args = arguments::parse(argc, argv);
-    if (args["help"]) {
-        arguments::printHelp();
+    arguments args = arguments(argc, argv);
+    if (args.printHelp()) {
         return 0;
     }
+    if (args.shouldExit()) {
+        return 1;
+    }
     int argInt = 0;
-    std::string argStr = arguments::getFileName(argc, argv);
-    if (args["file"]) {
-        if (argStr == "404") {
-            std::cout << "No file name supplied.\n";
-            return 1;
-        }
-    }
-    if (args["empty"]) {
-        argInt = arguments::getInt(argc, argv);
-    }
-    else if (args["filled"]) {
-        argInt = 81 - arguments::getInt(argc, argv);
-    }
 
-    if ((args["empty"] || args["filled"]) && argInt == 0) {
-        std::cout << "No number supplied.\n";
-        return 1;
-    }
-
-
-    if (arguments::incompatible(args))
-        return 1;
-
-    if (args["generate"]) {
+    /*if (args["generate"]) {
         generate(argInt, args["file"], argStr);
         return 0;
     }
@@ -53,6 +33,16 @@ int main(int argc, char *argv[]) {
     if (args["play"]) {
         play(args["file"], argStr, argInt);
         return 0;
+    }*/
+    switch(args.getFeature()) {
+        case feature::Generate:
+        generate(args.getArgInt(), args.fileArgSet(), args.getFileName());
+        break;
+        case feature::Solve:
+        solve(args.fileArgSet(), args.getFileName());
+        break;
+        case feature::Play:
+        play(args.fileArgSet(), args.getFileName(), args.getArgInt());
     }
     
 }

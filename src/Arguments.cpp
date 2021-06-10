@@ -2,8 +2,24 @@
 #include <string.h>
 #include <iostream>
 
+arguments::arguments(int argc, char *argv[]) {
+    argInt = 0;
+    parse(argc, argv);
+    if (args["file"]) {
+        argStr = getFileName(argc, argv);
+    }
+    if (args["filled"] || args["empty"]) {
+        argInt = getInt(argc, argv);
+        if (args["filled"] && argInt != 0) {
+            argInt = 81 - argInt;
+        }
+    }
+}
 
-void arguments::printHelp() {
+bool arguments::printHelp() {
+    if (!args["help"]) {
+        return false;
+    }
     const char *helpText = "usage: tuidoku [OPTIONS]\n\n"
                            "Play, solve and generate sudoku puzzles in the terminal.\n\n"
                            "Optional args:\n"
@@ -17,10 +33,11 @@ void arguments::printHelp() {
                            "Configuration is done by editing the file config.h\n"
                            "That file also contains all the keybinds.\n\n";
     std::cout << helpText << std::endl;
+    return true;
 }
 
 std::map<std::string, bool> arguments::parse(int argc, char *argv[]) {
-    std::map<std::string, bool> args;
+    //std::map<std::string, bool> args;
     for (auto i = 1; i < argc; i++) {
 
         if (argv[i][0] == '-' && argv[i][1] != '-') {
@@ -123,4 +140,38 @@ bool arguments::incompatible(std::map<std::string, bool> args) {
         return true;
     }
     return false;
+}
+
+bool arguments::shouldExit() {
+    if (args["file"] && argStr == "404") {
+        std::cout << "No filed name supplied.\n";
+        return true;
+    }
+    if ((args["empty"] || args["filled"]) && argInt == 0) {
+        std::cout << "No number supplied.\n";
+        return true;
+    }
+    return incompatible(args);
+}
+
+feature arguments::getFeature() {
+    if (args["solve"]) {
+        return feature::Solve;
+    }
+    if (args["generate"]) {
+        return feature::Generate;
+    }
+    return feature::Play;
+}
+
+int arguments::getArgInt() {
+    return argInt;
+}
+
+std::string arguments::getFileName() {
+    return argStr;
+}
+
+bool arguments::fileArgSet() {
+    return args["file"];
 }
