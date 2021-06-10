@@ -3,7 +3,7 @@
 #include "Board.h"
 #include <ncurses.h>
 #include <string>
-#include "Solver.h"
+#include "Row.h"
 
 class BasicWindow {
     protected:

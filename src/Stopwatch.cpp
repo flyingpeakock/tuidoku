@@ -1,5 +1,6 @@
 #include "Stopwatch.h"
 #include <chrono>
+#include <sstream>
 
 bool Stopwatch::running = false;
 std::thread Stopwatch::counter;

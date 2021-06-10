@@ -2,6 +2,7 @@
 
 #include "Window.h"
 #include "Board.h"
+#include "Solver.h"
 
 class Controller {
     protected:

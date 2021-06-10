@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 
+
 Board::Board(puzzle startGrid,
              puzzle finishGrid
             ): playGrid(startGrid), startGrid(startGrid), solutionGrid(finishGrid) {

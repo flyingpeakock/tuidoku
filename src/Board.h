@@ -2,7 +2,8 @@
 #include <vector>
 #include <map>
 #include <ostream>
-#include "Solver.h"
+#pragma once
+#include "Row.h"
 
 class Board {
     private:
