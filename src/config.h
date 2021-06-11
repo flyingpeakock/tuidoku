@@ -75,8 +75,8 @@ static const bool PRINT_TITLE = true;
 static const bool PRINT_HELP = true;
 static const bool PRINT_COORDS = true;
 static const bool PRINT_STATUS = true; // If false time taken to solve a puzzle will not be shown.
-static const bool ALPHABETICAL_ROW = false;
-static const bool ALPHABETICAL_COL = false;
+static const char ROW_CHAR = '1'; // Change to 'a' for alphabetical coords. Or '0' to start index at 0.
+static const char COL_CHAR = '1';
 static const char START_CHAR = '1';  // Change to 'a' for alphabetical.
 
 /*

@@ -79,23 +79,21 @@ void Controller::go() {
     char r = 0;
     char c = 0;
 
-    const char rChar = ALPHABETICAL_ROW ? 'a' : '1';
-    const char cChar = ALPHABETICAL_COL ? 'a' : '1';
-    while (c < cChar || c > cChar + 8) {
+    while (c < COL_CHAR || c > COL_CHAR + 8) {
         c = getch();
         if (c == 'q' || c == TOGGLE_KEY) {
             return;
         }
     }
 
-    while (r < rChar || r > rChar + 8) {
+    while (r < ROW_CHAR || r > ROW_CHAR + 8) {
         r = getch();
         if (r == 'q' || r == TOGGLE_KEY) {
             return;
         }
     }
-    row = r - rChar;
-    col = c - cChar;
+    row = r - ROW_CHAR;
+    col = c - COL_CHAR;
     window->moveCursor(row, col);
 }
 

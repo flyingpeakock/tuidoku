@@ -101,20 +101,8 @@ void BasicWindow::printCoords() {
 
     int col = boardLeft + 2;
 
-    char colCoord;
-    char rowCoord;
-    if (ALPHABETICAL_COL) {
-        colCoord = 'a';
-    }
-    else {
-        colCoord = '1';
-    }
-    if (ALPHABETICAL_ROW) {
-        rowCoord = 'a';
-    }
-    else {
-        rowCoord = '1';
-    }
+    char colCoord = COL_CHAR;
+    char rowCoord = ROW_CHAR;
 
     attron(COLOR_PAIR(10));
 
