@@ -77,6 +77,7 @@ static const bool PRINT_COORDS = true;
 static const bool PRINT_STATUS = true; // If false time taken to solve a puzzle will not be shown.
 static const bool ALPHABETICAL_ROW = false;
 static const bool ALPHABETICAL_COL = false;
+static const char START_CHAR = '1';  // Change to 'a' for alphabetical.
 
 /*
  * Check out https://en.wikipedia.org/wiki/Box-drawing_character#Unicode

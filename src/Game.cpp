@@ -40,7 +40,7 @@ void Controller::mainLoop() {
                 board->stopPlaying();
                 break;
             default:
-                if ((ch > '0' && ch <= '9') || ch == ' ') {
+                if ((ch > START_CHAR - 1 && ch <= START_CHAR + 8) || ch == ' ') {
                     board->insert(ch, row, col);
                 }
         }
@@ -133,7 +133,7 @@ void InteractiveSolver::mainLoop() {
             board->stopPlaying();
             break;
         default:
-            if ((ch > '0' && ch <= '9') || ch == ' ') {
+            if ((ch > START_CHAR - 1 && ch <= START_CHAR + 8) || ch == ' ') {
                 if (solver.isSafe(row, col, ch - '0')) {
                     board->insert(ch, row, col);
                     solver.changeGrid(board->getPlayGrid());
@@ -214,7 +214,7 @@ void Game::mainLoop() {
             mode == INSERT_KEY ? changeMode(PENCIL_KEY) : changeMode(INSERT_KEY);
             break;
         default:
-            if ((ch > '0' && ch <= '9') || ch == ' ') {
+            if ((ch > START_CHAR - 1 && ch <= START_CHAR + 8) || ch == ' ') {
                 window->select(ch);
                 if (mode == INSERT_KEY) {
                     board->insert(ch, row, col);

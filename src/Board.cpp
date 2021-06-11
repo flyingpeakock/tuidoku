@@ -71,7 +71,7 @@ void Board::insert(char val, int row, int col) {
         return;
     }
 
-    if (val == ' ' || val == '0') {
+    if (val == ' ' || val == START_CHAR - 1) {
         if (playGrid[row][col] != 0) {
             count[playGrid[row][col]]--;
             playGrid[row].set(col, 0);
@@ -80,12 +80,12 @@ void Board::insert(char val, int row, int col) {
         return;
     }
 
-    if (val > '0' && val <= '9') {
+    if (val > START_CHAR - 1 && val <= START_CHAR + 8) {
         restoreMarks(row, col);
         if (playGrid[row][col] != 0)
             count[playGrid[row][col]]--;
         count[val - '0']++;
-        playGrid[row].set(col, val - '0');
+        playGrid[row].set(col, val - (START_CHAR - 1));
     }
 
     removeMarks(val, row, col);
@@ -117,7 +117,7 @@ void Board::pencil(char val, int row, int col) {
         idx++;
     }
 
-    if (val > '0' && val <= '9') {
+    if (val > START_CHAR - 1 && val <= START_CHAR + 8) {
         marks.insert(marks.begin(), val);
     }
 }

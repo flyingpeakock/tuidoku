@@ -79,8 +79,8 @@ void BasicWindow::printNumbs() {
     for (auto i = 0; i < 9; i++) {
         int col = boardLeft + 2;
         for (auto j = 0; j < 9; j++) {
-            char ch = grid[i][j] + '0';
-            if (ch == '0') {
+            char ch = grid[i][j] + START_CHAR - 1;
+            if (ch == START_CHAR - 1) {
                 ch = ' ';
             }
 
@@ -307,8 +307,8 @@ void Window::printNumbs() {
     for (auto i = 0; i < 9; i++) {
         int col = boardLeft + 2;
         for (auto j = 0; j < 9; j++) {
-            const char ch = grid[i][j] + '0';
-            if (ch < '1') {
+            const char ch = grid[i][j] + START_CHAR - 1;
+            if (ch < START_CHAR) {
                 col += 4;
                 continue;
             }
