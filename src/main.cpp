@@ -21,19 +21,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     int argInt = 0;
-
-    /*if (args["generate"]) {
-        generate(argInt, args["file"], argStr);
-        return 0;
-    }
-    if (args["solve"]) {
-        solve(args["file"], argStr);
-        return 0;
-    }
-    if (args["play"]) {
-        play(args["file"], argStr, argInt);
-        return 0;
-    }*/
     switch(args.getFeature()) {
         case feature::Generate:
         generate(args.getArgInt(), args.fileArgSet(), args.getFileName());
@@ -43,6 +30,7 @@ int main(int argc, char *argv[]) {
         break;
         case feature::Play:
         play(args.fileArgSet(), args.getFileName(), args.getArgInt());
+        break;
     }
     
 }

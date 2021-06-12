@@ -37,7 +37,7 @@ static const char INSERT_KEY = 'i';
 static const char PENCIL_KEY = 'p';
 static const char QUIT_KEY = 'q';
 static const char CHECK_KEY = 'c';
-static const char ERASE_KEY = ' ';
+static const char ERASE_KEY = ' '; // 127 = backspace, or '\b' = backspace
 static const char GO_KEY = 'g';
 static const char TOGGLE_KEY = 27; // 27 = ESC. Switches between insert and pencil
 
