@@ -21,7 +21,7 @@ static const char *TITLE = "Tuidoku";
  * https://docs.python.org/3/library/curses.ascii.html#module-curses.ascii
  * 
  *  For example to set the QUIT_KEY to delete:
- *      #define QUIT_KEY 0x7f
+ *      static const char QUIT_KEY = 0x7f;
  */
 
 // Movement keys
