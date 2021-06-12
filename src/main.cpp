@@ -20,7 +20,6 @@ int main(int argc, char *argv[]) {
     if (args.shouldExit()) {
         return 1;
     }
-    int argInt = 0;
     switch(args.getFeature()) {
         case feature::Generate:
         generate(args.getArgInt(), args.fileArgSet(), args.getFileName());
