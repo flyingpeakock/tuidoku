@@ -76,8 +76,8 @@ Board file::getSDKPuzzle(std::istream &file) {
     while (getline(file, line)) {
         if (line.front() == '#')
             continue;
-        for (auto c : line) {
-            if ('1' <= c && '9' >= 'c') {
+        for (char c : line) {
+            if ('1' <= c && '9' >= c) {
                 stringStream << c;
             }
             else if ('.' == c || 'X' == c || '0' == c || 'x' == c) {
