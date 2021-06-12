@@ -5,14 +5,11 @@ written entirely in C++
 
 ## How to Play
 Move around the board and insert numbers or pencil-marks
-according to the keys set in ```config.h```. The defualt
-keys for movement are 'hjkl', 'i' for insert, 'p' for pencil and 'c'
-for check. To go to a specific box press the go key, default 'g',
-followed by the column then row.
+according to the keys set in ```config.h```.
 
 ## How to configure
 Configuration is done in the config.h file. Documentation for 
-what configuration does what can be read in the file.
+the configuration is in the form of comments in that same file.
 All configuration must be done before installation.
 Changing any configuration will require reinstallation.
 
