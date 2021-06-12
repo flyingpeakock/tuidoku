@@ -21,7 +21,7 @@ bool arguments::printHelp() {
     if (!args["help"]) {
         return false;
     }
-    const char *helpText = "usage: tuidoku [OPTIONS]\n\n"
+    const char *helpText = "usage: tuidoku [OPTIONS][FILE]\n\n"
                            "Play, solve and generate sudoku puzzles in the terminal.\n\n"
                            "Optional args:\n"
                            "-h --help\t\tView this page\n"
