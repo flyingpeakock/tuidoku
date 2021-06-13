@@ -29,6 +29,16 @@ cd tuidoku/
 clang++ -O3 -pthread -std=c++11 -stdlib=libc++ ./src/*.cpp -lncursesw -o tuidoku
 ```
 
+### AUR
+This package can be found as tuidoku-git on the AUR.
+```
+paru -S tuidoku-git
+
+# If you wish to edit config.h
+vim ~/.cache/paru/clone/tuidoku-git/config.h
+paru -S --rebuild tuidoku-git
+```
+
 -lncursesw flag is required to link ncurses.h   
 -O3 is recommended to speed up puzzle generation but is not required.   
 
