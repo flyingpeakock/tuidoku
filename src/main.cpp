@@ -2,10 +2,10 @@
 #include "File.h"
 #include "Arguments.h"
 #include "Generator.h"
+#include "config.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include "config.h"
 
 void generate(int, bool, std::string);
 void solve(bool, std::string);

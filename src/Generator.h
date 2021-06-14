@@ -1,5 +1,4 @@
 #pragma once
-#include "Solver.h"
 #include "Board.h"
 
 class Generator {

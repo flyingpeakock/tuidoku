@@ -5,15 +5,6 @@
 #include <string.h>
 #include <stdexcept>
 
-#define SIZE 9
-
-
-/*const bool row::operator==(const row &r) {
-    return (col1 == r.col1 && col2 == r.col2 && col3 == r.col3 &&
-            col4 == r.col4 && col5 == r.col5 && col6 == r.col6 &&
-            col7 == r.col7 && col8 == r.col8 && col9 == r.col9);
-}*/
-
 Solver::Solver() {
     solutions = 0;
     for (auto i = 0; i < SIZE; i++) {
@@ -28,7 +19,7 @@ Solver::Solver(puzzle board) {
     grid = board;
 }
 
-Solver::Solver(int board[9][9]) {
+Solver::Solver(int board[SIZE][SIZE]) {
     solutions = 0;
     for (auto i = 0; i < SIZE; i++) {
         for (auto j = 0; j < SIZE; j++) {
@@ -46,7 +37,7 @@ Solver::Solver(int **board) {
     }
 }
 
-Solver::Solver(std::array<std::array<int, 9>, 9> board) {
+Solver::Solver(std::array<std::array<int, SIZE>, SIZE> board) {
     solutions = 0;
     for (auto i = 0; i < board.size(); i++) {
         for (auto j = 0; j < board[i].size(); j++) {
@@ -118,7 +109,7 @@ bool Solver::backtrack(int row, int col) {
     // Here comes the fun part
     // Create array with randomness instead of normal loop
     // used to generate unique puzzles
-    std::array<int, 9> nums {1,2,3,4,5,6,7,8,9};
+    std::array<int, SIZE> nums {1,2,3,4,5,6,7,8,9};
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     shuffle (nums.begin(), nums.end(), std::default_random_engine(seed));
 

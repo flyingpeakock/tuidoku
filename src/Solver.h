@@ -7,6 +7,7 @@ class Solver {
         puzzle solution;
         bool backtrack(int row, int col);
         int solutions;
+        static const int SIZE = 9;
     public:
         Solver();
         Solver(puzzle board);

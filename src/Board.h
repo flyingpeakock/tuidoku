@@ -1,8 +1,7 @@
 #pragma once
 #include <vector>
 #include <map>
-#include <ostream>
-#pragma once
+#include <iosfwd>
 #include "Row.h"
 
 class Board {
