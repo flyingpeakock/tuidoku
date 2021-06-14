@@ -24,8 +24,24 @@ static const char *TITLE = "Tuidoku";
  *      #define QUIT_KEY 0x7f
  */
 
-// Movement keys
-// These keys will work along side the arrow keys
+enum keybinds {
+    // Movement Keys
+    // These keys will work along side the arrow keys
+    UP_KEY = 'k',
+    DOWN_KEY = 'j',
+    LEFT_KEY = 'h',
+    RIGHT_KEY = 'l',
+
+    // Other keys
+    INSERT_KEY = 'i',
+    PENCIL_KEY = 'p',
+    QUIT_KEY = 'q',
+    CHECK_KEY = 'c',
+    ERASE_KEY = ' ', // 127 = backspace, or '\b' = backspace
+    GO_KEY = 'g',
+    TOGGLE_KEY =  27, // 27 = ESC. Switches between incert and pencil
+};
+/*
 static const char UP_KEY = 'k';
 static const char DOWN_KEY = 'j';
 static const char LEFT_KEY = 'h';
@@ -40,6 +56,7 @@ static const char CHECK_KEY = 'c';
 static const char ERASE_KEY = ' '; // 127 = backspace, or '\b' = backspace
 static const char GO_KEY = 'g';
 static const char TOGGLE_KEY = 27; // 27 = ESC. Switches between insert and pencil
+/*
 
 // Colors
 
