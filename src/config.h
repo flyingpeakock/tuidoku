@@ -21,7 +21,7 @@ static const char *TITLE = "Tuidoku";
  * https://docs.python.org/3/library/curses.ascii.html#module-curses.ascii
  * 
  *  For example to set the QUIT_KEY to delete:
- *      #define QUIT_KEY 0x7f
+ *      QUIT_KEY = 0x7f,
  */
 
 enum keybinds {
@@ -41,25 +41,8 @@ enum keybinds {
     GO_KEY = 'g',
     TOGGLE_KEY =  27, // 27 = ESC. Switches between incert and pencil
 };
-/*
-static const char UP_KEY = 'k';
-static const char DOWN_KEY = 'j';
-static const char LEFT_KEY = 'h';
-static const char RIGHT_KEY = 'l';
-
-// Other keys
-
-static const char INSERT_KEY = 'i';
-static const char PENCIL_KEY = 'p';
-static const char QUIT_KEY = 'q';
-static const char CHECK_KEY = 'c';
-static const char ERASE_KEY = ' '; // 127 = backspace, or '\b' = backspace
-static const char GO_KEY = 'g';
-static const char TOGGLE_KEY = 27; // 27 = ESC. Switches between insert and pencil
-/*
 
 // Colors
-
 /* Available colors are:
  *  COLOR_BLACK = 0
  *  COLOR_RED = 1
@@ -72,19 +55,18 @@ static const char TOGGLE_KEY = 27; // 27 = ESC. Switches between insert and penc
  *  DEFAULT = -1
  * To disable any color set the value to -1
  */
+enum colors {
+    FOREGROUND_COLOR = -1,
+    BACKGROUND_COLOR = -1,
+    ERROR_COLOR = 1,
+    CORRECT_COLOR = 4,
+    HIGHLIGHT_COLOR = 3,
+    LOWLIGHT_COLOR = 6,
+    BOARD_COLOR = FOREGROUND_COLOR,
+    GIVEN_COLOR = FOREGROUND_COLOR,
+    PLACED_COLOR = FOREGROUND_COLOR,
+};
 
-static const int FOREGROUND_COLOR = -1;
-static const int BACKGROUND_COLOR = -1;
-
-static const int ERROR_COLOR = 1;
-static const int CORRECT_COLOR = 4;
-
-static const int HIGHLIGHT_COLOR = 3;
-static const int LOWLIGHT_COLOR = 6;
-
-static const int BOARD_COLOR = FOREGROUND_COLOR;
-static const int GIVEN_COLOR = FOREGROUND_COLOR;
-static const int PLACED_COLOR = FOREGROUND_COLOR;
 
 // Visual settings
 
