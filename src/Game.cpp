@@ -1,7 +1,5 @@
 #include "Game.h"
 #include "Stopwatch.h"
-#include <ctime>
-#include <sstream>
 #include "config.h"
 
 Controller::Controller(BasicWindow *win){

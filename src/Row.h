@@ -12,7 +12,6 @@ struct row {
     int col8:5;
     int col9:5;
     int operator[](int i);
-    //const bool operator==(const row &r);
     int size();
     void set(int col, int val);
 };

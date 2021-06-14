@@ -1,4 +1,5 @@
 #include "Generator.h"
+#include "Solver.h"
 #include <array>
 #include <algorithm>
 #include <random>
