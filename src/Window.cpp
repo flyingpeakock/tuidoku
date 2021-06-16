@@ -3,78 +3,97 @@
 #include <string.h>
 #include "config.h"
 
+BasicWindow::BasicWindow(Board *g, WINDOW *w) {
+    window = w;
+    game = g;
+
+    setlocale(LC_ALL, "");
+    initscr();
+    init();
+}
+
 BasicWindow::BasicWindow(Board *g) {
+    int maxY, maxX;
+    setlocale(LC_ALL, "");
+    initscr();
+
+    getmaxyx(stdscr, maxY, maxX);
+    window = newwin(maxY, maxX, 0, 0);
+    refresh();
+
     game = g;
     cursorRow = 0;
     cursorCol = 0;
-    setlocale(LC_ALL, "");
 
-    initscr();
+    init();
+}
 
+BasicWindow::~BasicWindow() {
+    delwin(window);
+    endwin();
+}
+
+void BasicWindow::init() {
     cbreak(); // Get input before enter is pressed
     noecho(); // Don't show keypresses
-    keypad(stdscr, true); // Use arrow keys to move
+    keypad(window, true); // Use arrow keys to move
 
     if (has_colors()) {
         use_default_colors();
         start_color();
+        init_pair(1, ERROR_COLOR, BACKGROUND_COLOR);
+        init_pair(2, CORRECT_COLOR, BACKGROUND_COLOR);
+        init_pair(3, HIGHLIGHT_COLOR, BACKGROUND_COLOR);
+        init_pair(4, LOWLIGHT_COLOR, BACKGROUND_COLOR);
         init_pair(5, BOARD_COLOR, BACKGROUND_COLOR);
+        init_pair(6, GIVEN_COLOR, BACKGROUND_COLOR);
         init_pair(7, PLACED_COLOR, BACKGROUND_COLOR);
         init_pair(10, FOREGROUND_COLOR, BACKGROUND_COLOR);
     }
-    printInstructions();
-    printBoard();
+    printBoxes();
     printCoords();
     printBoard();
-}
-
-BasicWindow::~BasicWindow() {
-    endwin();
 }
 
 Board *BasicWindow::getBoard() {
     return game;
 }
 
-void BasicWindow::printInstructions() {
-    return;
-}
-
 void BasicWindow::clear() {
-    move(0,0);
-    attron(COLOR_PAIR(10));
+    wmove(window, 0,0);
+    wattron(window, COLOR_PAIR(10));
     for (auto i = 0; i < windowRows; i++) {
         for (auto j = 0; j < windowCols; j++) {
-            addch(' ');
+            waddch(window, ' ');
         }
     }
-    attroff(COLOR_PAIR(10));
+    wattroff(window, COLOR_PAIR(10));
 }
 
 void BasicWindow::printBoxes() {
     int startHeight = boardTop;
-    attron(A_BOLD);
-    attron(COLOR_PAIR(5));
-    mvprintw(startHeight, boardLeft, TOPROW);
+    wattron(window, A_BOLD);
+    wattron(window, COLOR_PAIR(5));
+    mvwprintw(window, startHeight, boardLeft, TOPROW);
     for (auto i = 0; i < 3; i++) {
-        mvprintw(++startHeight, boardLeft, ROW1);
-        mvprintw(++startHeight, boardLeft, ROW2);
-        mvprintw(++startHeight, boardLeft, ROW1);
-        mvprintw(++startHeight, boardLeft, ROW2);
-        mvprintw(++startHeight, boardLeft, ROW1);
+        mvwprintw(window, ++startHeight, boardLeft, ROW1);
+        mvwprintw(window, ++startHeight, boardLeft, ROW2);
+        mvwprintw(window, ++startHeight, boardLeft, ROW1);
+        mvwprintw(window, ++startHeight, boardLeft, ROW2);
+        mvwprintw(window, ++startHeight, boardLeft, ROW1);
         if (i != 2)
-            mvprintw(++startHeight, boardLeft, ROW3);
+            mvwprintw(window, ++startHeight, boardLeft, ROW3);
     }
-    mvprintw(++startHeight, boardLeft, BOTROW);
-    attroff(A_BOLD);
-    attroff(COLOR_PAIR(5));
+    mvwprintw(window, ++startHeight, boardLeft, BOTROW);
+    wattroff(window, A_BOLD);
+    wattroff(window, COLOR_PAIR(5));
 }
 
 void BasicWindow::printNumbs() {
     auto grid = game->getPlayGrid();
     int row = boardTop + 1;
-    attron(A_BOLD);
-    attron(COLOR_PAIR(7));
+    wattron(window, A_BOLD);
+    wattron(window, COLOR_PAIR(7));
 
     for (auto i = 0; i < 9; i++) {
         int col = boardLeft + 2;
@@ -84,14 +103,14 @@ void BasicWindow::printNumbs() {
                 ch = ' ';
             }
 
-            mvaddch(row, col, ch);
+            mvwaddch(window, row, col, ch);
             col += 4;
         }
         row += 2;
     }
 
-    attroff(A_BOLD);
-    attroff(COLOR_PAIR(7));
+    wattroff(window, A_BOLD);
+    wattroff(window, COLOR_PAIR(7));
 }
 
 void BasicWindow::printCoords() {
@@ -104,10 +123,10 @@ void BasicWindow::printCoords() {
     char colCoord = COL_CHAR;
     char rowCoord = ROW_CHAR;
 
-    attron(COLOR_PAIR(10));
+    wattron(window, COLOR_PAIR(10));
 
     for (auto i = '1'; i <= '9'; i++) {
-        mvaddch(boardTop - 1, col, colCoord++);
+        mvwaddch(window, boardTop - 1, col, colCoord++);
         col += 4;
     }
 
@@ -115,23 +134,23 @@ void BasicWindow::printCoords() {
 
     int row = boardTop + 1;
     for (auto i = '1'; i <= '9'; i++) {
-        mvaddch(row, col, rowCoord++);
+        mvwaddch(window, row, col, rowCoord++);
         row += 2;
     }
 
-    attroff(COLOR_PAIR(10));
+    wattroff(window, COLOR_PAIR(10));
 }
 
 void BasicWindow::printCursor() {
     int row = cursorRow * 2 + boardTop + 1;
     int col = cursorCol * 4 + boardLeft + 2;
-    move(row, col);
+    wmove(window, row, col);
 }
 
 void BasicWindow::printBoard() {
     int oldRows = windowRows;
     int oldCols = windowCols;
-    getmaxyx(stdscr, windowRows, windowCols);
+    getmaxyx(window, windowRows, windowCols);
     bool resize = (oldRows != windowRows || oldCols != windowCols);
 
     boardTop = (windowRows - BoardRows) / 2;
@@ -143,27 +162,26 @@ void BasicWindow::printBoard() {
         clear();
         if (windowRows < BoardRows || windowCols < BoardCols) {
             char error[] = "Not enough space to draw board";
-            attron(COLOR_PAIR(10));
-            mvprintw(windowRows / 2, (windowCols - strlen(error)) / 2, "%s", error);
-            attroff(COLOR_PAIR(10));
-            refresh();
+            wattron(window, COLOR_PAIR(10));
+            mvwprintw(window, windowRows / 2, (windowCols - strlen(error)) / 2, "%s", error);
+            wattroff(window, COLOR_PAIR(10));
+            wrefresh(window);
             return;
         }
         if (windowRows - BoardRows > 3 && PRINT_TITLE) {
-            attron(A_BOLD | A_UNDERLINE);
-            attron(COLOR_PAIR(10));
-            mvprintw(boardTop - 3, (windowCols - strlen(TITLE)) / 2, "%s", TITLE);
-            attroff(COLOR_PAIR(10));
-            attroff(A_BOLD | A_UNDERLINE);
+            wattron(window, A_BOLD | A_UNDERLINE);
+            wattron(window, COLOR_PAIR(10));
+            mvwprintw(window, boardTop - 3, (windowCols - strlen(TITLE)) / 2, "%s", TITLE);
+            wattroff(window, COLOR_PAIR(10));
+            wattroff(window, A_BOLD | A_UNDERLINE);
         }
         printBoxes();
-        printInstructions();
         printCoords();
     }
 
     printNumbs();
     printCursor();
-    refresh();
+    wrefresh(window);
 }
 
 void BasicWindow::moveCursor(int row, int col) {
@@ -175,6 +193,10 @@ SolveWindow::SolveWindow(Board *g) : BasicWindow(g) {
     printInstructions();
 }
 
+SolveWindow::SolveWindow(Board *g, WINDOW * w) : BasicWindow(g, w) {
+    printInstructions();
+}
+
 void SolveWindow::printInstructions() {
     if (windowCols - BoardCols < 36 || !PRINT_HELP) {
         return;
@@ -182,41 +204,35 @@ void SolveWindow::printInstructions() {
     int row = boardTop + 3;
     int col = boardLeft + BoardCols + 5;
 
-    attron(COLOR_PAIR(10));
-    mvaddch(row, col + 3, UP_KEY);
-    mvaddch(row + 2, col, LEFT_KEY);
-    mvaddch(row + 2, col + 6, RIGHT_KEY);
-    mvaddch(row + 4, col + 3, DOWN_KEY);
+    wattron(window, COLOR_PAIR(10));
+    mvwaddch(window, row, col + 3, UP_KEY);
+    mvwaddch(window, row + 2, col, LEFT_KEY);
+    mvwaddch(window, row + 2, col + 6, RIGHT_KEY);
+    mvwaddch(window, row + 4, col + 3, DOWN_KEY);
     row += 8;
     col -= 2;
-    mvprintw(row, col, "Insert digits");
-    mvprintw(++row, col, "until the");
-    mvprintw(++row, col, "solution is");
-    mvprintw(++row, col, "unique.");
+    mvwprintw(window, row, col, "Insert digits");
+    mvwprintw(window, ++row, col, "until the");
+    mvwprintw(window, ++row, col, "solution is");
+    mvwprintw(window, ++row, col, "unique.");
 }
 
 Window::Window(Board *g): BasicWindow(g){
     mode = "Insert mode";
     checkColors = false;
     highlightNum = 0;
+}
 
-    if (has_colors()) {
-        init_pair(1, ERROR_COLOR, BACKGROUND_COLOR);
-        init_pair(2, CORRECT_COLOR, BACKGROUND_COLOR);
-        init_pair(3, HIGHLIGHT_COLOR, BACKGROUND_COLOR);
-        init_pair(4, LOWLIGHT_COLOR, BACKGROUND_COLOR);
-        init_pair(6, GIVEN_COLOR, BACKGROUND_COLOR);
-    }
-    printBoxes();
-    printInstructions();
-    printCoords();
-    printBoard();
+Window::Window(Board *g, WINDOW *w) : BasicWindow(g, w) {
+    mode = "Insert mode";
+    checkColors = false;
+    highlightNum = 0;
 }
 
 void Window::printBoard() {
     int oldRows = windowRows;
     int oldCols = windowCols;
-    getmaxyx(stdscr, windowRows, windowCols);
+    getmaxyx(window, windowRows, windowCols);
     bool resize = (oldRows != windowRows || oldCols != windowCols);
 
     boardTop = (windowRows - BoardRows) / 2;
@@ -228,18 +244,18 @@ void Window::printBoard() {
         clear();
         if (windowRows < BoardRows || windowCols < BoardCols) {
             char error[] = "Not enough space to draw board";
-            attron(COLOR_PAIR(10));
-            mvprintw(windowRows / 2, (windowCols - strlen(error)) / 2, "%s", error);
-            attroff(COLOR_PAIR(10));
-            refresh();
+            wattron(window, COLOR_PAIR(10));
+            mvwprintw(window, windowRows / 2, (windowCols - strlen(error)) / 2, "%s", error);
+            wattroff(window, COLOR_PAIR(10));
+            wrefresh(window);
             return;
         }
         if (windowRows - BoardRows > 3 && PRINT_TITLE) {
-            attron(A_BOLD | A_UNDERLINE);
-            attron(COLOR_PAIR(10));
-            mvprintw(boardTop - 3, (windowCols - strlen(TITLE)) / 2, "%s", TITLE);
-            attroff(COLOR_PAIR(10));
-            attroff(A_BOLD | A_UNDERLINE);
+            wattron(window, A_BOLD | A_UNDERLINE);
+            wattron(window, COLOR_PAIR(10));
+            mvwprintw(window, boardTop - 3, (windowCols - strlen(TITLE)) / 2, "%s", TITLE);
+            wattroff(window, COLOR_PAIR(10));
+            wattroff(window, A_BOLD | A_UNDERLINE);
         }
         printBoxes();
         printInstructions();
@@ -250,12 +266,12 @@ void Window::printBoard() {
     printPencil();
     printMode();
     printCursor();
-    refresh();
+    wrefresh(window);
 }
 
 
 void Window::printPencil() {
-    attron(A_DIM);
+    wattron(window, A_DIM);
     auto marks = game->getPencilMarks();
     auto grid = game->getPlayGrid();
     int row = boardTop + 1;
@@ -264,25 +280,25 @@ void Window::printPencil() {
         for (auto j = 0; j < 9; j++) {
            if (grid[i][j] < 1) {
                int idx[] = {0, 2, 1};
-               move(row, col);
+               wmove(window, row, col);
                for (auto k : idx) {
                    char c = marks[i][j][k];
                    if (!checkColors && c - '0' == highlightNum && HIGHLIGHT_SELECTED){
-                       attron(COLOR_PAIR(3));
+                       wattron(window, COLOR_PAIR(3));
                    }
                    else {
-                       attron(COLOR_PAIR(10));
+                       wattron(window, COLOR_PAIR(10));
                    }
-                   addch(c);
-                   attroff(COLOR_PAIR(3));
-                   attroff(COLOR_PAIR(10));
+                   waddch(window, c);
+                   wattroff(window, COLOR_PAIR(3));
+                   wattroff(window, COLOR_PAIR(10));
                }
            }
            col += 4;
         }
         row += 2;
     }
-    attroff(A_DIM);
+    wattroff(window, A_DIM);
 }
 
 void Window::printNumbs() {
@@ -291,7 +307,7 @@ void Window::printNumbs() {
     auto solution = game ->getSolution();
 
     int row = boardTop + 1;
-    attron(A_BOLD);
+    wattron(window, A_BOLD);
     for (auto i = 0; i < 9; i++) {
         int col = boardLeft + 2;
         for (auto j = 0; j < 9; j++) {
@@ -302,18 +318,19 @@ void Window::printNumbs() {
             }
 
             // Draw over potential pencilmarks
-            attron(COLOR_PAIR(10));
-            mvprintw(row, col - 1, "   ");
-            attroff(COLOR_PAIR(10));
+            wattron(window, COLOR_PAIR(10));
+            mvwprintw(window, row, col - 1, "   ");
+            wattroff(window, COLOR_PAIR(10));
 
-            attron(getColor(ch, i, j));
-            mvaddch(row, col, ch);
-            attroff(getColor(ch, i, j));
+            int color = getColor(ch, i, j);
+            wattron(window, color);
+            mvwaddch(window, row, col, ch);
+            wattroff(window, color);
             col += 4;
         }
         row += 2;
     }
-    attroff(A_BOLD);
+    wattroff(window, A_BOLD);
 }
 
 
@@ -325,57 +342,57 @@ void Window::printInstructions() {
     int row = boardTop + 3;
     int col = boardLeft + BoardCols + 5;
 
-    attron(COLOR_PAIR(10));
-    mvaddch(row, col + 3, UP_KEY);
-    mvaddch(row + 2, col, LEFT_KEY);
-    mvaddch(row + 2, col + 6, RIGHT_KEY);
-    mvaddch(row + 4, col + 3, DOWN_KEY);
-    attron(A_UNDERLINE);
-    mvaddch(row + 8, col, INSERT_KEY);
-    attroff(A_UNDERLINE);
+    wattron(window, COLOR_PAIR(10));
+    mvwaddch(window, row, col + 3, UP_KEY);
+    mvwaddch(window, row + 2, col, LEFT_KEY);
+    mvwaddch(window, row + 2, col + 6, RIGHT_KEY);
+    mvwaddch(window, row + 4, col + 3, DOWN_KEY);
+    wattron(window, A_UNDERLINE);
+    mvwaddch(window, row + 8, col, INSERT_KEY);
+    wattroff(window, A_UNDERLINE);
     if (INSERT_KEY == 'i' || INSERT_KEY == 'I') {
-        printw("nsert");
+        wprintw(window, "nsert");
     }
     else {
-        printw(" insert");
+        wprintw(window, " insert");
     }
-    attron(A_UNDERLINE);
-    mvaddch(row + 9, col, PENCIL_KEY);
-    attroff(A_UNDERLINE);
+    wattron(window, A_UNDERLINE);
+    mvwaddch(window, row + 9, col, PENCIL_KEY);
+    wattroff(window, A_UNDERLINE);
     if (PENCIL_KEY == 'p' || PENCIL_KEY == 'P') {
-        printw("encil");
+        wprintw(window, "encil");
     }
     else {
-        printw(" pencil");
+        wprintw(window, " pencil");
     }
-    attron(A_UNDERLINE);
-    mvaddch(row + 10, col, GO_KEY);
-    attroff(A_UNDERLINE);
+    wattron(window, A_UNDERLINE);
+    mvwaddch(window, row + 10, col, GO_KEY);
+    wattroff(window, A_UNDERLINE);
     if (GO_KEY == 'g' || GO_KEY == 'G') {
-        printw("o");
+        wprintw(window, "o");
     }
     else {
-        printw(" go");
+        wprintw(window, " go");
     }
-    attron(A_UNDERLINE);
-    mvaddch(row+11, col, CHECK_KEY);
-    attroff(A_UNDERLINE);
+    wattron(window, A_UNDERLINE);
+    mvwaddch(window, row+11, col, CHECK_KEY);
+    wattroff(window, A_UNDERLINE);
     if (CHECK_KEY == 'c' || CHECK_KEY == 'C') {
-        printw("heck");
+        wprintw(window, "heck");
     }
     else {
-        printw(" check");
+        wprintw(window, " check");
     }
-    attron(A_UNDERLINE);
-    mvaddch(row + 12, col, QUIT_KEY);
-    attroff(A_UNDERLINE);
+    wattron(window, A_UNDERLINE);
+    mvwaddch(window, row + 12, col, QUIT_KEY);
+    wattroff(window, A_UNDERLINE);
     if (QUIT_KEY == 'q' || QUIT_KEY == 'Q') {
-        printw("uit");
+        wprintw(window, "uit");
     }
     else {
-        printw(" quit");
+        wprintw(window, " quit");
     }
-    attroff(COLOR_PAIR(0));
+    wattroff(window, COLOR_PAIR(0));
 }
 
 
@@ -383,8 +400,8 @@ void Window::printMode() {
     if (windowRows <= BoardRows || !PRINT_STATUS) {
         return;
     }
-    attron(COLOR_PAIR(10));
-    move(boardTop + BoardRows, boardLeft);
+    wattron(window, COLOR_PAIR(10));
+    wmove(window, boardTop + BoardRows, boardLeft);
 
     int length;
     std::string longMode = mode;
@@ -392,9 +409,9 @@ void Window::printMode() {
     while (longMode.length() < length) {
         longMode += ' ';
     }
-    clrtoeol();
-    printw("%s", longMode.c_str());
-    attroff(COLOR_PAIR(10));
+    wclrtoeol(window);
+    wprintw(window, "%s", longMode.c_str());
+    wattroff(window, COLOR_PAIR(10));
 }
 
 
