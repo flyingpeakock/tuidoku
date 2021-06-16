@@ -4,8 +4,8 @@
 #include <iosfwd>
 #include "Row.h"
 
-class Board {
-    private:
+class SimpleBoard {
+    protected:
         struct cell {
             int row:5;
             int col:5;
@@ -16,8 +16,27 @@ class Board {
                 return row == r.row && col == r.col;
             }
         };
-
         puzzle playGrid;
+        bool playing;
+        void printBoard(puzzle grid, std::ostream &stream);
+
+    public:
+        SimpleBoard(puzzle startGrid);
+        void startPlaying();
+        void stopPlaying();
+        bool isPlaying();
+
+        puzzle &getPlayGrid();
+
+        virtual void insert(char val, int row, int col);
+
+        void printBoard(std::ostream &stream);
+        void printBoard();
+};
+
+
+class Board : public SimpleBoard {
+    private:
         puzzle startGrid;
         puzzle solutionGrid;
 
@@ -28,27 +47,19 @@ class Board {
 
         void removeMarks(char val, int row, int col);
         void restoreMarks(int row, int col);
-        void printBoard(puzzle grid, std::ostream &stream);
 
-        bool playing;
     public:
         Board(puzzle startGrid, puzzle finishGrid);
-        void startPlaying();
-        void stopPlaying();
-        bool isPlaying();
         bool isWon();
         bool isRemaining(int val);
 
         std::array<std::array<std::vector<char>, 9>, 9> &getPencilMarks();
-        puzzle &getPlayGrid();
         puzzle &getStartGrid();
         puzzle &getSolution();
 
         void insert(char val, int row, int col);
         void pencil(char val, int row, int col);
 
-        void printBoard(std::ostream &stream);
-        void printBoard();
         void printSolution(std::ostream &stream);
         void printSolution();
         void printStart(std::ostream &stream);
