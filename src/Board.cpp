@@ -92,6 +92,10 @@ void Board::insert(char val, int row, int col) {
 }
 
 void Board::pencil(char val, int row, int col) {
+    if (playGrid[row][col] > 0) {
+        // Grid not empty, cant pencil here
+        return;
+    }
     auto &marks = pencilMarks[row][col];
     if (val == ERASE_KEY || START_CHAR - 1 == val) {
         if (marks[0] != ' ') {
