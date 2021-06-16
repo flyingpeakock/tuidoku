@@ -93,24 +93,36 @@ void BasicWindow::printNumbs() {
     auto grid = game->getPlayGrid();
     int row = boardTop + 1;
     wattron(window, A_BOLD);
-    wattron(window, COLOR_PAIR(7));
 
     for (auto i = 0; i < 9; i++) {
         int col = boardLeft + 2;
         for (auto j = 0; j < 9; j++) {
             char ch = grid[i][j] + START_CHAR - 1;
-            if (ch == START_CHAR - 1) {
+            if (ch < START_CHAR) {
                 ch = ' ';
             }
 
+            // Draw over potential pencilmarks
+            wattron(window, COLOR_PAIR(10));
+            mvwprintw(window, row, col - 1, "   ");
+            wattroff(window, COLOR_PAIR(10));
+
+            int color = getColor(ch, i, j);
+            wattron(window, color);
             mvwaddch(window, row, col, ch);
+            wattroff(window, color);
             col += 4;
         }
+
         row += 2;
     }
 
     wattroff(window, A_BOLD);
     wattroff(window, COLOR_PAIR(7));
+}
+
+int BasicWindow::getColor(char i, int j, int k) {
+    return COLOR_PAIR(7);
 }
 
 void BasicWindow::printCoords() {
@@ -147,18 +159,16 @@ void BasicWindow::printCursor() {
     wmove(window, row, col);
 }
 
-void BasicWindow::printBoard() {
+void BasicWindow::resize() {
     int oldRows = windowRows;
     int oldCols = windowCols;
     getmaxyx(window, windowRows, windowCols);
-    bool resize = (oldRows != windowRows || oldCols != windowCols);
+    bool changedSize = (oldRows != windowRows || oldCols != windowCols);
 
     boardTop = (windowRows - BoardRows) / 2;
     boardLeft = (windowCols - BoardCols) / 2;
     int gridTop = boardTop + 1;
     int gridLeft = boardLeft + 2;
-
-    if (resize) {
         clear();
         if (windowRows < BoardRows || windowCols < BoardCols) {
             char error[] = "Not enough space to draw board";
@@ -177,8 +187,10 @@ void BasicWindow::printBoard() {
         }
         printBoxes();
         printCoords();
-    }
+}
 
+void BasicWindow::printBoard() {
+    resize();
     printNumbs();
     printCursor();
     wrefresh(window);
@@ -230,38 +242,8 @@ Window::Window(Board *g, WINDOW *w) : BasicWindow(g, w) {
 }
 
 void Window::printBoard() {
-    int oldRows = windowRows;
-    int oldCols = windowCols;
-    getmaxyx(window, windowRows, windowCols);
-    bool resize = (oldRows != windowRows || oldCols != windowCols);
-
-    boardTop = (windowRows - BoardRows) / 2;
-    boardLeft = (windowCols - BoardCols) / 2;
-    int gridTop = boardTop + 1;
-    int gridLeft = boardLeft + 2;
-
-    if (resize) {
-        clear();
-        if (windowRows < BoardRows || windowCols < BoardCols) {
-            char error[] = "Not enough space to draw board";
-            wattron(window, COLOR_PAIR(10));
-            mvwprintw(window, windowRows / 2, (windowCols - strlen(error)) / 2, "%s", error);
-            wattroff(window, COLOR_PAIR(10));
-            wrefresh(window);
-            return;
-        }
-        if (windowRows - BoardRows > 3 && PRINT_TITLE) {
-            wattron(window, A_BOLD | A_UNDERLINE);
-            wattron(window, COLOR_PAIR(10));
-            mvwprintw(window, boardTop - 3, (windowCols - strlen(TITLE)) / 2, "%s", TITLE);
-            wattroff(window, COLOR_PAIR(10));
-            wattroff(window, A_BOLD | A_UNDERLINE);
-        }
-        printBoxes();
-        printInstructions();
-        printCoords();
-    }
-
+    resize();
+    printInstructions();
     printNumbs();
     printPencil();
     printMode();
@@ -299,38 +281,6 @@ void Window::printPencil() {
         row += 2;
     }
     wattroff(window, A_DIM);
-}
-
-void Window::printNumbs() {
-    auto grid = game->getPlayGrid();
-    auto start = game->getStartGrid();
-    auto solution = game ->getSolution();
-
-    int row = boardTop + 1;
-    wattron(window, A_BOLD);
-    for (auto i = 0; i < 9; i++) {
-        int col = boardLeft + 2;
-        for (auto j = 0; j < 9; j++) {
-            const char ch = grid[i][j] + START_CHAR - 1;
-            if (ch < START_CHAR) {
-                col += 4;
-                continue;
-            }
-
-            // Draw over potential pencilmarks
-            wattron(window, COLOR_PAIR(10));
-            mvwprintw(window, row, col - 1, "   ");
-            wattroff(window, COLOR_PAIR(10));
-
-            int color = getColor(ch, i, j);
-            wattron(window, color);
-            mvwaddch(window, row, col, ch);
-            wattroff(window, color);
-            col += 4;
-        }
-        row += 2;
-    }
-    wattroff(window, A_BOLD);
 }
 
 

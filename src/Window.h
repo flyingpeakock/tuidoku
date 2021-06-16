@@ -22,7 +22,9 @@ class BasicWindow {
         void printCoords();
         void printCursor();
         void clear();
+        void resize();
         virtual void printInstructions() = 0;
+        virtual int getColor(char c, int row, int col);
     
     public:
         BasicWindow(Board *g);
@@ -48,7 +50,6 @@ class Window : public BasicWindow {
         bool checkColors;
         int highlightNum;
 
-        void printNumbs();
         void printInstructions();
 
         int getColor(char c, int row, int col);
