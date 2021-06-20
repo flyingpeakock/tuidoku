@@ -26,6 +26,7 @@ bool arguments::printHelp() {
                            "Optional args:\n"
                            "-h --help\t\tView this page\n"
                            "-p --play\t\tPlay sudoku. Default.\n"
+                           "-b --big\t\tUse a bigger board. Only has an effect with play.\n"
                            "-g --generate\t\tGenerate a sudoku puzzle.\n"
                            "-s --solve\t\tSolve a sudoku puzzle.\n"
                            "-f --file\t\tRead or write to a file. Requires a file name.\n"
@@ -92,6 +93,9 @@ std::map<std::string, bool> arguments::parse(int argc, char *argv[]) {
                     case 'F':
                     args["filled"] = true;
                     break;
+                    case 'b':
+                    args["big"] = true;
+                    break;
                 }
             }
         }
@@ -118,6 +122,9 @@ std::map<std::string, bool> arguments::parse(int argc, char *argv[]) {
             }
             else if (strcmp(argv[i]+2, "filled") == 0) {
                 args["filled"] = true;
+            }
+            else if (strcmp(argv[i]+2, "big") == 0) {
+                args["big"] = true;
             }
         }
     }
@@ -200,4 +207,8 @@ std::string arguments::getFileName() {
 
 bool arguments::fileArgSet() {
     return args["file"];
+}
+
+bool arguments::bigBoard() {
+    return args["big"];
 }

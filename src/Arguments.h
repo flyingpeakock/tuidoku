@@ -18,6 +18,7 @@ class arguments {
     std::string getFileName(int argc, char *argv[]);
     int getInt(int argc, char *argv[]);
     bool incompatible(std::map<std::string, bool> args);
+
     public:
     bool printHelp();
     arguments(int argc, char *argv[]);
@@ -26,4 +27,5 @@ class arguments {
     int getArgInt();
     std::string getFileName();
     bool fileArgSet();
+    bool bigBoard();
 };
