@@ -9,10 +9,9 @@
 
 void generate(int, bool, std::string);
 void solve(bool, std::string);
-void play(bool, std::string, int);
+void play(bool, std::string, int, bool);
 
 int main(int argc, char *argv[]) {
-
     arguments args = arguments(argc, argv);
     if (args.printHelp()) {
         return 0;
@@ -28,7 +27,7 @@ int main(int argc, char *argv[]) {
         solve(args.fileArgSet(), args.getFileName());
         break;
         case feature::Play:
-        play(args.fileArgSet(), args.getFileName(), args.getArgInt());
+        play(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
         break;
     }
     
@@ -87,9 +86,10 @@ Board createBoard(bool file, std::string fileName, int empty) {
     return Generator().createBoard();
 }
 
-void play(bool file, std::string fileName, int empty) {
+void play(bool file, std::string fileName, int empty, bool big) {
     Board b = createBoard(file, fileName, empty);
-    Window win = Window(&b);
-    Game game(&win);
+    Window *win = big ? new BigWindow(&b) : new Window(&b);
+    Game game(win);
     game.mainLoop();
+    delete win;
 }

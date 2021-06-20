@@ -3,10 +3,78 @@
 #include <iostream>
 #include <sstream>
 
+SimpleBoard::SimpleBoard(puzzle startGrid) : playGrid(startGrid) {
+}
+
+void SimpleBoard::startPlaying() {
+    playing = true;
+}
+
+void SimpleBoard::stopPlaying() {
+    playing = false;
+}
+
+bool SimpleBoard::isPlaying() {
+    return playing;
+}
+
+puzzle &SimpleBoard::getPlayGrid() {
+    return playGrid;
+}
+
+void SimpleBoard::insert(char val, int row, int col) {
+
+    if (val == ERASE_KEY || START_CHAR - 1 == val) {
+        if (playGrid[row][col] != 0) {
+            playGrid[row].set(col, 0);
+        }
+        return;
+    }
+
+    if (val > START_CHAR - 1 && val <= START_CHAR + 8) {
+        playGrid[row].set(col, val - START_CHAR + 1);
+    }
+}
+
+void SimpleBoard::printBoard(puzzle grid, std::ostream &stream) {
+    std::stringstream boardStream;
+    boardStream << TOPROW << '\n';
+    for (auto i = 0; i < 3; i++) {
+        boardStream << ROW1 << '\n';
+        boardStream << ROW2 << '\n';
+        boardStream << ROW1 << '\n';
+        boardStream << ROW2 << '\n';
+        boardStream << ROW1 << '\n';
+        if (i != 2)
+            boardStream << ROW3 << '\n';
+    }
+    boardStream << BOTROW << '\n';
+    std::string boardString = boardStream.str();
+    int idx = 0;
+    for (auto i = 0; i < 9; i++) {
+        idx += std::string{TOPROW}.size() + 5;
+        for (auto j = 0; j < 9; j++) {
+            if (grid[i][j] != 0)
+                boardString[idx] = grid[i][j] + '0';
+            idx += 6;
+        }
+    }
+    stream << boardString;
+}
+
+void SimpleBoard::printBoard() {
+    printBoard(playGrid, std::cout);
+}
+
+void SimpleBoard::printBoard(std::ostream &stream) {
+    printBoard(playGrid, stream);
+}
 
 Board::Board(puzzle startGrid,
              puzzle finishGrid
-            ): playGrid(startGrid), startGrid(startGrid), solutionGrid(finishGrid) {
+            ) : SimpleBoard(startGrid),
+                startGrid(startGrid), 
+                solutionGrid(finishGrid) {
     for (auto &array : pencilMarks) {
         for (auto &vec : array) {
             for (auto i = 0; i < 3; i++) {
@@ -29,17 +97,6 @@ Board::Board(puzzle startGrid,
     }
 }
 
-void Board::startPlaying() {
-    playing = true;
-}
-
-void Board::stopPlaying() {
-    playing = false;
-}
-
-bool Board::isPlaying() {
-    return playing;
-}
 
 bool Board::isWon() {
     if (playGrid == solutionGrid) {
@@ -51,10 +108,6 @@ bool Board::isWon() {
 
 std::array<std::array<std::vector<char>, 9>, 9> &Board::getPencilMarks() {
     return pencilMarks;
-}
-
-puzzle &Board::getPlayGrid() {
-    return playGrid;
 }
 
 puzzle &Board::getStartGrid() {
@@ -92,6 +145,10 @@ void Board::insert(char val, int row, int col) {
 }
 
 void Board::pencil(char val, int row, int col) {
+    if (playGrid[row][col] > 0) {
+        // Grid not empty, cant pencil here
+        return;
+    }
     auto &marks = pencilMarks[row][col];
     if (val == ERASE_KEY || START_CHAR - 1 == val) {
         if (marks[0] != ' ') {
@@ -188,40 +245,6 @@ bool Board::isRemaining(int val) {
     if (val == 0)
         return true;
     return count[val] < 9;
-}
-
-void Board::printBoard(puzzle grid, std::ostream &stream) {
-    std::stringstream boardStream;
-    boardStream << TOPROW << '\n';
-    for (auto i = 0; i < 3; i++) {
-        boardStream << ROW1 << '\n';
-        boardStream << ROW2 << '\n';
-        boardStream << ROW1 << '\n';
-        boardStream << ROW2 << '\n';
-        boardStream << ROW1 << '\n';
-        if (i != 2)
-            boardStream << ROW3 << '\n';
-    }
-    boardStream << BOTROW << '\n';
-    std::string boardString = boardStream.str();
-    int idx = 0;
-    for (auto i = 0; i < 9; i++) {
-        idx += std::string{TOPROW}.size() + 5;
-        for (auto j = 0; j < 9; j++) {
-            if (grid[i][j] != 0)
-                boardString[idx] = grid[i][j] + '0';
-            idx += 6;
-        }
-    }
-    stream << boardString;
-}
-
-void Board::printBoard() {
-    printBoard(playGrid, std::cout);
-}
-
-void Board::printBoard(std::ostream &stream) {
-    printBoard(playGrid, stream);
 }
 
 void Board::printSolution() {
