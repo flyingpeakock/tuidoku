@@ -12,6 +12,14 @@ void solve(bool, std::string);
 void play(bool, std::string, int);
 
 int main(int argc, char *argv[]) {
+    // testing some stuff
+    /*Board b = Generator().createBoard();
+    BigWindow win = BigWindow(&b);
+    Game game(&win);
+    game.mainLoop();
+
+    return 0;*/
+    // done testing
 
     arguments args = arguments(argc, argv);
     if (args.printHelp()) {

@@ -4,6 +4,7 @@
 #include <ncurses.h>
 #include <string>
 #include "Row.h"
+#include <map>
 
 class BasicWindow {
     private:
@@ -13,14 +14,14 @@ class BasicWindow {
         Board *game;
         int cursorRow, cursorCol;
         int windowRows, windowCols;
-        const int BoardRows = 19;
-        const int BoardCols = 37;
+        int BoardRows;
+        int BoardCols;
         int boardTop;
         int boardLeft;
-        void printBoxes();
-        void printNumbs();
-        void printCoords();
-        void printCursor();
+        virtual void printBoxes();
+        virtual void printNumbs();
+        virtual void printCoords();
+        virtual void printCursor();
         void clear();
         void resize();
         virtual void printInstructions() = 0;
@@ -32,7 +33,7 @@ class BasicWindow {
         ~BasicWindow();
 
         Board *getBoard();
-        void printBoard();
+        virtual void printBoard();
         void moveCursor(int row, int col);
 };
 
@@ -45,22 +46,38 @@ class SolveWindow : public BasicWindow {
 };
 
 class Window : public BasicWindow {
-    private:
+    protected:
+        int highlightNum;
         std::string mode;
         bool checkColors;
-        int highlightNum;
 
         void printInstructions();
 
         int getColor(char c, int row, int col);
-        void printPencil();
+        virtual void printPencil();
         void printMode();
 
     public:
         Window(Board *g);
         Window(Board *g, WINDOW *w);
-        void printBoard();
+        virtual void printBoard();
         void changeMode(std::string s);
         void check();
         void select(int val);
+};
+
+class BigWindow : public Window {
+    private:
+        void clearPencil(int row, int col);
+        void printPencil();
+        void printPencil(char c, int row, int col, std::map<char, bool> marks);
+        void printBoxes();
+        void printNumbs();
+        void printCursor();
+        void printCoords();
+    public:
+        BigWindow(Board *g);
+        BigWindow(Board *g, WINDOW *w);
+        void printBoard();
+
 };
