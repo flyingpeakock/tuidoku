@@ -23,7 +23,7 @@ class BasicWindow {
         virtual void printCoords();
         virtual void printCursor();
         void clear();
-        void resize();
+        bool resize();
         virtual void printInstructions() = 0;
         virtual int getColor(char c, int row, int col);
     

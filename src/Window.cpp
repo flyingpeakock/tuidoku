@@ -163,11 +163,10 @@ void BasicWindow::printCursor() {
     wmove(window, row, col);
 }
 
-void BasicWindow::resize() {
+bool BasicWindow::resize() {
     int oldRows = windowRows;
     int oldCols = windowCols;
     getmaxyx(window, windowRows, windowCols);
-    bool changedSize = (oldRows != windowRows || oldCols != windowCols);
 
     boardTop = (windowRows - BoardRows) / 2;
     boardLeft = (windowCols - BoardCols) / 2;
@@ -180,7 +179,7 @@ void BasicWindow::resize() {
         mvwprintw(window, windowRows / 2, (windowCols - strlen(error)) / 2, "%s", error);
         wattroff(window, COLOR_PAIR(10));
         wrefresh(window);
-        return;
+        return false;
     }
     if (windowRows - BoardRows > 3 && PRINT_TITLE) {
         wattron(window, A_BOLD | A_UNDERLINE);
@@ -189,12 +188,14 @@ void BasicWindow::resize() {
         wattroff(window, COLOR_PAIR(10));
         wattroff(window, A_BOLD | A_UNDERLINE);
     }
-    printBoxes();
-    printCoords();
+        printBoxes();
+        printCoords();
+        return true;
 }
 
 void BasicWindow::printBoard() {
-    resize();
+    if (!resize())
+        return;
     printNumbs();
     printCursor();
     wrefresh(window);
@@ -246,7 +247,8 @@ Window::Window(Board *g, WINDOW *w) : BasicWindow(g, w) {
 }
 
 void Window::printBoard() {
-    resize();
+    if (!resize())
+        return;
     printInstructions();
     printNumbs();
     printPencil();
@@ -446,7 +448,8 @@ BigWindow::BigWindow(Board *g, WINDOW *w) : Window(g, w) {
 }
 
 void BigWindow::printBoard() {
-    resize();
+    if (!resize())
+        return;
     printInstructions();
     printNumbs();
     printPencil();
