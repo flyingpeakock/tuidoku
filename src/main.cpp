@@ -90,6 +90,14 @@ void play(bool file, std::string fileName, int empty, bool big) {
     Board b = createBoard(file, fileName, empty);
     Window *win = big ? new BigWindow(&b) : new Window(&b);
     Game game(win);
-    game.mainLoop();
+    int playTime = game.mainLoop();
     delete win;
+    std::cout << "Puzzle:\n";
+    b.printStart();
+    std::cout << "\nSolution:\n";
+    b.printSolution();
+    if (playTime > 0) {
+        std::cout << "\nSeconds played: " << playTime << std::endl;
+    }
+
 }
