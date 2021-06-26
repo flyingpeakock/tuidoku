@@ -9,7 +9,7 @@ Controller::Controller(BasicWindow *win){
     col = 0;
 }
 
-void Controller::mainLoop() {
+int Controller::mainLoop() {
     board->startPlaying();
     while (board->isPlaying()) {
         window->printBoard();
@@ -43,6 +43,7 @@ void Controller::mainLoop() {
                 }
         }
     }
+    return 0;
 }
 
 void Controller::up() {
@@ -99,7 +100,7 @@ InteractiveSolver::InteractiveSolver(SolveWindow *win): Controller(win) {
     window = win;
 };
 
-void InteractiveSolver::mainLoop() {
+int InteractiveSolver::mainLoop() {
     board->startPlaying();
     while(board->isPlaying()) {
         solver.changeGrid(board->getPlayGrid());
@@ -139,7 +140,7 @@ void InteractiveSolver::mainLoop() {
                         solve();
                         window->printBoard();
                         getch();
-                        return;
+                        return 0;
                     }
                 }
             }
@@ -148,6 +149,7 @@ void InteractiveSolver::mainLoop() {
     }
     window->printBoard();
     getch();
+    return 0;
 }
 
 void InteractiveSolver::solve() {
@@ -164,7 +166,7 @@ Game::Game(Window *win): Controller(win) {
     mode = INSERT_KEY;
 }
 
-void Game::mainLoop() {
+int Game::mainLoop() {
     board->startPlaying();
     Stopwatch timer;
     if (START_TIMER)
@@ -226,7 +228,7 @@ void Game::mainLoop() {
     if (START_TIMER)
         timer.stop();
     if (!board->isWon()) {
-        return;
+        return START_TIMER ? timer.totalSeconds() : 0;
     }
 
     if (START_TIMER) {
@@ -235,6 +237,7 @@ void Game::mainLoop() {
     window->printBoard();
 
     getch();
+    return START_TIMER ? timer.totalSeconds() : 0;
 }
 
 void Game::changeMode(char c) {

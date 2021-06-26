@@ -15,4 +15,5 @@ class Stopwatch {
         void start();
         void stop();
         std::string timeTaken();
+        int totalSeconds();
 };
