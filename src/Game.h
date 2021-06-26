@@ -12,7 +12,7 @@ class Controller {
         int col : 5;
     public:
         Controller(BasicWindow *win);
-        virtual void mainLoop();
+        virtual int mainLoop();
         void up();
         void down();
         void left();
@@ -27,7 +27,7 @@ class InteractiveSolver : public Controller {
         void solve();
     public:
         InteractiveSolver(SolveWindow *win);
-        void mainLoop();
+        int mainLoop();
 };
 
 class Game : public Controller {
@@ -36,7 +36,7 @@ class Game : public Controller {
         wchar_t mode;
     public:
         Game(Window *win);
-        void mainLoop();
+        int mainLoop();
         void changeMode(char c);
         void check();
 };
