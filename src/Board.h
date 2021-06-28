@@ -59,6 +59,7 @@ class Board : public SimpleBoard {
 
         void insert(char val, int row, int col);
         void pencil(char val, int row, int col);
+        void autoPencil();
 
         void printSolution(std::ostream &stream);
         void printSolution();

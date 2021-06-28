@@ -79,5 +79,4 @@ class BigWindow : public Window {
         BigWindow(Board *g);
         BigWindow(Board *g, WINDOW *w);
         void printBoard();
-
 };
