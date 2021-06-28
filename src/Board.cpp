@@ -1,3 +1,4 @@
+#include "Solver.h"
 #include "Board.h"
 #include "config.h"
 #include <iostream>
@@ -142,6 +143,23 @@ void Board::insert(char val, int row, int col) {
     }
 
     removeMarks(val, row, col);
+}
+
+void Board::autoPencil() {
+    for (auto i = 0; i < playGrid.size(); i++) {
+        for (auto j = 0; j < playGrid[i].size(); j++) {
+            if (playGrid[i][j] > 0) {
+                // Number is filled, don't put pencil marks
+                continue;
+            }
+            for (auto k = 0; k < 9; k++) {
+                if (Solver::isSafe(playGrid, i, j, k)) {
+                    auto &marks = pencilMarks[i][j];
+                    marks.push_back(k);
+                }
+            }
+        }
+    }
 }
 
 void Board::pencil(char val, int row, int col) {
