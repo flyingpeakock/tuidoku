@@ -40,6 +40,7 @@ enum keybinds {
     ERASE_KEY = ' ', // 127 = backspace, or '\b' = backspace
     GO_KEY = 'g',
     TOGGLE_KEY =  27, // 27 = ESC. Switches between incert and pencil
+    AUTO_PENCIL_KEY = 'a',
 };
 
 // Colors

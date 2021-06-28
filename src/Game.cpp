@@ -208,6 +208,9 @@ int Game::mainLoop() {
         case CHECK_KEY:
             window->check();
             break;
+        case AUTO_PENCIL_KEY:
+            board->autoPencil();
+            break;
         case TOGGLE_KEY:
             mode == INSERT_KEY ? changeMode(PENCIL_KEY) : changeMode(INSERT_KEY);
             break;
