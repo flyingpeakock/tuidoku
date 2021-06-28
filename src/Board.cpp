@@ -152,10 +152,9 @@ void Board::autoPencil() {
                 // Number is filled, don't put pencil marks
                 continue;
             }
-            for (auto k = 0; k < 9; k++) {
-                if (Solver::isSafe(playGrid, i, j, k)) {
-                    auto &marks = pencilMarks[i][j];
-                    marks.push_back(k);
+            for (auto k = START_CHAR; k < START_CHAR + 9; k++) {
+                if (Solver::isSafe(playGrid, i, j, k - START_CHAR + 1)) {
+                    pencilMarks[i][j].push_back(k);
                 }
             }
         }
