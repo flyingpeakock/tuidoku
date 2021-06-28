@@ -16,6 +16,7 @@ class Solver {
         Solver(std::array<std::array<int, 9>, 9> board);
         Solver(const char *board);
         bool isSafe(int row, int col, int num);
+        static bool isSafe(puzzle p, int row, int col, int num);
         puzzle getGrid();
         void solve();
         bool isUnique();

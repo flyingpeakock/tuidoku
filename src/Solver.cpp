@@ -63,15 +63,19 @@ puzzle Solver::getGrid() {
 }
 
 bool Solver::isSafe(int row, int col, int num) {
+    return isSafe(grid, row, col, num);
+}
+
+bool Solver::isSafe(puzzle p, int row, int col, int num) {
 
     // Check for same numb in same row
     for (auto i = 0; i < SIZE; i++) {
-        if (grid[row][i] == num) return false;
+        if (p[row][i] == num) return false;
     }
 
     // Check for same numb in same col
     for (auto i = 0; i < SIZE; i++) {
-        if (grid[i][col] == num) return false;
+        if (p[i][col] == num) return false;
     }
 
     // Check for same numb in same box
@@ -79,7 +83,7 @@ bool Solver::isSafe(int row, int col, int num) {
     int boxCol = (col / 3) * 3;
     for (auto i = boxRow; i < boxRow + 3; i++) {
         for (auto j = boxCol; j < boxCol + 3; j++) {
-            if (grid[i][j] == num) return false;
+            if (p[i][j] == num) return false;
         }
     }
     
