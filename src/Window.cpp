@@ -259,7 +259,6 @@ void Window::printBoard() {
 
 
 void Window::printPencil() {
-    wattron(window, A_DIM);
     auto marks = game->getPencilMarks();
     auto grid = game->getPlayGrid();
     int row = boardTop + 1;
@@ -275,18 +274,17 @@ void Window::printPencil() {
                        wattron(window, COLOR_PAIR(3));
                    }
                    else {
-                       wattron(window, COLOR_PAIR(10));
+                       wattron(window, COLOR_PAIR(10) | A_DIM);
                    }
                    waddch(window, c);
                    wattroff(window, COLOR_PAIR(3));
-                   wattroff(window, COLOR_PAIR(10));
+                   wattroff(window, COLOR_PAIR(10) | A_DIM);
                }
            }
            col += 4;
         }
         row += 2;
     }
-    wattroff(window, A_DIM);
 }
 
 
@@ -535,15 +533,14 @@ void BigWindow::printPencil(char c, int row, int col, std::map<char, bool> marks
         wattron(window, COLOR_PAIR(3));
     }
     else {
-        wattron(window, COLOR_PAIR(10));
+        wattron(window, COLOR_PAIR(10) | A_DIM);
     }
     mvwaddch(window, row, col, c);
     wattroff(window, COLOR_PAIR(3));
-    wattroff(window, COLOR_PAIR(10));
+    wattroff(window, COLOR_PAIR(10) | A_DIM);
 }
 
 void BigWindow::printPencil() {
-    wattron(window, A_DIM);
     auto marks = game->getPencilMarks();
     auto grid = game->getPlayGrid();
 
@@ -566,7 +563,6 @@ void BigWindow::printPencil() {
         }
         row += 4;
     }
-    wattroff(window, A_DIM);
 }
 
 void BigWindow::printCursor() {
