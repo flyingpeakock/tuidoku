@@ -152,6 +152,9 @@ Board file::getTuidokuPuzzle(std::istream &file) {
         else if (c == ' ' && rawPuzzle[i+1] == ' ' && rawPuzzle[i+2] == ' ') {
             puzzleStream << '0';
         }
+        if (puzzleStream.tellp() >= 81) {
+            break;
+        }
     }
     return Generator{puzzleStream.str().c_str()}.createBoard();
 }
