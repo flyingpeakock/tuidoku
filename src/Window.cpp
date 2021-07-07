@@ -338,7 +338,16 @@ void Window::printInstructions() {
         wprintw(window, " check");
     }
     wattron(window, A_UNDERLINE);
-    mvwaddch(window, row + 12, col, QUIT_KEY);
+    mvwaddch(window, row+12, col, AUTO_PENCIL_KEY);
+    wattroff(window, A_UNDERLINE);
+    if (AUTO_PENCIL_KEY == 'a' || AUTO_PENCIL_KEY == 'A') {
+        wprintw(window, "uto fill pencil-marks");
+    }
+    else {
+        wprintw(window, " auto fill penicl-marks");
+    }
+    wattron(window, A_UNDERLINE);
+    mvwaddch(window, row + 13, col, QUIT_KEY);
     wattroff(window, A_UNDERLINE);
     if (QUIT_KEY == 'q' || QUIT_KEY == 'Q') {
         wprintw(window, "uit");
