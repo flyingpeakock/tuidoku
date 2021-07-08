@@ -33,6 +33,17 @@ int main(int argc, char *argv[]) {
     
 }
 
+Board selectBoard(std::vector<Board> boards) {
+    if (boards.size() <= 1) {
+        return boards[0];
+    }
+    SelectionWindow *win = new SelectionWindow(boards);
+    Selection game(win);
+    int index = game.mainLoop();
+    delete win;
+    return boards[index];
+}
+
 
 void generate(int empty, bool file, std::string fileName) {
     Generator gen = (empty) ? Generator(empty) : Generator();
@@ -48,11 +59,11 @@ void generate(int empty, bool file, std::string fileName) {
 
 void solve(bool file, std::string fileName) {
     if (file) {
-        file::getPuzzle(fileName.c_str()).printSolution();
+        selectBoard(file::getPuzzle(fileName.c_str())).printSolution();
         return;
     }
     else if (fileName != "404" && !fileName.empty()) {
-        file::getStringPuzzle(fileName.c_str()).printSolution();
+        selectBoard(file::getStringPuzzle(fileName.c_str())).printSolution();
         return;
     }
     std::ostringstream gridString;
@@ -74,11 +85,11 @@ void solve(bool file, std::string fileName) {
 
 Board createBoard(bool file, std::string fileName, int empty) {
     if (file) {
-        return file::getPuzzle(fileName.c_str());
+        return selectBoard(file::getPuzzle(fileName.c_str()));
     }
     if (fileName != "404" && !fileName.empty()) {
         // no file attempting to get string board from fileName
-        return file::getStringPuzzle(fileName.c_str());
+        return selectBoard(file::getStringPuzzle(fileName.c_str()));
     }
     if (empty) {
         return Generator(empty).createBoard();

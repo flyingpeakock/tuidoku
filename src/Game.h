@@ -3,6 +3,7 @@
 #include "Window.h"
 #include "Board.h"
 #include "Solver.h"
+#include <vector>
 
 class Controller {
     protected:
@@ -39,4 +40,13 @@ class Game : public Controller {
         int mainLoop();
         void changeMode(char c);
         void check();
+};
+
+class Selection : public Controller {
+    private:
+        int index;
+    public:
+        Selection(SelectionWindow *win);
+        SelectionWindow *window;
+        int mainLoop();
 };

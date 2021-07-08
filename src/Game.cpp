@@ -96,6 +96,33 @@ void Controller::go() {
     window->moveCursor(row, col);
 }
 
+Selection::Selection(SelectionWindow *win) : Controller(win) {
+    index = 0;
+    window = win;
+}
+
+int Selection::mainLoop() {
+    board->startPlaying();
+    while(board->isPlaying()) {
+        window->printBoard();
+        int ch = wgetch(stdscr);
+        switch (ch) {
+            case KEY_LEFT:
+            case LEFT_KEY:
+                window->changeBoard(--index);
+                break;
+            case RIGHT_KEY:
+            case KEY_RIGHT:
+                window->changeBoard(++index);
+                break;
+            case GO_KEY:
+            case QUIT_KEY:
+                return index;
+        }
+    }
+    return index;
+}
+
 InteractiveSolver::InteractiveSolver(SolveWindow *win): Controller(win) {
     window = win;
 };
