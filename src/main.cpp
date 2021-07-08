@@ -59,11 +59,11 @@ void generate(int empty, bool file, std::string fileName) {
 
 void solve(bool file, std::string fileName) {
     if (file) {
-        file::getPuzzle(fileName.c_str())[0].printSolution();
+        selectBoard(file::getPuzzle(fileName.c_str())).printSolution();
         return;
     }
     else if (fileName != "404" && !fileName.empty()) {
-        file::getStringPuzzle(fileName.c_str()).printSolution();
+        selectBoard(file::getStringPuzzle(fileName.c_str())).printSolution();
         return;
     }
     std::ostringstream gridString;
