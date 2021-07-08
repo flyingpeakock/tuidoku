@@ -34,7 +34,6 @@ class SimpleBoard {
         void printBoard();
 };
 
-
 class Board : public SimpleBoard {
     private:
         puzzle startGrid;

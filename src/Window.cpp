@@ -206,6 +206,54 @@ void BasicWindow::moveCursor(int row, int col) {
     cursorCol = col;
 }
 
+SelectionWindow::SelectionWindow(std::vector<Board> &g) : BasicWindow(&g[0]) {
+    boardVector = g;
+    printInstructions();
+}
+
+SelectionWindow::SelectionWindow(std::vector<Board> &g, WINDOW *w) : BasicWindow(&g[0], w) {
+    boardVector = g;
+    printInstructions();
+}
+
+void SelectionWindow::printBoard() {
+    if (!resize())
+        return;
+    printNumbs();
+    printInstructions();
+    printCursor();
+    wrefresh(window);
+}
+
+void SelectionWindow::printInstructions() {
+    if (windowCols - BoardCols < 36 || !PRINT_HELP) {
+        return;
+    }
+    int row = boardTop + 5;
+    int col = boardLeft + BoardCols + 5;
+
+    wattron(window, COLOR_PAIR(10));
+    mvwaddch(window, row, col, LEFT_KEY);
+    mvwaddch(window, row, col + 6, RIGHT_KEY);
+
+    wattron(window, A_UNDERLINE);
+    mvwaddch(window, row+2, col, GO_KEY);
+    wattroff(window, A_UNDERLINE);
+    wprintw(window, " Select");
+    wattroff(window, COLOR_PAIR(10));
+}
+
+void SelectionWindow::changeBoard(int idx) {
+    int max = boardVector.size() - 1;
+    if (idx > max) {
+        idx = max;
+    }
+    else if (idx < 0) {
+        idx = 0;
+    }
+    game = &boardVector[idx];
+}
+
 SolveWindow::SolveWindow(Board *g) : BasicWindow(g) {
     printInstructions();
 }
@@ -341,10 +389,10 @@ void Window::printInstructions() {
     mvwaddch(window, row+12, col, AUTO_PENCIL_KEY);
     wattroff(window, A_UNDERLINE);
     if (AUTO_PENCIL_KEY == 'a' || AUTO_PENCIL_KEY == 'A') {
-        wprintw(window, "uto fill pencil-marks");
+        wprintw(window, "uto pencil");
     }
     else {
-        wprintw(window, " auto fill penicl-marks");
+        wprintw(window, " auto pencil");
     }
     wattron(window, A_UNDERLINE);
     mvwaddch(window, row + 13, col, QUIT_KEY);

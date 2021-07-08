@@ -80,3 +80,14 @@ class BigWindow : public Window {
         BigWindow(Board *g, WINDOW *w);
         void printBoard();
 };
+
+class SelectionWindow : public BasicWindow {
+    private:
+        std::vector<Board> boardVector;
+        void printInstructions();
+    public:
+        SelectionWindow(std::vector<Board> &g);
+        SelectionWindow(std::vector<Board> &g, WINDOW *w);
+        void changeBoard(int idx);
+        void printBoard();
+};
