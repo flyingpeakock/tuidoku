@@ -23,9 +23,6 @@ Generator::Generator(const char *gridString) {
             grid[i].set(j, gridString[idx++] - '0');
         }
     }
-    Solver solver(grid);
-    solver.solve();
-    solution = solver.getGrid();
 }
 
 Generator::Generator(int unknowns) {
@@ -109,5 +106,14 @@ puzzle Generator::getSolution() {
 }
 
 Board Generator::createBoard() {
+    if (!solution[0][0]) {
+        Solver solver(grid);
+        solver.solve();
+        solution = solver.getGrid();
+    }
     return Board(grid, solution);
+}
+
+SimpleBoard Generator::createSimpleBoard() {
+    return SimpleBoard(grid);
 }

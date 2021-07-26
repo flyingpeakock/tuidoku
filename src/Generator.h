@@ -15,4 +15,5 @@ class Generator {
         puzzle getGrid();
         puzzle getSolution();
         Board createBoard();
+        SimpleBoard createSimpleBoard();
 };

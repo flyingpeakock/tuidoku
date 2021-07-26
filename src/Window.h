@@ -11,7 +11,7 @@ class BasicWindow {
         void init();
     protected:
         WINDOW *window;
-        Board *game;
+        SimpleBoard *game;
         int cursorRow, cursorCol;
         int windowRows, windowCols;
         int BoardRows;
@@ -28,8 +28,8 @@ class BasicWindow {
         virtual int getColor(char c, int row, int col);
     
     public:
-        BasicWindow(Board *g);
-        BasicWindow(Board *g, WINDOW *w);
+        BasicWindow(SimpleBoard *g);
+        BasicWindow(SimpleBoard *g, WINDOW *w);
         ~BasicWindow();
 
         Board *getBoard();
@@ -39,6 +39,7 @@ class BasicWindow {
 
 class SolveWindow : public BasicWindow {
     private:
+        Board *game;
         void printInstructions();
     public:
         SolveWindow(Board *g);
@@ -47,6 +48,7 @@ class SolveWindow : public BasicWindow {
 
 class Window : public BasicWindow {
     protected:
+        Board *game;
         int highlightNum;
         std::string mode;
         bool checkColors;
@@ -83,11 +85,11 @@ class BigWindow : public Window {
 
 class SelectionWindow : public BasicWindow {
     private:
-        std::vector<Board> boardVector;
+        std::vector<SimpleBoard> boardVector;
         void printInstructions();
     public:
-        SelectionWindow(std::vector<Board> &g);
-        SelectionWindow(std::vector<Board> &g, WINDOW *w);
+        SelectionWindow(std::vector<SimpleBoard> &g);
+        SelectionWindow(std::vector<SimpleBoard> &g, WINDOW *w);
         void changeBoard(int idx);
         void printBoard();
 };

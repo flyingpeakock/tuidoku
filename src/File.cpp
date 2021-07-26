@@ -7,7 +7,7 @@
 #include <sstream>
 #include "config.h"
 
-std::vector<Board> file::getPuzzle(const char *fileName) {
+std::vector<SimpleBoard> file::getPuzzle(const char *fileName) {
     std::ifstream file;
     file.open(fileName);
 
@@ -56,7 +56,7 @@ std::vector<Board> file::getPuzzle(const char *fileName) {
     return getSDKPuzzle(file); // Attempting with this function
 }
 
-std::vector<Board> file::getStringPuzzle(const char *puzzleString) {
+std::vector<SimpleBoard> file::getStringPuzzle(const char *puzzleString) {
     std::stringstream puzzle(puzzleString);
 
     if (puzzle.str().find(TOPROW) != std::string::npos) {
@@ -69,7 +69,7 @@ std::vector<Board> file::getStringPuzzle(const char *puzzleString) {
     return getSDKPuzzle(puzzle);
 }
 
-std::vector<Board> file::getSDKPuzzle(std::istream &file) {
+std::vector<SimpleBoard> file::getSDKPuzzle(std::istream &file) {
     file.seekg(std::ios_base::beg);
     std::stringstream stringStream;
     std::string line;
@@ -85,13 +85,13 @@ std::vector<Board> file::getSDKPuzzle(std::istream &file) {
             }
         }
     }
-    return std::vector<Board>{Generator{stringStream.str().c_str()}.createBoard()};
+    return std::vector<SimpleBoard>{Generator{stringStream.str().c_str()}.createSimpleBoard()};
 }
 
-std::vector<Board> file::getXMLPuzzle(std::istream &file) {
+std::vector<SimpleBoard> file::getXMLPuzzle(std::istream &file) {
     file.seekg(std::ios_base::beg);
     std::string line;
-    std::vector<Board> puzzles;
+    std::vector<SimpleBoard> puzzles;
     while (getline(file, line)) {
         std::size_t found = line.find("<game data=");
         if (found == std::string::npos)
@@ -102,24 +102,24 @@ std::vector<Board> file::getXMLPuzzle(std::istream &file) {
         std::size_t end = line.rfind("'");
         if (end == std::string::npos)
             end = line.rfind("\"");
-        Board b = Generator{(line.substr(begin+1, end- begin - 1)).c_str()}.createBoard();
+        SimpleBoard b = Generator{(line.substr(begin+1, end- begin - 1)).c_str()}.createSimpleBoard();
         puzzles.push_back(b);
     }
     return puzzles;
 }
 
-std::vector<Board> file::getSDMPuzzle(std::istream &file) {
+std::vector<SimpleBoard> file::getSDMPuzzle(std::istream &file) {
     file.seekg(std::ios_base::beg);
-    std::vector<Board> puzzles;
+    std::vector<SimpleBoard> puzzles;
     std::string line;
     while(getline(file, line)) {
         Generator g = Generator(line.c_str());
-        puzzles.emplace_back(g.createBoard());
+        puzzles.emplace_back(g.createSimpleBoard());
     }
     return puzzles;
 }
 
-std::vector<Board> file::getSSPuzzle(std::istream &file) {
+std::vector<SimpleBoard> file::getSSPuzzle(std::istream &file) {
     file.seekg(std::ios_base::beg);
     std::stringstream puzzle;
     while (file.good()) {
@@ -131,10 +131,10 @@ std::vector<Board> file::getSSPuzzle(std::istream &file) {
             puzzle << '0';
         }
     }
-    return std::vector<Board>{Generator{puzzle.str().c_str()}.createBoard()};
+    return std::vector<SimpleBoard>{Generator{puzzle.str().c_str()}.createSimpleBoard()};
 }
 
-std::vector<Board> file::getTuidokuPuzzle(std::istream &file) {
+std::vector<SimpleBoard> file::getTuidokuPuzzle(std::istream &file) {
     file.seekg(std::ios_base::beg);
     std::ostringstream sstr;
     std::string rawPuzzle;
@@ -154,5 +154,5 @@ std::vector<Board> file::getTuidokuPuzzle(std::istream &file) {
             break;
         }
     }
-    return std::vector<Board>{Generator{puzzleStream.str().c_str()}.createBoard()};
+    return std::vector<SimpleBoard>{Generator{puzzleStream.str().c_str()}.createSimpleBoard()};
 }

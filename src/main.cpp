@@ -33,15 +33,27 @@ int main(int argc, char *argv[]) {
     
 }
 
-Board selectBoard(std::vector<Board> boards) {
+Board makeNotSimpleBoard(SimpleBoard board) {
+    puzzle grid = board.getPlayGrid();
+    std::stringstream gridStringStream;
+    for (auto i = 0; i < grid.size(); i++) {
+        for (auto j = 0; j < grid[i].size(); j++) {
+            gridStringStream << grid[i][j];
+        }
+    }
+    return Generator{gridStringStream.str().c_str()}.createBoard();
+}
+
+Board selectBoard(std::vector<SimpleBoard> boards) {
     if (boards.size() <= 1) {
-        return boards[0];
+        return makeNotSimpleBoard(boards[0]);
     }
     SelectionWindow *win = new SelectionWindow(boards);
     Selection game(win);
     int index = game.mainLoop();
     delete win;
-    return boards[index];
+
+    return makeNotSimpleBoard(boards[index]);
 }
 
 

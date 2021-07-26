@@ -5,7 +5,7 @@
 #include <map>
 #include "config.h"
 
-BasicWindow::BasicWindow(Board *g, WINDOW *w) {
+BasicWindow::BasicWindow(SimpleBoard *g, WINDOW *w) {
     window = w;
     game = g;
 
@@ -14,7 +14,7 @@ BasicWindow::BasicWindow(Board *g, WINDOW *w) {
     init();
 }
 
-BasicWindow::BasicWindow(Board *g) {
+BasicWindow::BasicWindow(SimpleBoard *g) {
     int maxY, maxX;
     setlocale(LC_ALL, "");
     initscr();
@@ -60,7 +60,7 @@ void BasicWindow::init() {
 }
 
 Board *BasicWindow::getBoard() {
-    return game;
+    return (Board *) game;
 }
 
 void BasicWindow::clear() {
@@ -206,12 +206,12 @@ void BasicWindow::moveCursor(int row, int col) {
     cursorCol = col;
 }
 
-SelectionWindow::SelectionWindow(std::vector<Board> &g) : BasicWindow(&g[0]) {
+SelectionWindow::SelectionWindow(std::vector<SimpleBoard> &g) : BasicWindow(&g[0]) {
     boardVector = g;
     printInstructions();
 }
 
-SelectionWindow::SelectionWindow(std::vector<Board> &g, WINDOW *w) : BasicWindow(&g[0], w) {
+SelectionWindow::SelectionWindow(std::vector<SimpleBoard> &g, WINDOW *w) : BasicWindow(&g[0], w) {
     boardVector = g;
     printInstructions();
 }
@@ -255,10 +255,12 @@ void SelectionWindow::changeBoard(int idx) {
 }
 
 SolveWindow::SolveWindow(Board *g) : BasicWindow(g) {
+    game = g;
     printInstructions();
 }
 
 SolveWindow::SolveWindow(Board *g, WINDOW * w) : BasicWindow(g, w) {
+    game = g;
     printInstructions();
 }
 
@@ -283,12 +285,14 @@ void SolveWindow::printInstructions() {
 }
 
 Window::Window(Board *g): BasicWindow(g){
+    game = g;
     mode = "Insert mode";
     checkColors = false;
     highlightNum = 0;
 }
 
 Window::Window(Board *g, WINDOW *w) : BasicWindow(g, w) {
+    game = g;
     mode = "Insert mode";
     checkColors = false;
     highlightNum = 0;
