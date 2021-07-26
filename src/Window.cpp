@@ -56,7 +56,6 @@ void BasicWindow::init() {
     printBoxes();
     printCoords();
     printBoard();
-    printCursor();
 }
 
 Board *BasicWindow::getBoard() {
