@@ -32,7 +32,6 @@ BasicWindow::BasicWindow(SimpleBoard *g) {
 
 BasicWindow::~BasicWindow() {
     delwin(window);
-    endwin();
 }
 
 void BasicWindow::init() {

@@ -10,6 +10,9 @@
 void generate(int, bool, std::string);
 void solve(bool, std::string);
 void play(bool, std::string, int, bool);
+void startCurses();
+void endCurses();
+WINDOW * createWindow();
 
 int main(int argc, char *argv[]) {
     arguments args = arguments(argc, argv);
@@ -33,6 +36,23 @@ int main(int argc, char *argv[]) {
     
 }
 
+void startCurses() {
+    setlocale(LC_ALL, ""),
+    initscr();
+}
+
+void endCurses() {
+    endwin();
+}
+
+WINDOW * createWindow() {
+    int maxY, maxX;
+    getmaxyx(stdscr, maxY, maxX);
+    WINDOW * ret = newwin(maxY, maxX, 0, 0);
+    refresh();
+    return ret;
+}
+
 Board makeNotSimpleBoard(SimpleBoard board) {
     puzzle grid = board.getPlayGrid();
     std::stringstream gridStringStream;
@@ -48,7 +68,9 @@ Board selectBoard(std::vector<SimpleBoard> boards) {
     if (boards.size() <= 1) {
         return makeNotSimpleBoard(boards[0]);
     }
-    SelectionWindow *win = new SelectionWindow(boards);
+    int maxY, maxX;
+    getmaxyx(stdscr, maxY, maxX);
+    SelectionWindow *win = new SelectionWindow(boards, createWindow());
     Selection game(win);
     int index = game.mainLoop();
     delete win;
@@ -83,10 +105,11 @@ void solve(bool file, std::string fileName) {
         gridString << '0';
     }
     Board b = Generator(gridString.str().c_str()).createBoard();;
-    SolveWindow window = SolveWindow(&b);
+    startCurses();
+    SolveWindow window = SolveWindow(&b, createWindow());
     InteractiveSolver game(&window);
     game.mainLoop();
-    endwin();
+    endCurses();
     std::cout << "Puzzle:\n";
     b.printStart();
     std::cout << "Solution:\n";
@@ -110,11 +133,13 @@ Board createBoard(bool file, std::string fileName, int empty) {
 }
 
 void play(bool file, std::string fileName, int empty, bool big) {
+    startCurses();
     Board b = createBoard(file, fileName, empty);
-    Window *win = big ? new BigWindow(&b) : new Window(&b);
+    Window *win = big ? new BigWindow(&b, createWindow()) : new Window(&b, createWindow());
     Game game(win);
     int playTime = game.mainLoop();
     delete win;
+    endCurses();
     std::cout << "Puzzle:\n";
     b.printStart();
     std::cout << "\nSolution:\n";
