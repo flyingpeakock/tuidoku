@@ -110,14 +110,13 @@ std::vector<Board> file::getXMLPuzzle(std::istream &file) {
 
 std::vector<Board> file::getSDMPuzzle(std::istream &file) {
     file.seekg(std::ios_base::beg);
-    std::vector<std::string> puzzles;
+    std::vector<Board> puzzles;
     std::string line;
     while(getline(file, line)) {
-        puzzles.push_back(line);
+        Generator g = Generator(line.c_str());
+        puzzles.emplace_back(g.createBoard());
     }
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    srand(seed);
-    return std::vector<Board>{Generator{puzzles[rand() % puzzles.size()].c_str()}.createBoard()};
+    return puzzles;
 }
 
 std::vector<Board> file::getSSPuzzle(std::istream &file) {
