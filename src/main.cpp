@@ -53,7 +53,7 @@ WINDOW * createWindow() {
     return ret;
 }
 
-Board makeNotSimpleBoard(SimpleBoard board) {
+Board makeNotSimpleBoard(SimpleBoard &board) {
     puzzle grid = board.getPlayGrid();
     std::stringstream gridStringStream;
     for (auto i = 0; i < grid.size(); i++) {

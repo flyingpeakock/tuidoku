@@ -149,6 +149,7 @@ std::vector<SimpleBoard> file::getTuidokuPuzzle(std::istream &file) {
         }
         else if (c == ' ' && rawPuzzle[i+1] == ' ' && rawPuzzle[i+2] == ' ') {
             puzzleStream << '0';
+            i += 2;
         }
         if (puzzleStream.tellp() >= 81) {
             break;
