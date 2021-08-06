@@ -2,15 +2,15 @@
 #include <array>
 
 struct row {
-    int col1:5;
-    int col2:5;
-    int col3:5;
-    int col4:5;
-    int col5:5;
-    int col6:5;
-    int col7:5;
-    int col8:5;
-    int col9:5;
+    unsigned int col1:4;
+    unsigned int col2:4;
+    unsigned int col3:4;
+    unsigned int col4:4;
+    unsigned int col5:4;
+    unsigned int col6:4;
+    unsigned int col7:4;
+    unsigned int col8:4;
+    unsigned int col9:4;
     int operator[](int i);
     int size();
     void set(int col, int val);
