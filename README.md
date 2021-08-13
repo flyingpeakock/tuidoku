@@ -20,13 +20,13 @@ clone this repository then compile using g++ or clang++
 ```
 git clone https://github.com/flyingpeakock/tuidoku.git
 cd tuidoku/
-g++ -O3 -pthread ./src/*.cpp -lncursesw -o tuidoku
+g++ -Ofast -pthread ./src/*.cpp -lncursesw -o tuidoku
 ```
 ### OSX
 ```
 git clone https://github.com/flyingpeakock/tuidoku.git
 cd tuidoku/
-clang++ -O3 -pthread -std=c++11 -stdlib=libc++ ./src/*.cpp -lncursesw -o tuidoku
+clang++ -Ofast -pthread -std=c++11 -stdlib=libc++ ./src/*.cpp -lncursesw -o tuidoku
 ```
 
 ### AUR
@@ -40,7 +40,7 @@ paru -S --rebuild tuidoku-git
 ```
 
 -lncursesw flag is required to link ncurses.h   
--O3 is recommended to speed up puzzle generation but is not required.   
+-Ofast is recommended to speed up puzzle generation but is not required.   
 
 To run this program from any directory move the generated
 tuidoku file to anywhere in your $PATH.
