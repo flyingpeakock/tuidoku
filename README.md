@@ -52,6 +52,7 @@ ln -s tuidoku ~/.local/bin/tuidoku
 ![new game](https://i.imgur.com/CdTClft.png)
 ![same game mid playing](https://i.imgur.com/Y3NT2Tb.png)
 ![same game state with check](https://i.imgur.com/dRXx3j0.png)
+![big board after autopencil](https://i.imgur.com/okprUsJ.png)
 
 ### Troubleshooting
 If the compiler cannot find ncurses.h you need to make sure that ncurses is installed.
