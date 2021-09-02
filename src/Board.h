@@ -57,7 +57,7 @@ class Board : public SimpleBoard {
         puzzle &getSolution();
 
         void insert(char val, int row, int col);
-        void pencil(char val, int row, int col);
+        void pencil(char val, int row, int col, bool isBig);
         void autoPencil();
 
         void printSolution(std::ostream &stream);

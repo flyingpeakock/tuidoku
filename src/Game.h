@@ -35,8 +35,9 @@ class Game : public Controller {
     private:
         Window *window;
         wchar_t mode;
+        bool isBig;
     public:
-        Game(Window *win);
+        Game(Window *win, bool big);
         int mainLoop();
         void changeMode(char c);
         void check();

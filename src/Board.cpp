@@ -166,7 +166,7 @@ void Board::autoPencil() {
     }
 }
 
-void Board::pencil(char val, int row, int col) {
+void Board::pencil(char val, int row, int col, bool isBig) {
     if (playGrid[row][col] > 0) {
         // Grid not empty, cant pencil here
         return;
@@ -184,7 +184,7 @@ void Board::pencil(char val, int row, int col) {
     int idx = 0;
     for (auto &m : marks) {
         if (m == val) {
-            if (idx > 2) {
+            if (idx > 2 && !isBig) {
                 marks.erase(marks.begin() + idx);
                 marks.insert(marks.begin(), val);
             }
@@ -242,11 +242,11 @@ void Board::removeMarks(char val, int row, int col) {
 void Board::restoreMarks(int row, int col) {
     for (auto i = 0; i < 9; i++) {
         if (pencilHistory[row][i][cell{row, col}]) {
-            pencil(pencilHistory[row][i][cell{row, col}], row, i);
+            pencil(pencilHistory[row][i][cell{row, col}], row, i, true);
             pencilHistory[row][i][cell{row, col}] = 0;
         }
         if (pencilHistory[i][col][cell{row, col}]) {
-            pencil(pencilHistory[i][col][cell{row, col}], i, col);
+            pencil(pencilHistory[i][col][cell{row, col}], i, col, true);
             pencilHistory[i][col][cell{row, col}] = 0;
         }
     }
@@ -255,7 +255,7 @@ void Board::restoreMarks(int row, int col) {
     for (auto i = boxRow; i < boxRow + 3; i++) {
         for (auto j = boxCol; j < boxCol + 3; j++){
             if (pencilHistory[i][j][cell{row, col}]) {
-                pencil(pencilHistory[i][j][cell{row, col}], i, j);
+                pencil(pencilHistory[i][j][cell{row, col}], i, j, true);
                 pencilHistory[i][j][cell{row, col}] = 0;
             }
         }

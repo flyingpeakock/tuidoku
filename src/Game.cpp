@@ -188,9 +188,10 @@ void InteractiveSolver::solve() {
     }
 }
 
-Game::Game(Window *win): Controller(win) {
+Game::Game(Window *win, bool big): Controller(win) {
     window = win;
     mode = INSERT_KEY;
+    isBig = big;
 }
 
 int Game::mainLoop() {
@@ -248,7 +249,7 @@ int Game::mainLoop() {
                     board->insert(ch, row, col);
                 }
                 else if (mode == PENCIL_KEY) {
-                    board->pencil(ch, row, col);
+                    board->pencil(ch, row, col, isBig);
                 }
             }
         }

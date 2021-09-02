@@ -136,7 +136,7 @@ void play(bool file, std::string fileName, int empty, bool big) {
     startCurses();
     Board b = createBoard(file, fileName, empty);
     Window *win = big ? new BigWindow(&b, createWindow()) : new Window(&b, createWindow());
-    Game game(win);
+    Game game(win, big);
     int playTime = game.mainLoop();
     delete win;
     endCurses();
