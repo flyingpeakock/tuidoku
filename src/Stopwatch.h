@@ -4,16 +4,17 @@
 
 class Stopwatch {
     private:
-        static bool running;
-        static std::thread counter;
-        static int seconds;
-        static int minutes;
-        static int hours;
+        bool running;
+        std::thread counter;
+        int milliseconds, seconds, minutes, hours, days, weeks;
     public:
-        static void count();
+        void count();
         Stopwatch();
+        Stopwatch(const Stopwatch &boj);
+        Stopwatch &operator=(const Stopwatch &obj);
         void start();
         void stop();
         std::string timeTaken();
         int totalSeconds();
+        void reset();
 };
