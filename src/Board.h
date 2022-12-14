@@ -3,6 +3,7 @@
 #include <map>
 #include <iosfwd>
 #include "Row.h"
+#include <cstdint>
 
 class SimpleBoard {
     protected:
@@ -39,7 +40,7 @@ class Board : public SimpleBoard {
         puzzle startGrid;
         puzzle solutionGrid;
 
-        std::array<std::array<std::vector<char>, 9>, 9> pencilMarks;
+        std::array<std::array<std::uint16_t, 9>, 9> pencilMarks;
         std::array<std::array<std::map<cell, char>, 9>, 9> pencilHistory;
 
         std::map<int, int> count;
@@ -52,7 +53,7 @@ class Board : public SimpleBoard {
         bool isWon();
         bool isRemaining(int val);
 
-        std::array<std::array<std::vector<char>, 9>, 9> &getPencilMarks();
+        std::array<std::array<std::uint16_t, 9>, 9> &getPencilMarks();
         puzzle &getStartGrid();
         puzzle &getSolution();
 
