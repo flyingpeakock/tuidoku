@@ -22,4 +22,4 @@ inline bool operator==(const row &l, const row &r) {
             l.col7 == r.col7 && l.col8 == r.col8 && l.col9 == r.col9);
 };
 
-typedef std::array<row, 9> puzzle;
+typedef std::array<std::array<int, 9>, 9> puzzle;

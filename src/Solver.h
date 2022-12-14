@@ -13,7 +13,6 @@ class Solver {
         Solver(puzzle board);
         Solver(int board[9][9]);
         Solver(int **board);
-        Solver(std::array<std::array<int, 9>, 9> board);
         Solver(const char *board);
         bool isSafe(int row, int col, int num);
         static bool isSafe(puzzle p, int row, int col, int num);

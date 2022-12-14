@@ -3,13 +3,16 @@
 #include "Arguments.h"
 #include "Generator.h"
 #include "config.h"
+#include "HumanSolve.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <unistd.h>
 
 void generate(int, bool, std::string);
 void solve(bool, std::string);
 void play(bool, std::string, int, bool);
+void test(bool, std::string, int, bool);
 void startCurses();
 void endCurses();
 WINDOW * createWindow();
@@ -30,7 +33,8 @@ int main(int argc, char *argv[]) {
         solve(args.fileArgSet(), args.getFileName());
         break;
         case feature::Play:
-        play(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
+        //play(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
+        test(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
         break;
     }
     
@@ -148,4 +152,20 @@ void play(bool file, std::string fileName, int empty, bool big) {
         std::cout << "\nSeconds played: " << playTime << std::endl;
     }
 
+}
+
+void test(bool file, std::string fileName, int empty, bool big) {
+    startCurses();
+    Board b = createBoard(file, fileName, empty);
+    Window *win = big ? new BigWindow(&b, createWindow()) : new Window(&b, createWindow());
+    win->printBoard();
+    win->check();
+    while (solveHuman(&b)) {
+        win->printBoard();
+        usleep(100000);
+    }
+    delete win;
+    endCurses();
+    b.printStart();
+    b.printBoard();
 }

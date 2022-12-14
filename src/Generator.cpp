@@ -20,7 +20,7 @@ Generator::Generator(const char *gridString) {
     auto idx = 0;
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
-            grid[i].set(j, gridString[idx++] - '0');
+            grid[i][j] = gridString[idx++] - '0';
         }
     }
 }
@@ -74,13 +74,13 @@ void Generator::generate(int unknown) {
 
     int unknowns = 0;
     for (auto cell: cells) {
-        grid[cell.row].set(cell.col, 0);
+        grid[cell.row][cell.col] = 0;
         solver.changeGrid(grid);
         solver.solve();
         if (!solver.isUnique()) {
             // Removal of value does not produce unique solution
             // Put it back
-            grid[cell.row].set(cell.col, cell.val);
+            grid[cell.row][cell.col] = cell.val;
         }
         else {
             unknowns++;
