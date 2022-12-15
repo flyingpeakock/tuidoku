@@ -29,7 +29,7 @@ class SimpleBoard {
 
         puzzle &getPlayGrid();
 
-        virtual void insert(char val, int row, int col);
+        virtual bool insert(char val, int row, int col);
 
         void printBoard(std::ostream &stream);
         void printBoard();
@@ -57,8 +57,8 @@ class Board : public SimpleBoard {
         puzzle &getStartGrid();
         puzzle &getSolution();
 
-        void insert(char val, int row, int col);
-        void pencil(char val, int row, int col);
+        bool insert(char val, int row, int col);
+        bool pencil(char val, int row, int col);
         void autoPencil();
 
         void printSolution(std::ostream &stream);

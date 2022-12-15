@@ -23,18 +23,20 @@ puzzle &SimpleBoard::getPlayGrid() {
     return playGrid;
 }
 
-void SimpleBoard::insert(char val, int row, int col) {
+bool SimpleBoard::insert(char val, int row, int col) {
 
     if (val == ERASE_KEY || START_CHAR - 1 == val) {
         if (playGrid[row][col] != 0) {
             playGrid[row][col] = 0;
         }
-        return;
+        return true;
     }
 
     if (val > START_CHAR - 1 && val <= START_CHAR + 8) {
         playGrid[row][col] = val - START_CHAR + 1;
+        return true;
     }
+    return false;
 }
 
 void SimpleBoard::printBoard(puzzle grid, std::ostream &stream) {
@@ -117,10 +119,10 @@ puzzle &Board::getSolution() {
     return solutionGrid;
 }
 
-void Board::insert(char val, int row, int col) {
+bool Board::insert(char val, int row, int col) {
     if (startGrid[row][col] != 0) {
         // Trying to change a correct checked square
-        return;
+        return false;
     }
 
     if (val == ERASE_KEY || START_CHAR - 1 == val) {
@@ -128,8 +130,9 @@ void Board::insert(char val, int row, int col) {
             count[playGrid[row][col]]--;
             playGrid[row][col] = 0;
             restoreMarks(row, col);
+            return true;
         }
-        return;
+        return false;
     }
 
     if (val > START_CHAR - 1 && val <= START_CHAR + 8) {
@@ -141,6 +144,7 @@ void Board::insert(char val, int row, int col) {
     }
 
     removeMarks(val, row, col);
+    return playGrid[row][col] == solutionGrid[row][col];
 }
 
 void Board::autoPencil() {
@@ -161,20 +165,22 @@ void Board::autoPencil() {
     }
 }
 
-void Board::pencil(char val, int row, int col) {
+bool Board::pencil(char val, int row, int col) {
     if (playGrid[row][col] > 0) {
         // Grid not empty, cant pencil here
-        return;
+        return false;
     }
     auto &marks = pencilMarks[row][col];
     if (val == ERASE_KEY || START_CHAR - 1 == val) {
         marks = 0;
-        return;
+        return true;
     }
 
+    // removing a correct pencil
+    bool ret = !(((marks & (1 << (val - START_CHAR))) != 0) && (playGrid[row][col] == val));
     // toggle the bit
     marks ^= (1u << (val - START_CHAR));
-
+    return ret;
 }
 
 void Board::removeMarks(char val, int row, int col) {

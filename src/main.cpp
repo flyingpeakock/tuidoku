@@ -162,7 +162,7 @@ void test(bool file, std::string fileName, int empty, bool big) {
     win->check();
     while (solveHuman(&b)) {
         win->printBoard();
-        usleep(100000);
+        usleep(1000000);
     }
     delete win;
     endCurses();
