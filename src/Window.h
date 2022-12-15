@@ -3,7 +3,6 @@
 #include "Board.h"
 #include <ncurses.h>
 #include <string>
-#include "Row.h"
 #include <map>
 
 class BasicWindow {

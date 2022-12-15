@@ -1,5 +1,5 @@
 #pragma once
-#include "Row.h"
+#include "Board.h"
 
 class Solver {
     private:

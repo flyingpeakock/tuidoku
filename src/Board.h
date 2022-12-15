@@ -1,9 +1,11 @@
 #pragma once
+#include <array>
 #include <vector>
 #include <map>
 #include <iosfwd>
-#include "Row.h"
 #include <cstdint>
+
+typedef std::array<std::array<int, 9>, 9> puzzle;
 
 class SimpleBoard {
     protected:
