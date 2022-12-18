@@ -1,8 +1,11 @@
 #pragma once
+#include <array>
 #include <vector>
 #include <map>
 #include <iosfwd>
-#include "Row.h"
+#include <cstdint>
+
+typedef std::array<std::array<int, 9>, 9> puzzle;
 
 class SimpleBoard {
     protected:
@@ -25,10 +28,11 @@ class SimpleBoard {
         void startPlaying();
         void stopPlaying();
         bool isPlaying();
+        bool isEmpty(int row, int col);
 
         puzzle &getPlayGrid();
 
-        virtual void insert(char val, int row, int col);
+        virtual bool insert(char val, int row, int col);
 
         void printBoard(std::ostream &stream);
         void printBoard();
@@ -39,7 +43,7 @@ class Board : public SimpleBoard {
         puzzle startGrid;
         puzzle solutionGrid;
 
-        std::array<std::array<std::vector<char>, 9>, 9> pencilMarks;
+        std::array<std::array<std::uint16_t, 9>, 9> pencilMarks;
         std::array<std::array<std::map<cell, char>, 9>, 9> pencilHistory;
 
         std::map<int, int> count;
@@ -52,12 +56,13 @@ class Board : public SimpleBoard {
         bool isWon();
         bool isRemaining(int val);
 
-        std::array<std::array<std::vector<char>, 9>, 9> &getPencilMarks();
+        std::array<std::array<std::uint16_t, 9>, 9> &getPencilMarks();
         puzzle &getStartGrid();
         puzzle &getSolution();
 
-        void insert(char val, int row, int col);
-        void pencil(char val, int row, int col, bool isBig);
+        bool insert(char val, int row, int col);
+        bool pencil(const char val, int row, int col);
+        uint16_t getPencil(char row, char col);
         void autoPencil();
 
         void printSolution(std::ostream &stream);

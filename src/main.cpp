@@ -3,13 +3,16 @@
 #include "Arguments.h"
 #include "Generator.h"
 #include "config.h"
+#include "HumanSolve.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <unistd.h>
 
 void generate(int, bool, std::string);
 void solve(bool, std::string);
 void play(bool, std::string, int, bool);
+void test(bool, std::string, int, bool);
 void startCurses();
 void endCurses();
 WINDOW * createWindow();
@@ -31,6 +34,7 @@ int main(int argc, char *argv[]) {
         break;
         case feature::Play:
         play(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
+        //test(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
         break;
     }
     
@@ -148,4 +152,57 @@ void play(bool file, std::string fileName, int empty, bool big) {
         std::cout << "\nSeconds played: " << playTime << std::endl;
     }
 
+}
+
+#define TEST_SIZE 100
+void test(bool file, std::string fileName, int empty, bool big) {
+    int count = 0;
+    int count_solved = 0;
+    int fails = 0;
+    while (true) {
+        Board b = createBoard(file, fileName, empty);
+        std::cout << "Created board " << ++count << '\n'
+                  << "->Failures so far " << fails << '\n';
+        b.autoPencil();
+        startCurses();
+        Window * const win = big ? new BigWindow(&b, createWindow()) : new Window(&b, createWindow());
+        win->printBoard();
+        win->check();
+
+        Hint hint = solveHuman(b);
+        while (hint.found) {
+            bool correct_move = true;
+            for (Move &move : hint.moves) {
+                correct_move = move(&b);
+            }
+            win->printBoard();
+            // checking for mistakes
+            auto grid = b.getPlayGrid();
+            auto sol = b.getSolution();
+            auto pencils = b.getPencilMarks();
+            bool should_break = false;
+            for (auto i = 0; i < 9; i++) {
+                for (auto j = 0; j < 9; j++) {
+                    if ((grid[i][j] != 0 && grid[i][j] != sol[i][j]) || ((pencils[i][j] & (1 << sol[i][j] - 1)) == 0 && grid[i][j] == 0)) {
+                        should_break = true;
+                        break;
+                    }
+                }
+                if (should_break) break;
+            }
+            if (should_break) break;
+            hint = solveHuman(b);
+        }
+        if (fails == TEST_SIZE) {
+            break;
+        }
+        delete win;
+        endCurses();
+        // checking if it was solved
+        if (b.getPlayGrid() == b.getSolution()) count_solved++;
+        float percent_solved = (float)count_solved / count * 100;
+        std::cout << "-->Solved " << percent_solved << "%\n";
+        std::cout << "---> " << hint.hint1 << '\n';
+        std::cout << "---> " << hint.hint2 << '\n';
+    }
 }

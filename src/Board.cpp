@@ -23,18 +23,20 @@ puzzle &SimpleBoard::getPlayGrid() {
     return playGrid;
 }
 
-void SimpleBoard::insert(char val, int row, int col) {
+bool SimpleBoard::insert(char val, int row, int col) {
 
     if (val == ERASE_KEY || START_CHAR - 1 == val) {
         if (playGrid[row][col] != 0) {
-            playGrid[row].set(col, 0);
+            playGrid[row][col] = 0;
         }
-        return;
+        return true;
     }
 
     if (val > START_CHAR - 1 && val <= START_CHAR + 8) {
-        playGrid[row].set(col, val - START_CHAR + 1);
+        playGrid[row][col] = val - START_CHAR + 1;
+        return true;
     }
+    return false;
 }
 
 void SimpleBoard::printBoard(puzzle grid, std::ostream &stream) {
@@ -71,16 +73,18 @@ void SimpleBoard::printBoard(std::ostream &stream) {
     printBoard(playGrid, stream);
 }
 
+bool SimpleBoard::isEmpty(int row, int col) {
+    return playGrid[row][col] == 0;
+}
+
 Board::Board(puzzle startGrid,
              puzzle finishGrid
             ) : SimpleBoard(startGrid),
                 startGrid(startGrid), 
                 solutionGrid(finishGrid) {
     for (auto &array : pencilMarks) {
-        for (auto &vec : array) {
-            for (auto i = 0; i < 3; i++) {
-                vec.push_back(' ');
-            }
+        for (auto &marks : array) {
+            marks = 0;
         }
     }
 
@@ -107,7 +111,7 @@ bool Board::isWon() {
     return false;
 }
 
-std::array<std::array<std::vector<char>, 9>, 9> &Board::getPencilMarks() {
+std::array<std::array<std::uint16_t, 9>, 9> &Board::getPencilMarks() {
     return pencilMarks;
 }
 
@@ -119,19 +123,20 @@ puzzle &Board::getSolution() {
     return solutionGrid;
 }
 
-void Board::insert(char val, int row, int col) {
+bool Board::insert(char val, int row, int col) {
     if (startGrid[row][col] != 0) {
         // Trying to change a correct checked square
-        return;
+        return false;
     }
 
     if (val == ERASE_KEY || START_CHAR - 1 == val) {
         if (playGrid[row][col] != 0) {
             count[playGrid[row][col]]--;
-            playGrid[row].set(col, 0);
+            playGrid[row][col] = 0;
             restoreMarks(row, col);
+            return true;
         }
-        return;
+        return false;
     }
 
     if (val > START_CHAR - 1 && val <= START_CHAR + 8) {
@@ -139,10 +144,11 @@ void Board::insert(char val, int row, int col) {
         if (playGrid[row][col] != 0)
             count[playGrid[row][col]]--;
         count[val - '0']++;
-        playGrid[row].set(col, val - START_CHAR + 1);
+        playGrid[row][col] = val - START_CHAR + 1;
     }
 
     removeMarks(val, row, col);
+    return playGrid[row][col] == solutionGrid[row][col];
 }
 
 void Board::autoPencil() {
@@ -153,74 +159,48 @@ void Board::autoPencil() {
                 continue;
             }
             auto &marks = pencilMarks[i][j];
-            marks.clear();
-            for (auto k = 0; k < 3; k++) {
-                marks.push_back(' ');
-            }
-            for (auto k = START_CHAR; k < START_CHAR + 9; k++) {
+            marks = 0;
+            for (unsigned char k = START_CHAR; k < START_CHAR + 9; k++) {
                 if (Solver::isSafe(playGrid, i, j, k - START_CHAR + 1)) {
-                    marks.insert(marks.begin(), k);
+                    marks |= (1 << (k - START_CHAR));
                 }
             }
         }
     }
 }
 
-void Board::pencil(char val, int row, int col, bool isBig) {
+bool Board::pencil(const char val, int row, int col) {
     if (playGrid[row][col] > 0) {
         // Grid not empty, cant pencil here
-        return;
+        return false;
     }
-    auto &marks = pencilMarks[row][col];
     if (val == ERASE_KEY || START_CHAR - 1 == val) {
-        if (marks[0] != ' ') {
-            marks.erase(marks.begin());
-        }
-        return;
+        pencilMarks[row][col] = 0;
+        return true;
     }
 
-    // Check if mark exists, if visible delete
-    // else move to front
-    int idx = 0;
-    for (auto &m : marks) {
-        if (m == val) {
-            if (idx > 2 && !isBig) {
-                marks.erase(marks.begin() + idx);
-                marks.insert(marks.begin(), val);
-            }
-            else {
-                marks.erase(marks.begin() + idx);
-            }
-            return;
-        }
-        idx++;
+    // toggle the bit
+    bool ret = true;
+    if (((pencilMarks[row][col] & (1 << (val - START_CHAR)))) == 0) {
+        ret = true;
     }
+    else if (solutionGrid[row][col] == (val - START_CHAR) + 1) {
+        ret = false;
+    }
+    pencilMarks[row][col] ^= (1 << (val - START_CHAR));
+    return ret;
+}
 
-    if (val > START_CHAR - 1 && val <= START_CHAR + 8) {
-        marks.insert(marks.begin(), val);
-    }
+std::uint16_t Board::getPencil(char row, char col) {
+    return pencilMarks[row][col];
 }
 
 void Board::removeMarks(char val, int row, int col) {
     if (!REMOVE_MARKS)
         return;
     for (auto i = 0; i < 9; i++) {
-        for (auto j = 0; j < pencilMarks[row][i].size(); j++) {
-            auto &mark = pencilMarks[row][i];
-            if (val == mark[j] && mark[j] != ' ') {
-                mark.erase(mark.begin() + j);
-                pencilHistory[row][i][cell{row, col}] = val;
-                break;
-            }
-        }
-        for (auto j = 0; j < pencilMarks[i][col].size(); j++) {
-            auto &mark = pencilMarks[i][col];
-            if (val == mark[j] && mark[j] != ' ') {
-                mark.erase(mark.begin() + j);
-                pencilHistory[i][col][cell{row, col}] = val;
-                break;
-            }
-        }
+       pencilMarks[row][i] &= ~(1u << (val - START_CHAR));
+       pencilMarks[i][col] &= ~(1u << (val - START_CHAR));
     }
 
     int boxRow = (row / 3) * 3;
@@ -228,13 +208,7 @@ void Board::removeMarks(char val, int row, int col) {
     for (auto i = boxRow; i < boxRow + 3; i++) {
         for (auto j = boxCol; j < boxCol + 3; j++) {
             auto &mark = pencilMarks[i][j];
-            for (auto k = 0; k < mark.size(); k++) {
-                if (val == mark[k] && mark[k] != ' ') {
-                    mark.erase(mark.begin() + k);
-                    pencilHistory[i][j][cell{row, col}] = val;
-                    break;
-                }
-            }
+            mark &= ~(1u << (val - START_CHAR));
         }
     }
 }
@@ -242,11 +216,11 @@ void Board::removeMarks(char val, int row, int col) {
 void Board::restoreMarks(int row, int col) {
     for (auto i = 0; i < 9; i++) {
         if (pencilHistory[row][i][cell{row, col}]) {
-            pencil(pencilHistory[row][i][cell{row, col}], row, i, true);
+            pencil(pencilHistory[row][i][cell{row, col}], row, i);
             pencilHistory[row][i][cell{row, col}] = 0;
         }
         if (pencilHistory[i][col][cell{row, col}]) {
-            pencil(pencilHistory[i][col][cell{row, col}], i, col, true);
+            pencil(pencilHistory[i][col][cell{row, col}], i, col);
             pencilHistory[i][col][cell{row, col}] = 0;
         }
     }
@@ -255,7 +229,7 @@ void Board::restoreMarks(int row, int col) {
     for (auto i = boxRow; i < boxRow + 3; i++) {
         for (auto j = boxCol; j < boxCol + 3; j++){
             if (pencilHistory[i][j][cell{row, col}]) {
-                pencil(pencilHistory[i][j][cell{row, col}], i, j, true);
+                pencil(pencilHistory[i][j][cell{row, col}], i, j);
                 pencilHistory[i][j][cell{row, col}] = 0;
             }
         }

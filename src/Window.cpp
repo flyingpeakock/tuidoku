@@ -316,23 +316,27 @@ void Window::printPencil() {
     for (auto i = 0; i < 9; i++) {
         int col = boardLeft + 1;
         for (auto j = 0; j < 9; j++) {
-           if (grid[i][j] < 1) {
-               int idx[] = {0, 2, 1};
-               wmove(window, row, col);
-               for (auto k : idx) {
-                   char c = marks[i][j][k];
-                   if (!checkColors && c - '0' == highlightNum && HIGHLIGHT_SELECTED){
-                       wattron(window, COLOR_PAIR(3));
-                   }
-                   else {
-                       wattron(window, COLOR_PAIR(10) | A_DIM);
-                   }
-                   waddch(window, c);
-                   wattroff(window, COLOR_PAIR(3));
-                   wattroff(window, COLOR_PAIR(10) | A_DIM);
-               }
-           }
-           col += 4;
+            if (grid[i][j] < 1) {
+                wmove(window, row, col);
+                int numbOfMarks = 0;
+                for (auto count = 0; count < 9; count++) {
+                    if ((marks[i][j] & (1u << count)) != 0) {
+                        numbOfMarks++;
+                        char c = START_CHAR + count;
+                        if (!checkColors && c - START_CHAR - 1 == highlightNum && HIGHLIGHT_SELECTED) {
+                            wattron(window, COLOR_PAIR(3));
+                        }
+                        else {
+                            wattron(window, COLOR_PAIR(10) | A_DIM);
+                        }
+                        waddch(window, c);
+                        wattroff(window, COLOR_PAIR(3));
+                        wattroff(window, COLOR_PAIR(10) | A_DIM);
+                        if (numbOfMarks == 3) break;
+                    }
+                }
+            }
+            col += 4;
         }
         row += 2;
     }
@@ -573,16 +577,16 @@ void BigWindow::printNumbs() {
     wattroff(window, COLOR_PAIR(7));
 }
 
-void BigWindow::printPencil(char c, int row, int col, std::map<char, bool> marks) {
-    if (!marks[c])
+void BigWindow::printPencil(char c, int row, int col, std::uint16_t marks) {
+    if ((marks & (1u << (c - START_CHAR))) == 0)
         return;
-    if (c <= '3') {
+    if (c <= START_CHAR + 2) {
         row--;
     }
-    else if (c >= '7') {
+    else if (c >= START_CHAR + 6) {
         row++;
     }
-    char c_normalized = c - '1';
+    char c_normalized = c - START_CHAR;
     if (c_normalized % 3 == 0) {
         col -= 2;
     }
@@ -610,6 +614,7 @@ void BigWindow::printPencil() {
         int col = boardLeft + 4;
         for (auto j = 0; j < 9; j++) {
             if (grid[i][j] < 1) {
+                /*
                 std::map<char, bool> markmap;
                 for (auto &m : marks[i][j]) {
                     if (m != ' ')
@@ -617,6 +622,10 @@ void BigWindow::printPencil() {
                 }
                 for (char c = '1'; c <= '9'; c++) {
                     printPencil(c, row, col, markmap);
+                }
+                */
+                for (char c = START_CHAR; c <= START_CHAR+8; c++) {
+                    printPencil(c, row, col, marks[i][j]);
                 }
             }
             col += 8;

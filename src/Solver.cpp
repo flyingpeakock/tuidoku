@@ -9,7 +9,7 @@ Solver::Solver() {
     solutions = 0;
     for (auto i = 0; i < SIZE; i++) {
         for (auto j = 0; j < SIZE; j++) {
-            grid[i].set(j, 0);
+            grid[i][j] = 0;
         }
     }
 }
@@ -23,7 +23,7 @@ Solver::Solver(int board[SIZE][SIZE]) {
     solutions = 0;
     for (auto i = 0; i < SIZE; i++) {
         for (auto j = 0; j < SIZE; j++) {
-            grid[i].set(j, board[i][j]);
+            grid[i][j] = board[i][j];
         }
     }
 }
@@ -32,16 +32,7 @@ Solver::Solver(int **board) {
     solutions = 0;
     for (auto i = 0; i < SIZE; i++) {
         for (auto j = 0; j < SIZE; j++) {
-            grid[i].set(j, board[i][j]);
-        }
-    }
-}
-
-Solver::Solver(std::array<std::array<int, SIZE>, SIZE> board) {
-    solutions = 0;
-    for (auto i = 0; i < board.size(); i++) {
-        for (auto j = 0; j < board[i].size(); j++) {
-            grid[i].set(j, board[i][j]);
+            grid[i][j] = board[i][j];
         }
     }
 }
@@ -53,7 +44,7 @@ Solver::Solver(const char *board) {
         throw std::invalid_argument("Wrong amount of digits to make a 9x9 sudoku");
     for (auto i = 0; i < SIZE; i++) {
         for (auto j = 0; j < SIZE; j++) {
-            grid[i].set(j, board[idx++] - '0');
+            grid[i][j] = board[idx++] - '0';
         }
     }
 }
@@ -121,14 +112,14 @@ bool Solver::backtrack(int row, int col) {
     for (auto num : nums) {
         // Check if safe to place num
         if (isSafe(row, col, num)) {
-            grid[row].set(col, num);
+            grid[row][col] = num;
             if (backtrack(row, col + 1) && solutions > 1)
             //if (backtrack(row, col +1))
                 return true;
         }
     }
     // Number was wrong, reset
-    grid[row].set(col, 0);
+    grid[row][col] = 0;
     return false;
 }
 

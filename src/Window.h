@@ -3,7 +3,6 @@
 #include "Board.h"
 #include <ncurses.h>
 #include <string>
-#include "Row.h"
 #include <map>
 
 class BasicWindow {
@@ -72,7 +71,7 @@ class BigWindow : public Window {
     private:
         void clearPencil(int row, int col);
         void printPencil();
-        void printPencil(char c, int row, int col, std::map<char, bool> marks);
+        void printPencil(char c, int row, int col, std::uint16_t marks);
         void printBoxes();
         void printNumbs();
         void printCursor();
