@@ -28,6 +28,7 @@ class SimpleBoard {
         void startPlaying();
         void stopPlaying();
         bool isPlaying();
+        bool isEmpty(int row, int col);
 
         puzzle &getPlayGrid();
 
@@ -60,7 +61,8 @@ class Board : public SimpleBoard {
         puzzle &getSolution();
 
         bool insert(char val, int row, int col);
-        bool pencil(char val, int row, int col);
+        bool pencil(const char val, int row, int col);
+        uint16_t getPencil(char row, char col);
         void autoPencil();
 
         void printSolution(std::ostream &stream);

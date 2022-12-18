@@ -73,6 +73,10 @@ void SimpleBoard::printBoard(std::ostream &stream) {
     printBoard(playGrid, stream);
 }
 
+bool SimpleBoard::isEmpty(int row, int col) {
+    return playGrid[row][col] == 0;
+}
+
 Board::Board(puzzle startGrid,
              puzzle finishGrid
             ) : SimpleBoard(startGrid),
@@ -165,22 +169,30 @@ void Board::autoPencil() {
     }
 }
 
-bool Board::pencil(char val, int row, int col) {
+bool Board::pencil(const char val, int row, int col) {
     if (playGrid[row][col] > 0) {
         // Grid not empty, cant pencil here
         return false;
     }
-    auto &marks = pencilMarks[row][col];
     if (val == ERASE_KEY || START_CHAR - 1 == val) {
-        marks = 0;
+        pencilMarks[row][col] = 0;
         return true;
     }
 
-    // removing a correct pencil
-    bool ret = !(((marks & (1 << (val - START_CHAR))) != 0) && (playGrid[row][col] == val));
     // toggle the bit
-    marks ^= (1u << (val - START_CHAR));
+    bool ret = true;
+    if (((pencilMarks[row][col] & (1 << (val - START_CHAR)))) == 0) {
+        ret = true;
+    }
+    else if (solutionGrid[row][col] == (val - START_CHAR)) {
+        ret = false;
+    }
+    pencilMarks[row][col] ^= (1 << (val - START_CHAR));
     return ret;
+}
+
+std::uint16_t Board::getPencil(char row, char col) {
+    return pencilMarks[row][col];
 }
 
 void Board::removeMarks(char val, int row, int col) {

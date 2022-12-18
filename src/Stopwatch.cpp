@@ -4,7 +4,6 @@
 
 Stopwatch::Stopwatch(){
     running = false;
-    counter;
     milliseconds = 0;
     seconds = 0;
     minutes = 0;
@@ -15,7 +14,6 @@ Stopwatch::Stopwatch(){
 
 Stopwatch::Stopwatch(const Stopwatch &obj) {
     running = obj.running;
-    counter;
     milliseconds = obj.milliseconds;
     seconds = obj.seconds;
     minutes = obj.minutes;
@@ -26,7 +24,6 @@ Stopwatch::Stopwatch(const Stopwatch &obj) {
 
 Stopwatch &Stopwatch::operator=(const Stopwatch &obj) {
     running = obj.running;
-    counter;
     milliseconds = obj.milliseconds;
     seconds = obj.seconds;
     minutes = obj.minutes;
