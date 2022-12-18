@@ -653,7 +653,11 @@ static bool removedByXwing(Board &board, std::uint16_t *positions, std::uint16_t
             if (((*(positions)) & (1 << j)) == 0) continue;
             auto marks = board.getPencil(i, j);
             if ((marks & num) == 0) continue;
-            board.pencil(getSetBits(num)[0] + START_CHAR, i ,j);
+            //board.pencil(getSetBits(num)[0] + START_CHAR, i ,j);
+            Move move = {
+                (char)(getSetBits(num)[0] + START_CHAR), i, j, &Board::pencil
+            };
+            moves.push_back(move);
             ret = true;
         }
     }
