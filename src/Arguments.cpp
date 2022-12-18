@@ -1,7 +1,6 @@
 #include "Arguments.h"
 #include <string.h>
 #include <iostream>
-#include "config.h"
 
 arguments::arguments(int argc, char *argv[]) {
     argInt = 0;
@@ -69,7 +68,7 @@ std::map<std::string, bool> arguments::parse(int argc, char *argv[]) {
 
         if (argv[i][0] == '-' && argv[i][1] != '-') {
             // Single letter arguments, loop through every letter
-            for (auto j = 1; j < strlen(argv[i]); j++) {
+            for (size_t j = 1; j < strlen(argv[i]); j++) {
                 char c = argv[i][j];
                 switch(c) {
                     case 'h':

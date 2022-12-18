@@ -60,8 +60,8 @@ WINDOW * createWindow() {
 Board makeNotSimpleBoard(SimpleBoard &board) {
     puzzle grid = board.getPlayGrid();
     std::stringstream gridStringStream;
-    for (auto i = 0; i < grid.size(); i++) {
-        for (auto j = 0; j < grid[i].size(); j++) {
+    for (size_t i = 0; i < grid.size(); i++) {
+        for (size_t j = 0; j < grid[i].size(); j++) {
             gridStringStream << grid[i][j];
         }
     }
@@ -171,9 +171,8 @@ void test(bool file, std::string fileName, int empty, bool big) {
 
         Hint hint = solveHuman(b);
         while (hint.found) {
-            bool correct_move = true;
             for (Move &move : hint.moves) {
-                correct_move = move(&b);
+                move(&b);
             }
             win->printBoard();
             // checking for mistakes
@@ -183,7 +182,7 @@ void test(bool file, std::string fileName, int empty, bool big) {
             bool should_break = false;
             for (auto i = 0; i < 9; i++) {
                 for (auto j = 0; j < 9; j++) {
-                    if ((grid[i][j] != 0 && grid[i][j] != sol[i][j]) || ((pencils[i][j] & (1 << sol[i][j] - 1)) == 0 && grid[i][j] == 0)) {
+                    if ((grid[i][j] != 0 && grid[i][j] != sol[i][j]) || ((pencils[i][j] & (1 << (sol[i][j] - 1))) == 0 && grid[i][j] == 0)) {
                         should_break = true;
                         break;
                     }

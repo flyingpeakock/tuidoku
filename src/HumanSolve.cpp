@@ -11,7 +11,7 @@ static std::string getGenericHint(std::vector<Move> moves) {
     ret << "Look closer at the digit ";
     ret << moves[0].val;
     std::uint16_t seen = (1 << (moves[0].val - START_CHAR));
-    for (auto i = 1; i < moves.size(); i++) {
+    for (size_t i = 1; i < moves.size(); i++) {
         if ((seen & (1 << (moves[i].val - START_CHAR))) != 0) continue;
             ret << " and " << moves[i].val;
             seen |= (1 << (moves[i].val - START_CHAR));
@@ -41,7 +41,7 @@ static std::vector<uint16_t> getCombinations(Board &board, int k) {
 static int countBits(std::uint16_t bits) {
     int count = 0;
     while (bits != 0) {
-        if (bits & 1 == 1) {
+        if ((bits & 1) == 1) {
             count++;
         }
         bits >>=1;
@@ -102,7 +102,7 @@ static bool removedOccurrencesNaked(Board &board, std::uint16_t bits, char i_min
             for (auto &num : set_bits) {
                 //board.pencil(num + START_CHAR, i, j);
                 Move move = {
-                    num + START_CHAR, i, j, &Board::pencil
+                    (char)(num + START_CHAR), i, j, &Board::pencil
                 };
                 moves.push_back(move);
                 ret = true;
@@ -124,7 +124,7 @@ static bool removedOccurrencesHidden(Board &board, std::uint16_t bits, char i_mi
             for (auto &num : set_bits) {
                 //board->pencil(num + START_CHAR, i, j);
                 Move move = {
-                    num + START_CHAR, i, j, &Board::pencil
+                    (char)(num + START_CHAR), i, j, &Board::pencil
                 };
                 moves.push_back(move);
                 ret = true;
@@ -396,14 +396,14 @@ bool findHidden(Board &board, const std::uint16_t num, std::vector<Move> &moves)
     return false;
 }
 
-static bool removeMarks_i_box(Board &board, char val, int i, int j_box, std::vector<Move> &moves) {
+static bool removeMarks_i_box(Board &board, char val, char i, char j_box, std::vector<Move> &moves) {
     auto pencil = board.getPencilMarks();
     for (auto idx = 0; idx < 9; idx++) {
         if (((idx / 3) * 3) == j_box) continue; // same box as pointers
         if (!board.isEmpty(i, idx)) continue;
         if ((pencil[i][idx] & (1 << val)) != 0) {
             //board->pencil(val + START_CHAR, i, idx);
-            Move move = {val + START_CHAR, i, idx, &Board::pencil};
+            Move move = {(char)(val + START_CHAR), i, idx, &Board::pencil};
             moves.push_back(move);
             return true;
         }
@@ -411,14 +411,14 @@ static bool removeMarks_i_box(Board &board, char val, int i, int j_box, std::vec
     return false;
 }
 
-static bool removeMarks_j_box(Board &board, char val, int j, int i_box, std::vector<Move> &moves) {
+static bool removeMarks_j_box(Board &board, char val, char j, char i_box, std::vector<Move> &moves) {
     auto pencil = board.getPencilMarks();
     for (auto idx = 0; idx < 9; idx++) {
         if (((idx / 3) * 3) == i_box) continue;
         if (!board.isEmpty(idx, j)) continue;
         if ((pencil[idx][j] & (1 << val)) != 0) {
             //board->pencil(val + START_CHAR, idx, j);
-            Move move = {val + START_CHAR, idx, j, &Board::pencil};
+            Move move = {(char)(val + START_CHAR), idx, j, &Board::pencil};
             moves.push_back(move);
             return true;
         }
@@ -502,7 +502,7 @@ static bool removedLockedIFromBox(Board &board, char box_i, char box_j, char loc
             if (i == locked_i) continue;
             if ((pencils[i][j] & (1 << num)) != 0) {
                 //board->pencil(num + START_CHAR, i, j);
-                Move move = {num + START_CHAR, i, j, &Board::pencil};
+                Move move = {(char)(num + START_CHAR), i, j, &Board::pencil};
                 moves.push_back(move);
                 ret = true;
             }
@@ -520,7 +520,7 @@ static bool removedLockedJFromBox(Board &board, char box_i, char box_j, char loc
             if (j == locked_j) continue;
             if ((pencils[i][j] & (1 << num)) != 0) {
                 //board->pencil(num + START_CHAR, i, j);
-                Move move = {num + START_CHAR, i, j, &Board::pencil};
+                Move move = {(char)(num + START_CHAR), i, j, &Board::pencil};
                 moves.push_back(move);
                 ret = true;
             }
@@ -558,7 +558,8 @@ bool findLockedCandidates(Board &board, std::vector<Move> &moves) {
 
 bool findBug(Board &board, Move *move) {
     int numb_of_threes = 0;
-    int col, row;
+    int col = 0xFF;
+    int row = 0xFF;
     std::uint16_t bits = 0;
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
@@ -633,12 +634,12 @@ static bool removedByXwing(Board &board, std::uint16_t *positions, std::uint16_t
     for (auto j : getSetBits(*(positions))) {
         for (auto i = 0; i < 9; i++) {
             if (!board.isEmpty(i, j)) continue;
-            if ((*(positions + 1)) & (1 << i) == 0) continue;
+            if (((*(positions + 1)) & (1 << i)) == 0) continue;
             auto marks = board.getPencil(i, j);
             if ((marks & num) == 0) continue;
             //board.pencil(getSetBits(num)[0] + START_CHAR, i, j);
             Move move = {
-                getSetBits(num)[0] + START_CHAR, i, j, &Board::pencil
+                (char)(getSetBits(num)[0] + START_CHAR), (char)i, (char)j, &Board::pencil
             };
             moves.push_back(move);
             ret = true;
@@ -649,7 +650,7 @@ static bool removedByXwing(Board &board, std::uint16_t *positions, std::uint16_t
     for (auto i : getSetBits(*(positions + 1))) {
         for (auto j = 0; j < 9; j++) {
             if (!board.isEmpty(i ,j)) continue;
-            if ((*(positions)) & (1 << j) == 0) continue;
+            if (((*(positions)) & (1 << j)) == 0) continue;
             auto marks = board.getPencil(i, j);
             if ((marks & num) == 0) continue;
             board.pencil(getSetBits(num)[0] + START_CHAR, i ,j);
@@ -670,6 +671,11 @@ bool findXwing(Board &board, const std::uint16_t num, std::vector<Move> &moves) 
         //std::vector<char> pos_vector[2];
         std::uint16_t indexes[2];
         if (hasEqualwing(board, num, i_counts[i], i_counts, true, indexes)) {
+            if (removedByXwing(board, indexes, num, moves)) {
+                return true;
+            }
+        }
+        if (hasEqualwing(board, num, j_counts[i], j_counts, false, indexes)) {
             if (removedByXwing(board, indexes, num, moves)) {
                 return true;
             }
@@ -704,7 +710,7 @@ static bool findIntersection(Board &board, std::uint16_t num, char cur_i, char c
     for (auto rem : getSetBits(marks)) {
         //board->pencil(rem + START_CHAR, i_1, j_1);
         Move move = {
-            rem + START_CHAR, i_1, j_1, &Board::pencil
+            (char)(rem + START_CHAR), i_1, j_1, &Board::pencil
         };
         moves.push_back(move);
         ret = true;

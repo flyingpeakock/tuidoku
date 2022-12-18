@@ -152,8 +152,8 @@ bool Board::insert(char val, int row, int col) {
 }
 
 void Board::autoPencil() {
-    for (auto i = 0; i < playGrid.size(); i++) {
-        for (auto j = 0; j < playGrid[i].size(); j++) {
+    for (size_t i = 0; i < playGrid.size(); i++) {
+        for (size_t j = 0; j < playGrid[i].size(); j++) {
             if (playGrid[i][j] > 0) {
                 // Number is filled, don't put pencil marks
                 continue;

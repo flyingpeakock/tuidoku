@@ -163,14 +163,10 @@ void BasicWindow::printCursor() {
 }
 
 bool BasicWindow::resize() {
-    int oldRows = windowRows;
-    int oldCols = windowCols;
     getmaxyx(window, windowRows, windowCols);
 
     boardTop = (windowRows - BoardRows) / 2;
     boardLeft = (windowCols - BoardCols) / 2;
-    int gridTop = boardTop + 1;
-    int gridLeft = boardLeft + 2;
     clear();
     if (windowRows < BoardRows || windowCols < BoardCols) {
         char error[] = "Not enough space to draw board";
@@ -411,6 +407,10 @@ void Window::printInstructions() {
         wprintw(window, " quit");
     }
     wattroff(window, COLOR_PAIR(0));
+    wattron(window, A_UNDERLINE);
+    mvwaddch(window, row + 13, col, HINT_KEY);
+    wattroff(window, A_UNDERLINE);
+    wprintw(window, " get hint");
 }
 
 
@@ -421,7 +421,7 @@ void Window::printMode() {
     wattron(window, COLOR_PAIR(10));
     wmove(window, boardTop + BoardRows, boardLeft);
 
-    int length;
+    size_t length;
     std::string longMode = mode;
     length = windowCols - boardLeft;
     while (longMode.length() < length) {
