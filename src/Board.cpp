@@ -184,7 +184,7 @@ bool Board::pencil(const char val, int row, int col) {
     if (((pencilMarks[row][col] & (1 << (val - START_CHAR)))) == 0) {
         ret = true;
     }
-    else if (solutionGrid[row][col] == (val - START_CHAR)) {
+    else if (solutionGrid[row][col] == (val - START_CHAR) + 1) {
         ret = false;
     }
     pencilMarks[row][col] ^= (1 << (val - START_CHAR));

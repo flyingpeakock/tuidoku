@@ -241,8 +241,13 @@ int Game::mainLoop() {
         case TOGGLE_KEY:
             mode == INSERT_KEY ? changeMode(PENCIL_KEY) : changeMode(INSERT_KEY);
             break;
+        case HINT_KEY:
+            hints_since_move++;
+            getHint();
+            break;
         default:
             if ((ch >= START_CHAR - 1 && ch <= START_CHAR + 8) || ch == ERASE_KEY) {
+                hints_since_move = 0;
                 window->select(ch);
                 if (mode == INSERT_KEY) {
                     board->insert(ch, row, col);
@@ -288,4 +293,21 @@ void Game::changeMode(char c) {
     }
     Window *win = (Window *) window;
     win->changeMode(s);
+}
+
+void Game::getHint() {
+    static Hint hint;
+    if (hints_since_move == 1) {
+        hint = solveHuman(*board);
+        window->changeMode(hint.hint1);
+    }
+    else if (hints_since_move == 2) {
+        window->changeMode(hint.hint2);
+    }
+    else if (hints_since_move > 2) {
+        for (auto &move : hint.moves) {
+            move(board);
+        }
+        hints_since_move = 0;
+    }
 }

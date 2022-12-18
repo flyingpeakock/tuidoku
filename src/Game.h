@@ -3,6 +3,7 @@
 #include "Window.h"
 #include "Board.h"
 #include "Solver.h"
+#include "HumanSolve.h"
 #include <vector>
 
 class Controller {
@@ -35,6 +36,8 @@ class Game : public Controller {
     private:
         Window *window;
         wchar_t mode;
+        int hints_since_move;
+        void getHint();
     public:
         Game(Window *win);
         int mainLoop();

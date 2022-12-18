@@ -33,8 +33,8 @@ int main(int argc, char *argv[]) {
         solve(args.fileArgSet(), args.getFileName());
         break;
         case feature::Play:
-        //play(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
-        test(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
+        play(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
+        //test(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
         break;
     }
     
@@ -165,12 +165,17 @@ void test(bool file, std::string fileName, int empty, bool big) {
                   << "->Failures so far " << fails << '\n';
         b.autoPencil();
         startCurses();
-        Window *win = big ? new BigWindow(&b, createWindow()) : new Window(&b, createWindow());
+        Window * const win = big ? new BigWindow(&b, createWindow()) : new Window(&b, createWindow());
         win->printBoard();
         win->check();
-        while (solveHuman(&b)) {
+
+        Hint hint = solveHuman(b);
+        while (hint.found) {
+            bool correct_move = true;
+            for (Move &move : hint.moves) {
+                correct_move = move(&b);
+            }
             win->printBoard();
-            //usleep(10000);
             // checking for mistakes
             auto grid = b.getPlayGrid();
             auto sol = b.getSolution();
@@ -186,7 +191,7 @@ void test(bool file, std::string fileName, int empty, bool big) {
                 if (should_break) break;
             }
             if (should_break) break;
-
+            hint = solveHuman(b);
         }
         if (fails == TEST_SIZE) {
             break;
@@ -194,21 +199,10 @@ void test(bool file, std::string fileName, int empty, bool big) {
         delete win;
         endCurses();
         // checking if it was solved
-        bool solved = true;
-        auto grid = b.getPlayGrid();
-        auto sol = b.getSolution();
-        for (auto i = 0; i < 9; i++) {
-            for (auto j = 0; j < 9; j++) {
-                if (grid[i][j] != sol[i][j]) {
-                    solved = false;
-                }
-            }
-        }
-        if (solved) {
-            std::cout << "-->Puzzle " << count << " solved.\n";
-            count_solved++;
-        }
+        if (b.getPlayGrid() == b.getSolution()) count_solved++;
         float percent_solved = (float)count_solved / count * 100;
         std::cout << "-->Solved " << percent_solved << "%\n";
+        std::cout << "---> " << hint.hint1 << '\n';
+        std::cout << "---> " << hint.hint2 << '\n';
     }
 }

@@ -41,6 +41,7 @@ enum keybinds {
     GO_KEY = 'g',
     TOGGLE_KEY =  27, // 27 = ESC. Switches between incert and pencil
     AUTO_PENCIL_KEY = 'a',
+    HINT_KEY = '?',
 };
 
 // Colors
