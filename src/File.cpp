@@ -142,7 +142,7 @@ std::vector<SimpleBoard> file::getTuidokuPuzzle(std::istream &file) {
     rawPuzzle = sstr.str();
     
     std::ostringstream puzzleStream;
-    for (auto i = 0; i < rawPuzzle.length(); i++) {
+    for (size_t i = 0; i < rawPuzzle.length(); i++) {
         char c = rawPuzzle[i];
         if ('1' <= c && '9' >= c) {
             puzzleStream << c;

@@ -34,8 +34,8 @@ Generator::Generator(int unknowns) {
 void Generator::generateGiveEmpty(int unknowns) {
     generate(unknowns);
     int empty = 0;
-    for (auto i = 0; i < grid.size(); i++) {
-        for (auto j = 0; j < grid[i].size(); j++) {
+    for (size_t i = 0; i < grid.size(); i++) {
+        for (size_t j = 0; j < grid[i].size(); j++) {
             if (grid[i][j] == 0)
                 empty++;
         }
