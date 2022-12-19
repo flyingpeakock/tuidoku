@@ -20,7 +20,6 @@ struct Hint {
     std::string hint1;
     std::string hint2;
     std::vector<Move> moves;
-    bool found;
 };
 
 Hint solveHuman(Board &board);

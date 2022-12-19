@@ -32,7 +32,7 @@ static void getCombinations(int offset, int k, std::uint16_t combinations, std::
     }
 }
 
-static std::vector<uint16_t> getCombinations(Board &board, int k) {
+static std::vector<uint16_t> getCombinations(int k) {
     std::vector<uint16_t> final;
     getCombinations(0, k, 0, final);
     return final;
@@ -59,33 +59,39 @@ static int countBits(std::uint16_t bits) {
     return nums;
  }
 
-static char countOccurrencesNaked(Board &board, std::uint16_t bits, char i_min, char i_max, char j_min, char j_max) {
+static char countOccurrencesNaked(Board &board, std::uint16_t bits, char i_min, char i_max, char j_min, char j_max, std::uint16_t &seen_i, std::uint16_t &seen_j) {
     char count = 0;
     for (auto i = i_min; i < i_max; i++) {
         for (auto j = j_min; j < j_max; j++) {
             if (!board.isEmpty(i, j)) continue;
             std::uint16_t marks = board.getPencil(i, j);
             if ((marks & bits) == 0) continue; // does not exist here
-            if ((marks | bits) == bits) count++; // only exists here
+            if ((marks | bits) == bits){ // only exists here
+                seen_i |= (1 << i);
+                seen_j |= (1 << j);
+                count++;
+            }
         }
     }
     return count;
 }
 
-static char countOccurrencesHidden(Board &board, std::uint16_t bits, char i_min, char i_max, char j_min, char j_max) {
+static char countOccurrencesHidden(Board &board, std::uint16_t bits, char i_min, char i_max, char j_min, char j_max, std::uint16_t &seen_i, std::uint16_t &seen_j) {
    char count = 0;
-   std::uint16_t seen = 0;
+   std::uint16_t seen_vals = 0;
    for (auto i = i_min; i < i_max; i++) {
         for (auto j = j_min; j < j_max; j++) {
             if (!board.isEmpty(i, j)) continue;
             auto marks = board.getPencil(i ,j);
             if ((marks & bits) != 0) {
+                seen_i |= (1 << i);
+                seen_j |= (1 << j);
+                seen_vals |= (marks & bits);
                 count++;
-                seen |= (marks & bits);
             }
         }
     }
-    if (seen != bits) return 0xFF;
+    if (seen_vals != bits) return 0xFF;
     return count;
 }
 
@@ -140,20 +146,18 @@ Hint solveHuman(Board &board) {
         "",
         "",
         {},
-        false,
     };
 
     if (board.isWon()){
         hint.hint1 = "Board is solved!";
         hint.hint2 = "Board is solved!";
-        hint.found = false;
         return hint;
     }
 
-    static auto all_singles = getCombinations(board, 1);
-    static auto all_doubles = getCombinations(board, 2);
-    static auto all_triples = getCombinations(board, 3);
-    static auto all_quads = getCombinations(board, 4);
+    static auto all_singles = getCombinations(1);
+    static auto all_doubles = getCombinations(2);
+    static auto all_triples = getCombinations(3);
+    static auto all_quads = getCombinations(4);
     for (auto &num : all_singles) {
         Move single_move;
         if (findNakedSingles(board, num, &single_move)) {
@@ -165,7 +169,6 @@ Hint solveHuman(Board &board) {
             hint_2_stream << "row " << (char)(hint.moves[0].row + START_CHAR) << " column " << (char)(hint.moves[0].col + START_CHAR) << " can only be " << hint.moves[0].val;
             hint.hint1 = hint_1_stream.str();
             hint.hint2 = hint_2_stream.str();
-            hint.found = true;
             return hint;
 
         }
@@ -177,7 +180,6 @@ Hint solveHuman(Board &board) {
             hint_2_stream << "row " << (char)(hint.moves[0].row + START_CHAR) << " column " << (char)(hint.moves[0].col + START_CHAR) << " is the only possible location for " << hint.moves[0].val;
             hint.hint1 = hint_1_stream.str();
             hint.hint2 = hint_2_stream.str();
-            hint.found = true;
             return hint;
         }
     }
@@ -191,7 +193,6 @@ Hint solveHuman(Board &board) {
                 hint_2_stream << "The digit " << hint.moves[0].val << " forms a pointing box.";
                 hint.hint1 = hint_1_stream.str();
                 hint.hint2 = hint_2_stream.str();
-                hint.found = true;
                 return hint;
             }
         }
@@ -201,13 +202,11 @@ Hint solveHuman(Board &board) {
         if (findNaked(board, num, hint.moves)) {
             hint.hint1 = "Look for a naked double";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.found = true;
             return hint;
         }
         if (findHidden(board, num, hint.moves)) {
             hint.hint1 = "Look for a hidden double";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.found = true;
             return hint;
         }
     }
@@ -217,7 +216,6 @@ Hint solveHuman(Board &board) {
         std::stringstream hint_2_stream;
         hint.hint1 = "Look for locked candidates";
         hint.hint2 = getGenericHint(hint.moves);
-        hint.found = true;
         return hint;
     }
     for (auto &triple : all_triples) {
@@ -225,7 +223,6 @@ Hint solveHuman(Board &board) {
             //return true;
             hint.hint1 = "Look for a naked triple";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.found = true;
             return hint;
         }
     }
@@ -234,7 +231,6 @@ Hint solveHuman(Board &board) {
             //return true;
             hint.hint1 = "Look for a naked quadtruple";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.found = true;
             return hint;
         }
     }
@@ -243,7 +239,6 @@ Hint solveHuman(Board &board) {
             //return true;
             hint.hint1 = "Look for a hidden triple";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.found = true;
             return hint;
         }
     }
@@ -252,7 +247,6 @@ Hint solveHuman(Board &board) {
             //return true;
             hint.hint1 = "Look for a hidden quadruple";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.found = true;
             return hint;
         }
     }
@@ -262,17 +256,16 @@ Hint solveHuman(Board &board) {
         hint.hint1 = "Look for a bug";
         std::stringstream hintStream;
         hintStream << "The digit " << hint.moves[0].val << "can only go in row " << (char)(hint.moves[0].row + START_CHAR) << "and in column " << (char)(hint.moves[0].col + START_CHAR);
-        hint.found = true;
         return hint;
     }
     for (auto &single : all_singles) {
         if (findXwing(board, single, hint.moves)) {
             //return true;
             hint.hint1 = "Look for an X-wing";
-            std::stringstream hintstr("Look closer at the digit ");
+            std::stringstream hintstr;
+            hintstr << "Look closer at the digit ";
             hintstr << hint.moves[0].val;
             hint.hint2 = hintstr.str();
-            hint.found = true;
             return hint;
         }
     }
@@ -281,14 +274,12 @@ Hint solveHuman(Board &board) {
             //return true;
             hint.hint1 = "Look for a unique rectangle";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.found = true;
             return hint;
         }
     }
 
     hint.hint1 = "Unable to give any hints";
     hint.hint2 = "This is out of my league";
-    hint.found = false;
     return hint;
 }
 
@@ -316,10 +307,10 @@ bool findHiddenSingles(Board &board, const std::uint16_t single, Move *move) {
             if ((board.getPencil(i, j) & single) == 0) continue;
             auto i_box = (i / 3) * 3;
             auto j_box = (j / 3) * 3;
-            if ((countOccurrencesHidden(board, single, i_box, i_box + 3, j_box, j_box+3) == 1)
-              || (countOccurrencesHidden(board, single, i, i+1, 0, 9) == 1)
-              || (countOccurrencesHidden(board, single, 0, 9, j, j+1) == 1)) {
-                //board->insert(getSetBits(single)[0] + START_CHAR, i ,j);
+            std::uint16_t trash;
+            if ((countOccurrencesHidden(board, single, i_box, i_box + 3, j_box, j_box + 3, trash, trash) == 1)
+                || (countOccurrencesHidden(board, single, i, i + 1, 0, 9, trash, trash) == 1)
+                || (countOccurrencesHidden(board, single, 0, 9, j, j + 1, trash, trash) == 1)) {
                 (*move).col = j;
                 (*move).row = i;
                 (*move).val = getSetBits(single)[0] + START_CHAR;
@@ -332,12 +323,13 @@ bool findHiddenSingles(Board &board, const std::uint16_t single, Move *move) {
 }
 
 bool findNaked(Board &board, const std::uint16_t num, std::vector<Move> &moves) {
+    std::uint16_t trash;
     if (num == 0) return false;
     const char matcher = countBits(num);
     // finding in box
     for (auto i_box = 0; i_box < 9; i_box += 3) {
         for (auto j_box = 0; j_box < 9; j_box += 3) {
-            auto count = countOccurrencesNaked(board, num, i_box, i_box + 3, j_box, j_box + 3);
+            auto count = countOccurrencesNaked(board, num, i_box, i_box + 3, j_box, j_box + 3, trash, trash);
             if (count != matcher) continue;
             if (removedOccurrencesNaked(board, num, i_box, i_box + 3, j_box, j_box + 3, moves)) {
                 return true;
@@ -347,13 +339,13 @@ bool findNaked(Board &board, const std::uint16_t num, std::vector<Move> &moves) 
 
     // rows and cols
     for (auto i = 0; i < 9; i++) {
-        auto count =  countOccurrencesNaked(board, num, i, i+1, 0, 9);
+        auto count =  countOccurrencesNaked(board, num, i, i+1, 0, 9, trash, trash);
         if (count == matcher) {
             if (removedOccurrencesNaked(board, num, i, i+1, 0, 9, moves)) {
                 return true;
             }
         }
-        count = countOccurrencesNaked(board, num, 0, 9, i, i+1);
+        count = countOccurrencesNaked(board, num, 0, 9, i, i+1, trash, trash);
         if (count == matcher) {
             if (removedOccurrencesNaked(board, num, 0, 9, i, i+1, moves)) {
                 return true;
@@ -367,10 +359,11 @@ bool findNaked(Board &board, const std::uint16_t num, std::vector<Move> &moves) 
 bool findHidden(Board &board, const std::uint16_t num, std::vector<Move> &moves) {
     if (num == 0) return false;
     const char matcher = countBits(num);
+    std::uint16_t trash;
     // finding in box
     for (auto i_box = 0; i_box < 9; i_box += 3) {
         for (auto j_box = 0; j_box < 9; j_box += 3) {
-            char count = countOccurrencesHidden(board, num, i_box, i_box + 3, j_box, j_box + 3);
+            char count = countOccurrencesHidden(board, num, i_box, i_box + 3, j_box, j_box + 3, trash, trash);
             if (count != matcher) continue;
             if (removedOccurrencesHidden(board, num, i_box, i_box + 3, j_box, j_box + 3, moves)) {
                 return true;
@@ -380,13 +373,13 @@ bool findHidden(Board &board, const std::uint16_t num, std::vector<Move> &moves)
 
     // finding in rows and cols
     for (auto i = 0; i < 9; i++) {
-        char count = countOccurrencesHidden(board, num, i, i+1, 0, 9);
+        char count = countOccurrencesHidden(board, num, i, i+1, 0, 9, trash, trash);
         if (count == matcher) {
             if (removedOccurrencesHidden(board, num, i, i+1, 0, 9, moves)) {
                 return true;
             }
         }
-        count = countOccurrencesHidden(board, num, 0, 9, i, i+1);
+        count = countOccurrencesHidden(board, num, 0, 9, i, i+1, trash, trash);
         if (count == matcher) {
             if (removedOccurrencesHidden(board, num, 0, 9, i, i+1, moves)) {
                 return true;
@@ -582,9 +575,10 @@ bool findBug(Board &board, Move *move) {
     int row_box = (row / 3) * 3;
     for (auto num: numbs) {
         std::uint16_t num_bits = (1 << num);
-        if ((countOccurrencesHidden(board, num_bits, col, col + 1, 0, 9) == 3)
-          && (countOccurrencesHidden(board, num_bits, 0, 9, row, row + 1) == 3)
-          && (countOccurrencesHidden(board, num_bits, col_box, col_box + 3, row_box, row_box + 3))) {
+        std::uint16_t trash;
+        if ((countOccurrencesHidden(board, num_bits, col, col + 1, 0, 9, trash, trash) == 3)
+          && (countOccurrencesHidden(board, num_bits, 0, 9, row, row + 1, trash, trash) == 3)
+          && (countOccurrencesHidden(board, num_bits, col_box, col_box + 3, row_box, row_box + 3, trash, trash)) == 3) {
             //board->insert(num + START_CHAR, col, row);
             (*move).col = row;
             (*move).row = col;
@@ -596,143 +590,106 @@ bool findBug(Board &board, Move *move) {
     return false;
 }
 
-static bool hasEqualwing(Board &board, std::uint16_t num, char occurrences, char *occurrences_ptr, bool is_i, std::uint16_t *positions) {
-    if (occurrences == 0) return false;
-    char positions_index = is_i ? 0 : 1;
-    for (auto i = 0; i < 9; i++) {
-        if (*(occurrences_ptr + i) == occurrences) {
-            //(*(positions + positions_index)).emplace_back(i);
-            (*(positions + positions_index)) |= (1 << i);
+static std::uint16_t getEqualWingIndexes(std::array<std::uint16_t, 9> positions, std::uint16_t curr) {
+    std::uint16_t indexes;
+    int index = 0;
+    for (auto &pos : positions) {
+        if (pos == curr) {
+            indexes |= (1 << index);
         }
+        index++;
     }
-    //if ((*(positions + positions_index)).size() != occurrences) return false;
-    if (countBits(*positions) != occurrences) return false;
-
-    //for (auto i : (*(positions + positions_index))) {
-    for (auto i : getSetBits(*(positions + positions_index))) {
-        for (auto j = 0; j < 9; j++) {
-            std::uint16_t mark;
-            if (is_i) {
-                if (!board.isEmpty(i, j)) continue;
-                mark = board.getPencil(i, j);
-            }
-            else {
-                if (!board.isEmpty(j, j)) continue;
-                mark = board.getPencil(i, j);
-            }
-            if ((mark & num) == 0) continue;
-            (*(positions + (!positions_index))) |= (1 << j);
-        }
-    }
-    //return (*(positions + (!positions_index))).size() == occurrences;
-    return countBits((*(positions + (!positions_index)))) == occurrences;
+    return indexes;
 }
 
-static bool removedByXwing(Board &board, std::uint16_t *positions, std::uint16_t num, std::vector<Move> &moves) {
+static bool removeXwingByRows(Board &board, const std::uint16_t num, std::uint16_t i_indexes, std::uint16_t j_indexes, std::vector<Move> &moves) {
     bool ret = false;
-    // removing in j
-    for (auto j : getSetBits(*(positions))) {
-        for (auto i = 0; i < 9; i++) {
+    for (auto i : getSetBits(i_indexes)) {
+        for (auto j = 0; j < 9; j) {
+            if ((j_indexes & (1 << j)) != 0) continue; // same position as x-wing
             if (!board.isEmpty(i, j)) continue;
-            if (((*(positions + 1)) & (1 << i)) == 0) continue;
-            auto marks = board.getPencil(i, j);
-            if ((marks & num) == 0) continue;
-            //board.pencil(getSetBits(num)[0] + START_CHAR, i, j);
-            Move move = {
-                (char)(getSetBits(num)[0] + START_CHAR), (char)i, (char)j, &Board::pencil
-            };
-            moves.push_back(move);
-            ret = true;
-        }
-    }
-
-    // removing in i
-    for (auto i : getSetBits(*(positions + 1))) {
-        for (auto j = 0; j < 9; j++) {
-            if (!board.isEmpty(i ,j)) continue;
-            if (((*(positions)) & (1 << j)) == 0) continue;
-            auto marks = board.getPencil(i, j);
-            if ((marks & num) == 0) continue;
-            //board.pencil(getSetBits(num)[0] + START_CHAR, i ,j);
-            Move move = {
-                (char)(getSetBits(num)[0] + START_CHAR), i, j, &Board::pencil
-            };
-            moves.push_back(move);
-            ret = true;
+            auto marks = board.getPencil(i, j) & num;
+            if (marks == 0) continue;
+            for (auto unset : getSetBits(marks)) {
+                Move move = {(char)(unset + START_CHAR), i, j, &Board::pencil};
+                moves.push_back(move);
+                ret = true;
+            }
         }
     }
     return ret;
 }
 
-bool findXwing(Board &board, const std::uint16_t num, std::vector<Move> &moves) {
-    char i_counts[9] = {};
-    char j_counts[9] = {};
+static bool removeXwingByCols(Board &board, const std::uint16_t num, std::uint16_t i_indexes, std::uint16_t j_indexes, std::vector<Move> &moves) {
+    bool ret = false;
     for (auto i = 0; i < 9; i++) {
-        i_counts[i] = countOccurrencesHidden(board, num, i, i+1, 0, 9);
-        j_counts[i] = countOccurrencesHidden(board, num, 0, 9, i, i+1);
-    }
-    for (auto i = 0; i < 9; i++) {
-        //std::vector<char> pos_vector[2];
-        std::uint16_t indexes[2];
-        if (hasEqualwing(board, num, i_counts[i], i_counts, true, indexes)) {
-            if (removedByXwing(board, indexes, num, moves)) {
-                return true;
+        if ((i_indexes & (1 << i)) != 0) continue;
+        for (auto j : getSetBits(j_indexes)) {
+            if (!board.isEmpty(i, j)) continue;
+            auto marks = board.getPencil(i, j) & num;
+            if (marks == 0) continue;
+            for (auto unset : getSetBits(marks)) {
+                Move move = {(char)(unset + START_CHAR), i, j, &Board::pencil};
+                moves.push_back(move);
+                ret = true;
             }
         }
-        if (hasEqualwing(board, num, j_counts[i], j_counts, false, indexes)) {
-            if (removedByXwing(board, indexes, num, moves)) {
-                return true;
-            }
+    }
+    return ret;
+}
+
+static bool findXwing(Board &board, const std::uint16_t num, std::vector<Move> &moves) {
+    std::array<std::uint16_t, 9> positions[2];
+    for (auto i = 0; i < 9; i++) {
+        std::uint16_t seen_j, seen_i, trash;
+        seen_j = seen_i = 0;
+        countOccurrencesHidden(board, num, i, i+1, 0, 9, trash, seen_j);
+        positions[0][i] = seen_j;
+
+        countOccurrencesHidden(board, num, 0, 9, i, i+1, seen_i, trash);
+        positions[1][i] = seen_i;
+    }
+    for (auto i = 0; i < 9; i++) {
+        // indexes are columns where we should remove
+        std::uint16_t indexes = getEqualWingIndexes(positions[0], positions[0][i]);
+        if (countBits(indexes) != countBits(positions[0][i])) continue;
+        if (removeXwingByRows(board, num, positions[0][i], indexes, moves)) {
+            return true;
+        }
+    }
+    for (auto i = 0; i < 9; i++) {
+        std::uint16_t indexes = getEqualWingIndexes(positions[1], positions[1][i]);
+        if (countBits(indexes) != countBits(positions[1][i])) continue;
+        if (removeXwingByCols(board, num, positions[1][i], indexes, moves)) {
+            return true;
         }
     }
     return false;
-}
-
-static bool findIntersection(Board &board, std::uint16_t num, char cur_i, char cur_j, std::vector<Move> &moves) {
-    char i_1 = 0xFF;
-    char j_1 = 0xFF;
-    for (auto i = 0; i < 9; i++) {
-        if (i == cur_i) continue;
-        if (!board.isEmpty(i, cur_j)) continue;
-        if ((board.getPencil(i, cur_j) & num) == num) {
-            i_1 = i;
-            break;
-        }
-    }
-    for (auto j = 0; j < 9; j++) {
-        if (j == cur_j) continue;
-        if (!board.isEmpty(cur_i, j)) continue;
-        if ((board.getPencil(cur_i, j) & num) == num) {
-            j_1 = j;
-            break;
-        }
-    }
-    if (i_1 == 0xFF || j_1 == 0xFF) return false;
-    if (!board.isEmpty(i_1, j_1)) return false;
-    auto marks = board.getPencil(i_1, j_1) & num;
-    bool ret = false;
-    for (auto rem : getSetBits(marks)) {
-        //board->pencil(rem + START_CHAR, i_1, j_1);
-        Move move = {
-            (char)(rem + START_CHAR), i_1, j_1, &Board::pencil
-        };
-        moves.push_back(move);
-        ret = true;
-    }
-    return ret;
 }
 
 bool findUniqueRectangle(Board &board, const std::uint16_t num, std::vector<Move> &moves) {
     if (num == 0) return false;
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
+            std::uint16_t i_pos, j_pos, trash;
+            i_pos = j_pos = 0;
             if (!board.isEmpty(i ,j)) continue;
             if ((board.getPencil(i, j)) != num) continue;
-            if (countOccurrencesNaked(board, num, i, i+1, 0, 9) != 2) continue;
-            if (countOccurrencesNaked(board, num, 0, 9, j, j+1) != 2) continue;
-            if (findIntersection(board, num, i, j, moves)) {
-                return true;
+            if (countOccurrencesNaked(board, num, i, i+1, 0, 9, trash, j_pos) != 2) continue;
+            if (countOccurrencesNaked(board, num, 0, 9, j, j+1, i_pos, trash) != 2) continue;
+            i_pos &= ~(1 << i); // remove the location that we are at
+            j_pos &= ~(1 << j); // the one remaining is the intersection
+            if ((i_pos == 0) || j_pos == 0) continue;
+            auto intersect_i = getSetBits(i_pos)[0];
+            auto intersect_j = getSetBits(j_pos)[0];
+            if (!board.isEmpty(intersect_i, intersect_j)) continue;
+            auto mark = board.getPencil(intersect_i, intersect_j) & num;
+            if (mark == 0) continue;
+            for (auto &unset : getSetBits(mark)) {
+                Move move = { (char)(unset + START_CHAR), intersect_i, intersect_j, &Board::pencil };
+                moves.push_back(move);
             }
+            return true;
         }
     }
     return false;

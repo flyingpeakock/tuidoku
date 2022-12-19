@@ -33,8 +33,8 @@ int main(int argc, char *argv[]) {
         solve(args.fileArgSet(), args.getFileName());
         break;
         case feature::Play:
-        play(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
-        //test(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
+        //play(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
+        test(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
         break;
     }
     
@@ -170,7 +170,7 @@ void test(bool file, std::string fileName, int empty, bool big) {
         win->check();
 
         Hint hint = solveHuman(b);
-        while (hint.found) {
+        while (hint.moves.size() != 0) {
             for (Move &move : hint.moves) {
                 move(&b);
             }
