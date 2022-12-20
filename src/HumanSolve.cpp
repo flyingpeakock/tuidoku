@@ -294,6 +294,15 @@ Hint solveHuman(Board &board) {
     return hint;
 }
 
+/**
+ * @brief finds any naked singles in the board
+ * 
+ * @param board that should be searched through
+ * @param single number with bits set that represent the digit being searched for
+ * @param move pointer to Move that holds information about the next move
+ * @return true when found a naked single
+ * @return false otherwise
+ */
 bool findNakedSingles(Board &board, const std::uint16_t single, Move *move) {
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
@@ -751,8 +760,8 @@ static bool build_chain(std::vector<Coord> &chain_a, std::vector<Coord> &chain_b
 }
 
 static bool removedByChain(Board &board, const std::uint16_t num, std::vector<Coord> chain_a, std::vector<Coord> chain_b, std::vector<Move> &moves) {
-    for (auto i = 0; i < 9; i++) {
-        for (auto j = 0; j < 9; j++) {
+    for (char i = 0; i < 9; i++) {
+        for (char j = 0; j < 9; j++) {
             if (!board.isEmpty(i, j)) continue;
             auto marks = board.getPencil(i, j) & num;
             if (marks == 0) continue;

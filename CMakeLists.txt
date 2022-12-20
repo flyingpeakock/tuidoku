@@ -28,9 +28,11 @@ set(TEST_SOURCES
     src/Generator.cpp
     src/Solver.cpp
     src/Board.cpp
+    src/HumanSolve.cpp
 
     #Add unit tests here
     tests/file_test.cpp
+    tests/humanSolve_test.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
