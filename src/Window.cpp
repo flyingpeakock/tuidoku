@@ -469,7 +469,7 @@ int Window::getColor(char c, int row, int col) {
         ret = A_UNDERLINE;
     }
 
-    if (!game->isRemaining(c) && DIM_COMPLETED && !checkColors) {
+    if (!game->isRemaining(start[row][col]) && DIM_COMPLETED && !checkColors) {
         // Dimming numbers that appear 9 times
         return COLOR_PAIR(4) | ret;
     }

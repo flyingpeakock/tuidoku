@@ -237,7 +237,7 @@ void Board::restoreMarks(int row, int col) {
 
 }
 
-bool Board::isRemaining(int val) const{
+bool Board::isRemaining(char val) const{
     if (val == 0)
         return true;
     //return count[val] < 9;

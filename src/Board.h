@@ -46,7 +46,7 @@ class Board : public SimpleBoard {
         std::array<std::array<std::uint16_t, 9>, 9> pencilMarks;
         std::array<std::array<std::map<cell, char>, 9>, 9> pencilHistory;
 
-        std::map<int, int> count;
+        std::map<char, char> count;
 
         void removeMarks(char val, int row, int col);
         void restoreMarks(int row, int col);
@@ -54,7 +54,7 @@ class Board : public SimpleBoard {
     public:
         Board(puzzle startGrid, puzzle finishGrid);
         bool isWon();
-        bool isRemaining(int val) const;
+        bool isRemaining(char val) const;
 
         const std::array<std::array<std::uint16_t, 9>, 9> &getPencilMarks();
         const puzzle &getStartGrid() const;
