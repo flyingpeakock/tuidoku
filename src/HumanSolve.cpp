@@ -320,6 +320,15 @@ bool findNakedSingles(Board &board, const std::uint16_t single, Move *move) {
     return false;
 }
 
+/**
+ * @brief Finds hidden singles
+ * 
+ * @param board to search through
+ * @param single number to search for where the number is the position of the set bit
+ * @param move pointer to move which stores information about the next move
+ * @return true when a hidden single is found
+ * @return false otherwise
+ */
 bool findHiddenSingles(Board &board, const std::uint16_t single, Move *move) {
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {

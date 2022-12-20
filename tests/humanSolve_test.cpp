@@ -33,3 +33,35 @@ TEST(HumanSolve_test, findNakedSingle) {
         EXPECT_EQ(move.move, test.move.move);
     }
 }
+
+/**
+ * @brief Unit test for findHiddenSingle
+ * 
+ */
+TEST(HumanSolve_test, findHiddenSingle) {
+    struct findHiddenSingle_t {
+        std::uint16_t num;
+        Move move;
+        bool ret;
+        const char *gridString;
+    };
+
+    findHiddenSingle_t test_table[] = {
+        {(1 << 0), {'1', 6, 2, &Board::insert}, true, "009032000000700000162000000010020560000900000050000107000000403026009000005870000"},
+    };
+
+    for (auto &test : test_table) {
+        Move move = {};
+        Generator gen(test.gridString);
+        Board board = gen.createBoard();
+        board.autoPencil();
+
+        EXPECT_EQ(findHiddenSingles(board, test.num, &move), test.ret);
+        if (test.ret == false) continue;
+
+        EXPECT_EQ(move.val, test.move.val);
+        EXPECT_EQ(move.row, test.move.row);
+        EXPECT_EQ(move.col, test.move.col);
+        EXPECT_EQ(move.move, test.move.move);
+    }
+}
