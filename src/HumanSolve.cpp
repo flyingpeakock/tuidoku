@@ -49,8 +49,8 @@ static int countBits(std::uint16_t bits) {
     return count;
 }
 
- static std::vector<unsigned char> getSetBits(std::uint16_t bits) {
-    std::vector<unsigned char> nums;
+ static std::vector<char> getSetBits(std::uint16_t bits) {
+    std::vector<char> nums;
     for (unsigned char num = 0; num < 9; num++) {
         if ((bits & (1 << num)) != 0) {
             nums.push_back(num);
@@ -391,7 +391,7 @@ bool findHidden(Board &board, const std::uint16_t num, std::vector<Move> &moves)
 
 static bool removeMarks_i_box(Board &board, char val, char i, char j_box, std::vector<Move> &moves) {
     auto pencil = board.getPencilMarks();
-    for (auto idx = 0; idx < 9; idx++) {
+    for (char idx = 0; idx < 9; idx++) {
         if (((idx / 3) * 3) == j_box) continue; // same box as pointers
         if (!board.isEmpty(i, idx)) continue;
         if ((pencil[i][idx] & (1 << val)) != 0) {
@@ -406,7 +406,7 @@ static bool removeMarks_i_box(Board &board, char val, char i, char j_box, std::v
 
 static bool removeMarks_j_box(Board &board, char val, char j, char i_box, std::vector<Move> &moves) {
     auto pencil = board.getPencilMarks();
-    for (auto idx = 0; idx < 9; idx++) {
+    for (char idx = 0; idx < 9; idx++) {
         if (((idx / 3) * 3) == i_box) continue;
         if (!board.isEmpty(idx, j)) continue;
         if ((pencil[idx][j] & (1 << val)) != 0) {
@@ -604,8 +604,8 @@ static std::uint16_t getEqualWingIndexes(std::array<std::uint16_t, 9> positions,
 
 static bool removeXwingByRows(Board &board, const std::uint16_t num, std::uint16_t i_indexes, std::uint16_t j_indexes, std::vector<Move> &moves) {
     bool ret = false;
-    for (auto i : getSetBits(i_indexes)) {
-        for (auto j = 0; j < 9; j) {
+    for (char i : getSetBits(i_indexes)) {
+        for (char j = 0; j < 9; j) {
             if ((j_indexes & (1 << j)) != 0) continue; // same position as x-wing
             if (!board.isEmpty(i, j)) continue;
             auto marks = board.getPencil(i, j) & num;
@@ -622,9 +622,9 @@ static bool removeXwingByRows(Board &board, const std::uint16_t num, std::uint16
 
 static bool removeXwingByCols(Board &board, const std::uint16_t num, std::uint16_t i_indexes, std::uint16_t j_indexes, std::vector<Move> &moves) {
     bool ret = false;
-    for (auto i = 0; i < 9; i++) {
+    for (char i = 0; i < 9; i++) {
         if ((i_indexes & (1 << i)) != 0) continue;
-        for (auto j : getSetBits(j_indexes)) {
+        for (char j : getSetBits(j_indexes)) {
             if (!board.isEmpty(i, j)) continue;
             auto marks = board.getPencil(i, j) & num;
             if (marks == 0) continue;
@@ -638,7 +638,7 @@ static bool removeXwingByCols(Board &board, const std::uint16_t num, std::uint16
     return ret;
 }
 
-static bool findXwing(Board &board, const std::uint16_t num, std::vector<Move> &moves) {
+bool findXwing(Board &board, const std::uint16_t num, std::vector<Move> &moves) {
     std::array<std::uint16_t, 9> positions[2];
     for (auto i = 0; i < 9; i++) {
         std::uint16_t seen_j, seen_i, trash;
@@ -680,8 +680,8 @@ bool findUniqueRectangle(Board &board, const std::uint16_t num, std::vector<Move
             i_pos &= ~(1 << i); // remove the location that we are at
             j_pos &= ~(1 << j); // the one remaining is the intersection
             if ((i_pos == 0) || j_pos == 0) continue;
-            auto intersect_i = getSetBits(i_pos)[0];
-            auto intersect_j = getSetBits(j_pos)[0];
+            char intersect_i = getSetBits(i_pos)[0];
+            char intersect_j = getSetBits(j_pos)[0];
             if (!board.isEmpty(intersect_i, intersect_j)) continue;
             auto mark = board.getPencil(intersect_i, intersect_j) & num;
             if (mark == 0) continue;
