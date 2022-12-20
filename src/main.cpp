@@ -33,8 +33,8 @@ int main(int argc, char *argv[]) {
         solve(args.fileArgSet(), args.getFileName());
         break;
         case feature::Play:
-        //play(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
-        test(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
+        play(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
+        //test(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
         break;
     }
     
