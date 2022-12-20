@@ -5,6 +5,10 @@
 #include <algorithm>
 #include <sstream>
 
+struct Coord {
+    char i;
+    char j;
+};
 
 static std::string getGenericHint(std::vector<Move> moves) {
     std::stringstream ret;
@@ -258,14 +262,10 @@ Hint solveHuman(Board &board) {
         hintStream << "The digit " << hint.moves[0].val << "can only go in row " << (char)(hint.moves[0].row + START_CHAR) << "and in column " << (char)(hint.moves[0].col + START_CHAR);
         return hint;
     }
-    for (auto &single : all_singles) {
-        if (findXwing(board, single, hint.moves)) {
-            //return true;
-            hint.hint1 = "Look for an X-wing";
-            std::stringstream hintstr;
-            hintstr << "Look closer at the digit ";
-            hintstr << hint.moves[0].val;
-            hint.hint2 = hintstr.str();
+    for (auto &doub : all_doubles) {
+        if (findChainOfPairs(board, doub, hint.moves)) {
+            hint.hint1 = "Look for a chain of pairs";
+            hint.hint2 = getGenericHint(hint.moves);
             return hint;
         }
     }
@@ -274,6 +274,17 @@ Hint solveHuman(Board &board) {
             //return true;
             hint.hint1 = "Look for a unique rectangle";
             hint.hint2 = getGenericHint(hint.moves);
+            return hint;
+        }
+    }
+    for (auto &single : all_singles) {
+        if (findXwing(board, single, hint.moves)) {
+            //return true;
+            hint.hint1 = "Look for an X-wing";
+            std::stringstream hintstr;
+            hintstr << "Look closer at the digit ";
+            hintstr << hint.moves[0].val;
+            hint.hint2 = hintstr.str();
             return hint;
         }
     }
@@ -638,7 +649,7 @@ static bool removeXwingByCols(Board &board, const std::uint16_t num, std::uint16
     return ret;
 }
 
-static bool findXwing(Board &board, const std::uint16_t num, std::vector<Move> &moves) {
+bool findXwing(Board &board, const std::uint16_t num, std::vector<Move> &moves) {
     std::array<std::uint16_t, 9> positions[2];
     for (auto i = 0; i < 9; i++) {
         std::uint16_t seen_j, seen_i, trash;
@@ -682,6 +693,17 @@ bool findUniqueRectangle(Board &board, const std::uint16_t num, std::vector<Move
             if ((i_pos == 0) || j_pos == 0) continue;
             auto intersect_i = getSetBits(i_pos)[0];
             auto intersect_j = getSetBits(j_pos)[0];
+            // current location has box start idx i/3*3, j/3*3
+            // one intersection has i/3*3, j_pos/3*3
+            // other one has i_pos/3*3/ j/3*3
+            char boxi1, boxj1, boxi2, boxj2, boxi3, boxj3;
+            boxi1 = (i / 3) * 3;
+            boxj1 = (j / 3) * 3;
+            boxi2 = (i / 3) * 3;
+            boxj2 = (j_pos / 3) * 3;
+            boxi3 = (i_pos / 3) * 3;
+            boxj3 = (j / 3) * 3;
+            if (!((boxi1 == boxi2 && boxj1 == boxj2) || (boxi1 == boxi3 && boxj1 == boxj3) || (boxi2 == boxj3 && boxj2 == boxj3))) continue;
             if (!board.isEmpty(intersect_i, intersect_j)) continue;
             auto mark = board.getPencil(intersect_i, intersect_j) & num;
             if (mark == 0) continue;
@@ -689,6 +711,99 @@ bool findUniqueRectangle(Board &board, const std::uint16_t num, std::vector<Move
                 Move move = { (char)(unset + START_CHAR), intersect_i, intersect_j, &Board::pencil };
                 moves.push_back(move);
             }
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool canSee(char i_1, char j_1, char i_2, char j_2) {
+    if (i_1 == i_2) return true;
+    if (j_1 == j_2) return true;
+    char box_i_1, box_i_2, box_j_1, box_j_2;
+    box_i_1 = (i_1 / 3) * 3;
+    box_i_2 = (i_2 / 3) * 3;
+    box_j_1 = (j_1 / 3) * 3;
+    box_j_2 = (j_2 / 3) * 3;
+    return ((box_i_1 == box_i_2) && (box_j_1 == box_j_2));
+}
+
+// chain a starts with 1 item, chain b is empty
+static bool build_chain(std::vector<Coord> &chain_a, std::vector<Coord> &chain_b,  std::vector<Coord> &all) {
+    if (all.size() == 0)
+    for (std::vector<Coord>::iterator link_itr = all.begin(); link_itr != all.end(); link_itr++) {
+        for (auto a : chain_a) {
+            if (canSee((*link_itr).i, (*link_itr).j, a.i, a.j)) {
+                chain_b.push_back(*link_itr);
+                link_itr = all.erase(link_itr);
+                return true;
+            }
+        }
+        for (auto b : chain_b) {
+            if (canSee((*link_itr).i, (*link_itr).j, b.i, b.j)) {
+                chain_a.push_back(*link_itr);
+                link_itr = all.erase(link_itr);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+static bool removedByChain(Board &board, const std::uint16_t num, std::vector<Coord> chain_a, std::vector<Coord> chain_b, std::vector<Move> &moves) {
+    for (auto i = 0; i < 9; i++) {
+        for (auto j = 0; j < 9; j++) {
+            if (!board.isEmpty(i, j)) continue;
+            auto marks = board.getPencil(i, j) & num;
+            if (marks == 0) continue;
+            if (marks == num) continue;
+            bool seen_a = false;
+            bool seen_b = false;
+            for (auto &a : chain_a) {
+                if (canSee(i, j, a.i, a.j)) {
+                    seen_a = true;
+                    break;
+                }
+            }
+            for (auto &b : chain_b) {
+                if (canSee(i, j, b.i, b.j)) {
+                    seen_b = true;
+                    break;
+                }
+            }
+            if (seen_a && seen_b) {
+                bool should_ret = false;
+                for (auto unset : getSetBits(marks)) {
+                    Move move = {(char)(unset + START_CHAR), i, j, &Board::pencil};
+                    moves.push_back(move);
+                    should_ret = true;
+                }
+                if (should_ret) return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool findChainOfPairs(Board &board, const std::uint16_t num, std::vector<Move> &moves) {
+    std::vector<Coord> all_doubles;
+    for (auto i = 0; i < 9; i++) {
+        for (auto j = 0; j < 9; j++) {
+            if (!board.isEmpty(i, j)) continue;
+            if (board.getPencil(i, j) != num) continue;
+            // Double in this location
+            Coord here = {(char)i, (char)j};
+            all_doubles.push_back(here);
+        }
+    }
+    if (all_doubles.size() < 3) return false;
+    for (auto link : all_doubles) {
+        auto chain = all_doubles;
+        std::vector<Coord> chain_a, chain_b;
+        chain_a.push_back(link);
+        while (build_chain(chain_a, chain_b, chain)) {};
+        if (chain_a.size() + chain_b.size() < 3) continue;
+        if (removedByChain(board, num, chain_a, chain_b, moves)) {
             return true;
         }
     }
