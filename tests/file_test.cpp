@@ -1,15 +1,31 @@
 #include <gtest/gtest.h>
-#include "file_test.h"
 #include <fstream>
+#include "file_test.h"
 
 /**
- * @brief struct that holds data for creating puzzles
+ * @brief sets the function to be tested
  * 
+ * @param f the function
  */
-struct file_test_t {
-    std::string fileName;
-    int puzzle[9][9];
-};
+void FileTest::setFunc(std::vector<SimpleBoard> (*f)(std::istream&)) {
+    func = f;
+}
+
+/**
+ * @brief run the tests
+ * 
+ * @param test_table pointer to the start of the test table
+ * @param size size of the test table
+ */
+void FileTest::runTests(file_test_t *test_table, size_t size) {
+    for (auto i = 0; i < size; i++) {
+        std::ifstream file;
+        file.open((test_table + i)->fileName);
+        auto puzzle = func(file);
+        ASSERT_GT(puzzle.size(), 0);
+        EXPECT_EQ(puzzle[0].getPlayGrid(), buildPuzzle((test_table + i)->puzzle));
+    }
+}
 
 /**
  * @brief function that turns 9x9 c style array into 2d std::array
@@ -31,7 +47,7 @@ puzzle buildPuzzle(int array[9][9]) {
  * @brief Unit test for getSDKPuzzle which parses sdk files for puzzles
  * 
  */
-TEST(file_test, getSDKPuzzle) {
+TEST_F(FileTest, getSDKPuzzle) {
     file_test_t test_table[] = {
         {
             TEST_PUZZLES_ROOT_DIR "sdkpuzzle1.sdk",
@@ -49,20 +65,16 @@ TEST(file_test, getSDKPuzzle) {
         },
     };
 
-    for (auto & test : test_table) {
-        std::ifstream file;
-        file.open(test.fileName);
-        auto puzzle = file::getSDKPuzzle(file);
-        ASSERT_GT(puzzle.size(), 0);
-        EXPECT_EQ(puzzle[0].getPlayGrid(), buildPuzzle(test.puzzle));
-    }
+    this->setFunc(*file::getSDKPuzzle);
+    this->runTests(test_table, sizeof(test_table) / sizeof(test_table[0]));
 }
+
 
 /**
  * @brief Unit test for getSDMpuzzle wich parses SDM files for puzzles
  * 
  */
-TEST(file_test, getSDMPuzzle) {
+TEST_F(FileTest, getSDMPuzzle) {
     file_test_t test_table[] = {
         {
             TEST_PUZZLES_ROOT_DIR "sdmpuzzle1.sdm",
@@ -80,16 +92,11 @@ TEST(file_test, getSDMPuzzle) {
         },
     };
 
-    for (auto &test : test_table) {
-        std::ifstream file;
-        file.open(test.fileName);
-        auto puzzle = file::getSDMPuzzle(file);
-        ASSERT_GT(puzzle.size(), 0);
-        EXPECT_EQ(puzzle[0].getPlayGrid(), buildPuzzle(test.puzzle));
-    }
+    this->setFunc(*file::getSDMPuzzle);
+    this->runTests(test_table, sizeof(test_table) / sizeof(test_table[0]));
 }
 
-TEST(file_test, getSSPuzzle) {
+TEST_F(FileTest, getSSPuzzle) {
     file_test_t test_table[] = {
         {
             TEST_PUZZLES_ROOT_DIR "sspuzzle1.ss",
@@ -121,11 +128,7 @@ TEST(file_test, getSSPuzzle) {
         },
     };
 
-    for (auto &test : test_table) {
-        std::ifstream file;
-        file.open(test.fileName);
-        auto puzzle = file::getSSPuzzle(file);
-        ASSERT_GT(puzzle.size(), 0);
-        EXPECT_EQ(puzzle[0].getPlayGrid(), buildPuzzle(test.puzzle));
-    }
+    this->setFunc(*file::getSSPuzzle);
+    this->runTests(test_table, sizeof(test_table) / sizeof(test_table[0]));
 }
+
