@@ -21,21 +21,21 @@ class SimpleBoard {
         };
         puzzle playGrid;
         bool playing;
-        void printBoard(puzzle grid, std::ostream &stream);
+        void printBoard(puzzle grid, std::ostream &stream) const;
 
     public:
         SimpleBoard(puzzle startGrid);
         void startPlaying();
         void stopPlaying();
-        bool isPlaying();
-        bool isEmpty(int row, int col);
+        bool isPlaying() const;
+        bool isEmpty(int row, int col) const;
 
-        puzzle &getPlayGrid();
+        const puzzle &getPlayGrid() const;
 
         virtual bool insert(char val, int row, int col);
 
-        void printBoard(std::ostream &stream);
-        void printBoard();
+        void printBoard(std::ostream &stream) const;
+        void printBoard() const;
 };
 
 class Board : public SimpleBoard {
@@ -54,21 +54,21 @@ class Board : public SimpleBoard {
     public:
         Board(puzzle startGrid, puzzle finishGrid);
         bool isWon();
-        bool isRemaining(int val);
+        bool isRemaining(int val) const;
 
-        std::array<std::array<std::uint16_t, 9>, 9> &getPencilMarks();
-        puzzle &getStartGrid();
-        puzzle &getSolution();
+        const std::array<std::array<std::uint16_t, 9>, 9> &getPencilMarks();
+        const puzzle &getStartGrid() const;
+        const puzzle &getSolution() const;
 
         bool insert(char val, int row, int col);
         bool pencil(const char val, int row, int col);
-        uint16_t getPencil(char row, char col);
+        uint16_t getPencil(char row, char col) const;
         void autoPencil();
 
-        void printSolution(std::ostream &stream);
-        void printSolution();
-        void printStart(std::ostream &stream);
-        void printStart();
+        void printSolution(std::ostream &stream) const;
+        void printSolution() const;
+        void printStart(std::ostream &stream) const;
+        void printStart() const;
 
         void swapStartGrid();
         void swapStartGrid(puzzle solution);

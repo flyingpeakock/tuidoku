@@ -15,11 +15,11 @@ void SimpleBoard::stopPlaying() {
     playing = false;
 }
 
-bool SimpleBoard::isPlaying() {
+bool SimpleBoard::isPlaying() const{
     return playing;
 }
 
-puzzle &SimpleBoard::getPlayGrid() {
+const puzzle &SimpleBoard::getPlayGrid() const{
     return playGrid;
 }
 
@@ -39,7 +39,7 @@ bool SimpleBoard::insert(char val, int row, int col) {
     return false;
 }
 
-void SimpleBoard::printBoard(puzzle grid, std::ostream &stream) {
+void SimpleBoard::printBoard(puzzle grid, std::ostream &stream) const{
     std::stringstream boardStream;
     boardStream << TOPROW << '\n';
     for (auto i = 0; i < 3; i++) {
@@ -65,15 +65,15 @@ void SimpleBoard::printBoard(puzzle grid, std::ostream &stream) {
     stream << boardString;
 }
 
-void SimpleBoard::printBoard() {
+void SimpleBoard::printBoard() const{
     printBoard(playGrid, std::cout);
 }
 
-void SimpleBoard::printBoard(std::ostream &stream) {
+void SimpleBoard::printBoard(std::ostream &stream) const{
     printBoard(playGrid, stream);
 }
 
-bool SimpleBoard::isEmpty(int row, int col) {
+bool SimpleBoard::isEmpty(int row, int col) const{
     return playGrid[row][col] == 0;
 }
 
@@ -103,7 +103,7 @@ Board::Board(puzzle startGrid,
 }
 
 
-bool Board::isWon() {
+bool Board::isWon(){
     if (playGrid == solutionGrid) {
         playing = false;
         return true;
@@ -111,15 +111,15 @@ bool Board::isWon() {
     return false;
 }
 
-std::array<std::array<std::uint16_t, 9>, 9> &Board::getPencilMarks() {
+const std::array<std::array<std::uint16_t, 9>, 9> &Board::getPencilMarks() {
     return pencilMarks;
 }
 
-puzzle &Board::getStartGrid() {
+const puzzle &Board::getStartGrid() const{
     return startGrid;
 }
 
-puzzle &Board::getSolution() {
+const puzzle &Board::getSolution() const{
     return solutionGrid;
 }
 
@@ -191,7 +191,7 @@ bool Board::pencil(const char val, int row, int col) {
     return ret;
 }
 
-std::uint16_t Board::getPencil(char row, char col) {
+std::uint16_t Board::getPencil(char row, char col) const{
     return pencilMarks[row][col];
 }
 
@@ -237,33 +237,34 @@ void Board::restoreMarks(int row, int col) {
 
 }
 
-bool Board::isRemaining(int val) {
+bool Board::isRemaining(int val) const{
     if (val == 0)
         return true;
-    return count[val] < 9;
+    //return count[val] < 9;
+    return count.at(val) < 9;
 }
 
-void Board::printSolution() {
+void Board::printSolution() const{
     printBoard(solutionGrid, std::cout);
 }
 
-void Board::printSolution(std::ostream &stream) {
+void Board::printSolution(std::ostream &stream) const{
     printBoard(solutionGrid, stream);
 }
 
-void Board::printStart() {
+void Board::printStart() const{
     printBoard(startGrid, std::cout);
 }
 
-void Board::printStart(std::ostream &stream) {
+void Board::printStart(std::ostream &stream) const{
     printBoard(startGrid, stream);
 }
 
-void Board::swapStartGrid() {
+void Board::swapStartGrid(){
     startGrid = playGrid;
 }
 
-void Board::swapStartGrid(puzzle solution) {
+void Board::swapStartGrid(puzzle solution){
     startGrid = playGrid;
     solutionGrid = solution;
 }

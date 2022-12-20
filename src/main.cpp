@@ -18,6 +18,7 @@ void endCurses();
 WINDOW * createWindow();
 
 int main(int argc, char *argv[]) {
+    std::cout << "Starting Tuidoku\n";
     arguments args = arguments(argc, argv);
     if (args.printHelp()) {
         return 0;
@@ -37,7 +38,7 @@ int main(int argc, char *argv[]) {
         //test(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
         break;
     }
-    
+    std::cout << "Thanks for playing (:\n" << std::endl;
 }
 
 void startCurses() {
@@ -154,6 +155,7 @@ void play(bool file, std::string fileName, int empty, bool big) {
 
 }
 
+/*
 #define TEST_SIZE 100
 void test(bool file, std::string fileName, int empty, bool big) {
     int count = 0;
@@ -205,3 +207,4 @@ void test(bool file, std::string fileName, int empty, bool big) {
         std::cout << "---> " << hint.hint2 << '\n';
     }
 }
+*/

@@ -69,6 +69,12 @@ std::vector<SimpleBoard> file::getStringPuzzle(const char *puzzleString) {
     return getSDKPuzzle(puzzle);
 }
 
+/**
+ * @brief creates boards from an SDK puzzle file
+ * 
+ * @param file
+ * @return std::vector<SimpleBoard> 
+ */
 std::vector<SimpleBoard> file::getSDKPuzzle(std::istream &file) {
     file.seekg(std::ios_base::beg);
     std::stringstream stringStream;
@@ -108,6 +114,12 @@ std::vector<SimpleBoard> file::getXMLPuzzle(std::istream &file) {
     return puzzles;
 }
 
+/**
+ * @brief Parses sdm files for puzzles
+ * 
+ * @param file containing the puzzles in sdm format
+ * @return std::vector<SimpleBoard> containing puzzles in the file
+ */
 std::vector<SimpleBoard> file::getSDMPuzzle(std::istream &file) {
     file.seekg(std::ios_base::beg);
     std::vector<SimpleBoard> puzzles;
@@ -119,6 +131,12 @@ std::vector<SimpleBoard> file::getSDMPuzzle(std::istream &file) {
     return puzzles;
 }
 
+/**
+ * @brief parses ss files for puzzles
+ * 
+ * @param file containing the puzzle
+ * @return std::vector<SimpleBoard> containing the puzzle
+ */
 std::vector<SimpleBoard> file::getSSPuzzle(std::istream &file) {
     file.seekg(std::ios_base::beg);
     std::stringstream puzzle;
