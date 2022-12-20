@@ -58,3 +58,9 @@ target_link_libraries(${UNIT_TESTS}
 )
 include(GoogleTest)
 gtest_discover_tests(${UNIT_TESTS})
+
+add_custom_target(
+    run_gtest ALL
+    COMMENT "Running unit tests\n"
+    COMMAND ${UNIT_TESTS}
+)

@@ -69,6 +69,12 @@ std::vector<SimpleBoard> file::getStringPuzzle(const char *puzzleString) {
     return getSDKPuzzle(puzzle);
 }
 
+/**
+ * @brief creates boards from an SDK puzzle file
+ * 
+ * @param file
+ * @return std::vector<SimpleBoard> 
+ */
 std::vector<SimpleBoard> file::getSDKPuzzle(std::istream &file) {
     file.seekg(std::ios_base::beg);
     std::stringstream stringStream;
