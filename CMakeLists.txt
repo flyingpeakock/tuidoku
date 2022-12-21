@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(PROJECT_NAME tuidoku)
 set(UNIT_TESTS tuidoku_unit_tests)
+set(STATS_EXE tuidoku_run_stats)
 
 project(${PROJECT_NAME} C CXX)
 
@@ -23,19 +24,32 @@ set(SOURCES
 )
 
 set(TEST_SOURCES
-    #Add files to be tested here
+    # Add files to be tested here
     src/File.cpp
     src/Generator.cpp
     src/Solver.cpp
     src/Board.cpp
     src/HumanSolve.cpp
 
-    #Add unit tests here
+    # Add unit tests here
     tests/file_test.cpp
     tests/humanSolve_test.cpp
 )
 
+set(STATS_SOURCES
+    # Add project source files here
+    src/Generator.cpp
+    src/Solver.cpp
+    src/Board.cpp
+    src/HumanSolve.cpp
+
+    # Add statistics source files here
+    statistics/main.cpp
+    statistics/HumanSolverPercentage.cpp
+)
+
 add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${STATS_EXE} EXCLUDE_FROM_ALL ${STATS_SOURCES})
 
 find_package(GTest REQUIRED)
 
