@@ -82,5 +82,4 @@ add_custom_target(
     COMMENT "Running unit tests\n"
     DEPENDS ${UNIT_TESTS}
     COMMAND ${UNIT_TESTS}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build/
 )
