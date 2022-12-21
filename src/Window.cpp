@@ -77,17 +77,17 @@ void BasicWindow::printBoxes() {
     int startHeight = boardTop;
     wattron(window, A_BOLD);
     wattron(window, COLOR_PAIR(5));
-    mvwprintw(window, startHeight, boardLeft, TOPROW);
+    mvwprintw(window, startHeight, boardLeft, TOPROW, NULL);
     for (auto i = 0; i < 3; i++) {
-        mvwprintw(window, ++startHeight, boardLeft, ROW1);
-        mvwprintw(window, ++startHeight, boardLeft, ROW2);
-        mvwprintw(window, ++startHeight, boardLeft, ROW1);
-        mvwprintw(window, ++startHeight, boardLeft, ROW2);
-        mvwprintw(window, ++startHeight, boardLeft, ROW1);
+        mvwprintw(window, ++startHeight, boardLeft, ROW1, NULL);
+        mvwprintw(window, ++startHeight, boardLeft, ROW2, NULL);
+        mvwprintw(window, ++startHeight, boardLeft, ROW1, NULL);
+        mvwprintw(window, ++startHeight, boardLeft, ROW2, NULL);
+        mvwprintw(window, ++startHeight, boardLeft, ROW1, NULL);
         if (i != 2)
-            mvwprintw(window, ++startHeight, boardLeft, ROW3);
+            mvwprintw(window, ++startHeight, boardLeft, ROW3, NULL);
     }
-    mvwprintw(window, ++startHeight, boardLeft, BOTROW);
+    mvwprintw(window, ++startHeight, boardLeft, BOTROW, NULL);
     wattroff(window, A_BOLD);
     wattroff(window, COLOR_PAIR(5));
 }
@@ -524,20 +524,20 @@ void BigWindow::printBoxes() {
     int startHeight = boardTop;
     wattron(window, A_BOLD);
     wattron(window, COLOR_PAIR(5));
-    mvwprintw(window, startHeight, boardLeft, BIGTOP);
+    mvwprintw(window, startHeight, boardLeft, BIGTOP, NULL);
     for (auto i = 0; i < 3; i++) {
         for (auto j = 0; j < 3; j++)
-            mvwprintw(window, ++startHeight, boardLeft, BIGROW1);
-        mvwprintw(window, ++startHeight, boardLeft, BIGROW2);
+            mvwprintw(window, ++startHeight, boardLeft, BIGROW1, NULL);
+        mvwprintw(window, ++startHeight, boardLeft, BIGROW2, NULL);
         for (auto j = 0; j < 3; j++)
-            mvwprintw(window, ++startHeight, boardLeft, BIGROW1);
-        mvwprintw(window, ++startHeight, boardLeft, BIGROW2);
+            mvwprintw(window, ++startHeight, boardLeft, BIGROW1, NULL);
+        mvwprintw(window, ++startHeight, boardLeft, BIGROW2, NULL);
         for (auto j = 0; j < 3; j++)
-            mvwprintw(window, ++startHeight, boardLeft, BIGROW1);
+            mvwprintw(window, ++startHeight, boardLeft, BIGROW1, NULL);
         if (i != 2)
-            mvwprintw(window, ++startHeight, boardLeft, BIGROW3);
+            mvwprintw(window, ++startHeight, boardLeft, BIGROW3, NULL);
     }
-    mvwprintw(window, ++startHeight, boardLeft, BIGBOTTOM);
+    mvwprintw(window, ++startHeight, boardLeft, BIGBOTTOM, NULL);
     wattroff(window, A_BOLD);
     wattroff(window, COLOR_PAIR(5));
 }
