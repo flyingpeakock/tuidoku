@@ -7,11 +7,9 @@ struct Move {
     char val;
     char row;
     char col;
-    //Board *board;
     bool (Board::*move)(char, int, int);
     bool operator()(Board *board) {
         if (move == NULL) return false;
-        //return (board->*move)(val, row, col);
         return (board->*move)(val, row, col);
     }
 };
@@ -19,6 +17,7 @@ struct Move {
 struct Hint {
     std::string hint1;
     std::string hint2;
+    int difficulty;
     std::vector<Move> moves;
 };
 

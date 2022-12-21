@@ -1,4 +1,5 @@
 #include "HumanSolverPercentage.h"
+#include "GeneratorStatistics.h"
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -13,4 +14,5 @@ int main(int argc, char *argv[]) {
     if (find_solve_percent != args.end()) {
         getSolvedPercentage(stoi(*(find_solve_percent + 1)));
     }
+    accumulateBoardGrades(100);
 }

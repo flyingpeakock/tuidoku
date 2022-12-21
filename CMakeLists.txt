@@ -46,6 +46,7 @@ set(STATS_SOURCES
     # Add statistics source files here
     statistics/main.cpp
     statistics/HumanSolverPercentage.cpp
+    statistics/GeneratorStatistics.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

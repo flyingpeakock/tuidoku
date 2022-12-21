@@ -149,6 +149,7 @@ Hint solveHuman(Board &board) {
     Hint hint = {
         "",
         "",
+        0,
         {},
     };
 
@@ -173,6 +174,7 @@ Hint solveHuman(Board &board) {
             hint_2_stream << "row " << (char)(hint.moves[0].row + START_CHAR) << " column " << (char)(hint.moves[0].col + START_CHAR) << " can only be " << hint.moves[0].val;
             hint.hint1 = hint_1_stream.str();
             hint.hint2 = hint_2_stream.str();
+            hint.difficulty = 1;
             return hint;
 
         }
@@ -184,6 +186,7 @@ Hint solveHuman(Board &board) {
             hint_2_stream << "row " << (char)(hint.moves[0].row + START_CHAR) << " column " << (char)(hint.moves[0].col + START_CHAR) << " is the only possible location for " << hint.moves[0].val;
             hint.hint1 = hint_1_stream.str();
             hint.hint2 = hint_2_stream.str();
+            hint.difficulty = 2;
             return hint;
         }
     }
@@ -197,6 +200,7 @@ Hint solveHuman(Board &board) {
                 hint_2_stream << "The digit " << hint.moves[0].val << " forms a pointing box.";
                 hint.hint1 = hint_1_stream.str();
                 hint.hint2 = hint_2_stream.str();
+                hint.difficulty = 3;
                 return hint;
             }
         }
@@ -206,11 +210,13 @@ Hint solveHuman(Board &board) {
         if (findNaked(board, num, hint.moves)) {
             hint.hint1 = "Look for a naked double";
             hint.hint2 = getGenericHint(hint.moves);
+            hint.difficulty = 4;
             return hint;
         }
         if (findHidden(board, num, hint.moves)) {
             hint.hint1 = "Look for a hidden double";
             hint.hint2 = getGenericHint(hint.moves);
+            hint.difficulty = 5;
             return hint;
         }
     }
@@ -220,6 +226,7 @@ Hint solveHuman(Board &board) {
         std::stringstream hint_2_stream;
         hint.hint1 = "Look for locked candidates";
         hint.hint2 = getGenericHint(hint.moves);
+        hint.difficulty = 6;
         return hint;
     }
     for (auto &triple : all_triples) {
@@ -227,6 +234,7 @@ Hint solveHuman(Board &board) {
             //return true;
             hint.hint1 = "Look for a naked triple";
             hint.hint2 = getGenericHint(hint.moves);
+            hint.difficulty = 7;
             return hint;
         }
     }
@@ -235,6 +243,7 @@ Hint solveHuman(Board &board) {
             //return true;
             hint.hint1 = "Look for a naked quadtruple";
             hint.hint2 = getGenericHint(hint.moves);
+            hint.difficulty = 8;
             return hint;
         }
     }
@@ -243,6 +252,7 @@ Hint solveHuman(Board &board) {
             //return true;
             hint.hint1 = "Look for a hidden triple";
             hint.hint2 = getGenericHint(hint.moves);
+            hint.difficulty = 9;
             return hint;
         }
     }
@@ -251,6 +261,7 @@ Hint solveHuman(Board &board) {
             //return true;
             hint.hint1 = "Look for a hidden quadruple";
             hint.hint2 = getGenericHint(hint.moves);
+            hint.difficulty = 10;
             return hint;
         }
     }
@@ -260,12 +271,14 @@ Hint solveHuman(Board &board) {
         hint.hint1 = "Look for a bug";
         std::stringstream hintStream;
         hintStream << "The digit " << hint.moves[0].val << "can only go in row " << (char)(hint.moves[0].row + START_CHAR) << "and in column " << (char)(hint.moves[0].col + START_CHAR);
+        hint.difficulty = 11;
         return hint;
     }
     for (auto &doub : all_doubles) {
         if (findChainOfPairs(board, doub, hint.moves)) {
             hint.hint1 = "Look for a chain of pairs";
             hint.hint2 = getGenericHint(hint.moves);
+            hint.difficulty = 12;
             return hint;
         }
     }
@@ -274,6 +287,7 @@ Hint solveHuman(Board &board) {
             //return true;
             hint.hint1 = "Look for a unique rectangle";
             hint.hint2 = getGenericHint(hint.moves);
+            hint.difficulty = 13;
             return hint;
         }
     }
@@ -285,12 +299,14 @@ Hint solveHuman(Board &board) {
             hintstr << "Look closer at the digit ";
             hintstr << hint.moves[0].val;
             hint.hint2 = hintstr.str();
+            hint.difficulty = 14;
             return hint;
         }
     }
 
     hint.hint1 = "Unable to give any hints";
     hint.hint2 = "This is out of my league";
+    hint.difficulty = 15;
     return hint;
 }
 

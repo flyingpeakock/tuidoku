@@ -38,7 +38,7 @@ void getSolvedPercentage(int count) {
             std::cout << "--> Failed\n";
         }
         std::cout << "--> Took: " << elapsed_solve.count() << "s\n";
-        float percent = (float)(solved_count / (i + 1)) * 100;
+        float percent = (float)(solved_count) / (i + 1) * 100;
         std::cout << "---> Solved: " << solved_count << '/' << i + 1 << " (" << percent << "%)\n\n";
     }
     std::cout << std::endl;
