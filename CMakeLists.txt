@@ -64,5 +64,7 @@ gtest_discover_tests(${UNIT_TESTS})
 add_custom_target(
     run_gtest ALL
     COMMENT "Running unit tests\n"
+    DEPENDS ${UNIT_TESTS}
     COMMAND ${UNIT_TESTS}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build/
 )
