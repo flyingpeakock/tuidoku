@@ -54,6 +54,7 @@ add_executable(${STATS_EXE} EXCLUDE_FROM_ALL ${STATS_SOURCES})
 
 find_package(GTest REQUIRED)
 
+set(CURSES_NEED_WIDE true)
 find_package( Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIRS})
 
