@@ -8,13 +8,17 @@
 bool HumanSolveUntilFailed(Board &board) {
     Hint hint = solveHuman(board);
 
+    // get the hint and make the moves until there are none left
     while(hint.moves.size() > 0) {
         for (auto &move : hint.moves) {
             move(&board);
         }
         hint = solveHuman(board);
     }
-    return board.getPlayGrid() == board.getStartGrid();
+
+    puzzle grid = board.getPlayGrid();
+    puzzle sol = board.getSolution();
+    return grid == sol;
 }
 
 void getSolvedPercentage(int count) {
@@ -27,6 +31,7 @@ void getSolvedPercentage(int count) {
         std::chrono::duration<double> elapsed_gen = end_gen - start_gen;
         std::cout << "--> Took: " << elapsed_gen.count() << "s\n";
         auto start_solve = std::chrono::system_clock::now();
+        board.autoPencil();
         bool solved = HumanSolveUntilFailed(board);
         auto end_solve = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_solve = end_solve - start_solve;

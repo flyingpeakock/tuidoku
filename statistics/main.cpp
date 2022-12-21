@@ -14,5 +14,8 @@ int main(int argc, char *argv[]) {
     if (find_solve_percent != args.end()) {
         getSolvedPercentage(stoi(*(find_solve_percent + 1)));
     }
-    accumulateBoardGrades(100);
+    auto acc_board_grades = std::find(args.begin(), args.end(), "acc_board_grades");
+    if (acc_board_grades != args.end()) {
+        accumulateBoardGrades(stoi(*(acc_board_grades + 1)));
+    }
 }
