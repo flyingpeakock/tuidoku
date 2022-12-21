@@ -619,8 +619,17 @@ bool findBug(Board &board, Move *move) {
     return false;
 }
 
+/**
+ * @brief Gets the indexes of the positions in the array matching curr
+ * 
+ * The matching indexes bits are set in the return value
+ * 
+ * @param positions array containing the positions of the value being searched for in row/box
+ * @param curr the current indexes to match with
+ * @return the indexes in positions that match with curr as set bits in a 16bit integer 
+ */
 static std::uint16_t getEqualWingIndexes(std::array<std::uint16_t, 9> positions, std::uint16_t curr) {
-    std::uint16_t indexes;
+    std::uint16_t indexes = 0;
     int index = 0;
     for (auto &pos : positions) {
         if (pos == curr) {
@@ -631,25 +640,20 @@ static std::uint16_t getEqualWingIndexes(std::array<std::uint16_t, 9> positions,
     return indexes;
 }
 
+/**
+ * @brief remove pencils marks found by X-wing in rows
+ * 
+ * This function gets called if there are matching X-wings found in rows
+ * 
+ * @param board that the X-wing was found in
+ * @param num that matches the X-wing. Num is the set bit
+ * @param i_indexes Row indexes that the X-wing was found on
+ * @param j_indexes Column indexes that the X-wing was found on
+ * @param moves Vector that gets populated with the correct moves
+ * @return true when correct moves have been found
+ * @return false otherwise
+ */
 static bool removeXwingByRows(Board &board, const std::uint16_t num, std::uint16_t i_indexes, std::uint16_t j_indexes, std::vector<Move> &moves) {
-    bool ret = false;
-    for (char i : getSetBits(i_indexes)) {
-        for (char j = 0; j < 9; j) {
-            if ((j_indexes & (1 << j)) != 0) continue; // same position as x-wing
-            if (!board.isEmpty(i, j)) continue;
-            auto marks = board.getPencil(i, j) & num;
-            if (marks == 0) continue;
-            for (auto unset : getSetBits(marks)) {
-                Move move = {(char)(unset + START_CHAR), i, j, &Board::pencil};
-                moves.push_back(move);
-                ret = true;
-            }
-        }
-    }
-    return ret;
-}
-
-static bool removeXwingByCols(Board &board, const std::uint16_t num, std::uint16_t i_indexes, std::uint16_t j_indexes, std::vector<Move> &moves) {
     bool ret = false;
     for (char i = 0; i < 9; i++) {
         if ((i_indexes & (1 << i)) != 0) continue;
@@ -667,6 +671,46 @@ static bool removeXwingByCols(Board &board, const std::uint16_t num, std::uint16
     return ret;
 }
 
+/**
+ * @brief Adds moves to the vector that are found by the X-Wing
+ * 
+ * This function gets called if there are matching x-wings found in columns.
+ * 
+ * @param board that the X-wing has been found in
+ * @param num that matches the X-wing. Num is the set bit
+ * @param i_indexes row indexes where the x-wing is located
+ * @param j_indexes col indexes where the x-wing is located
+ * @param moves vector that found moves gets put into
+ * @return true if found any pencil marks to remove
+ * @return false otherwise
+ */
+static bool removeXwingByCols(Board &board, const std::uint16_t num, std::uint16_t i_indexes, std::uint16_t j_indexes, std::vector<Move> &moves) {
+    bool ret = false;
+    for (char i : getSetBits(i_indexes)) {
+        for (char j = 0; j < 9; j++) {
+            if ((j_indexes & (1 << j)) != 0) continue; // same position as x-wing
+            if (!board.isEmpty(i, j)) continue;
+            auto marks = board.getPencil(i, j) & num;
+            if (marks == 0) continue;
+            for (auto unset : getSetBits(marks)) {
+                Move move = {(char)(unset + START_CHAR), i, j, &Board::pencil};
+                moves.push_back(move);
+                ret = true;
+            }
+        }
+    }
+    return ret;
+}
+
+/**
+ * @brief Looks for xwings in the board
+ * 
+ * @param board to look through
+ * @param num to match with the x-wing
+ * @param moves vector that gets filled with the correct moves, if any
+ * @return true  if found any x-wings
+ * @return false otherwise
+ */
 bool findXwing(Board &board, const std::uint16_t num, std::vector<Move> &moves) {
     std::array<std::uint16_t, 9> positions[2];
     for (auto i = 0; i < 9; i++) {
@@ -682,7 +726,7 @@ bool findXwing(Board &board, const std::uint16_t num, std::vector<Move> &moves) 
         // indexes are columns where we should remove
         std::uint16_t indexes = getEqualWingIndexes(positions[0], positions[0][i]);
         if (countBits(indexes) != countBits(positions[0][i])) continue;
-        if (removeXwingByRows(board, num, positions[0][i], indexes, moves)) {
+        if (removeXwingByRows(board, num, indexes, positions[0][i], moves)) {
             return true;
         }
     }

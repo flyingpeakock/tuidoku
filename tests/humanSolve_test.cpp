@@ -65,3 +65,36 @@ TEST(HumanSolve_test, findHiddenSingle) {
         EXPECT_EQ(move.move, test.move.move);
     }
 }
+
+TEST(HumanSolve_test, findXwing) {
+    struct findXwing_t {
+        std::uint16_t num;
+        Move move;
+        int moves;
+        bool ret;
+        const char *gridString;
+    };
+
+    findXwing_t test_table[] = {
+        {(1 << 4), {'5', 3, 4, &Board::pencil}, 1, true, "041729030769003402032640719403900170607004903195370024214567398376090541958431267"},
+        {(1 << 0), {'1', 1, 3, &Board::pencil}, 9, true, "980062753065003000327050006790030500050009000832045009673591428249087005518020007"},
+    };
+
+    for (auto &test : test_table) {
+        std::vector<Move> moves;
+        Generator gen(test.gridString);
+        Board board = gen.createBoard();
+        board.autoPencil();
+
+        std::stringstream boardstrstream;
+        board.printBoard(boardstrstream);
+        EXPECT_EQ(findXwing(board, test.num, moves), test.ret) << "Could not find X-Wing:\n" << boardstrstream.str();
+        if (test.ret == false) continue;
+
+        ASSERT_EQ(moves.size(), test.moves);
+        EXPECT_EQ(moves[0].val, test.move.val);
+        EXPECT_EQ(moves[0].row, test.move.row);
+        EXPECT_EQ(moves[0].col, test.move.col);
+        EXPECT_EQ(moves[0].move, test.move.move);
+    }
+}
