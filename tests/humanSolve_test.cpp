@@ -67,9 +67,9 @@ TEST(HumanSolve_test, findXwing) {
         std::stringstream boardstrstream;
         board.printBoard(boardstrstream);
         EXPECT_EQ(findXwing(board, test.num, moves), test.ret) << "Could not find X-Wing:\n" << boardstrstream.str();
+        ASSERT_EQ(moves.size(), test.moves);
         if (test.ret == false) continue;
 
-        ASSERT_EQ(moves.size(), test.moves);
         EXPECT_EQ(moves[0].val, test.move.val);
         EXPECT_EQ(moves[0].row, test.move.row);
         EXPECT_EQ(moves[0].col, test.move.col);
@@ -89,9 +89,35 @@ TEST(HumanSolve_test, findUniqueRectangle) {
         board.autoPencil();
 
         EXPECT_EQ(findUniqueRectangle(board, test.num, moves), test.ret);
+        ASSERT_EQ(moves.size(), test.moves);
         if (test.ret == false) continue;
 
+        EXPECT_EQ(moves[0].val, test.move.val);
+        EXPECT_EQ(moves[0].row, test.move.row);
+        EXPECT_EQ(moves[0].col, test.move.col);
+        EXPECT_EQ(moves[0].move, test.move.move);
+    }
+}
+
+TEST(HumanSolve_test, findChainOfPairs) {
+    single_digit_human_solve_t test_table[] = {
+        {((1 << 3) | (1 << 4)), {'5', 5, 6, &Board::pencil}, 1, true, "798452316603781092012030870370265048820143760060897023980014237107028050200070081"},
+        {((1 << 3) | (1 << 0)), {0, 0, 0, NULL}, 0, false, "798452316603781092012030870370265048820143760060897023980014237107028050200070081"},
+        {((1 << 1) | (1 << 6)), {'7', 4, 8, &Board::pencil}, 1, true, "360859004519472386408613950146738295900541000005926401054387009093164500001295043"},
+    };
+
+    for (auto &test : test_table) {
+        std::vector<Move> moves;
+        Generator gen(test.gridString);
+        Board board = gen.createBoard();
+        board.autoPencil();
+
+        std::stringstream boardstrstr;
+        board.printBoard(boardstrstr);
+        EXPECT_EQ(findChainOfPairs(board, test.num, moves), test.ret) << "No chain found:\n" << boardstrstr.str();
         ASSERT_EQ(moves.size(), test.moves);
+        if (test.ret == false) continue;
+
         EXPECT_EQ(moves[0].val, test.move.val);
         EXPECT_EQ(moves[0].row, test.move.row);
         EXPECT_EQ(moves[0].col, test.move.col);

@@ -740,6 +740,15 @@ bool findXwing(Board &board, const std::uint16_t num, std::vector<Move> &moves) 
     return false;
 }
 
+/**
+ * @brief Looks for unique rectangles
+ * 
+ * @param board to search through
+ * @param num 2 digits that form the rectangle
+ * @param moves vector that gets populated with found moves
+ * @return true if pencil marks can be removed
+ * @return false otherwise
+ */
 bool findUniqueRectangle(Board &board, const std::uint16_t num, std::vector<Move> &moves) {
     if (num == 0) return false;
     for (auto i = 0; i < 9; i++) {
@@ -779,6 +788,16 @@ bool findUniqueRectangle(Board &board, const std::uint16_t num, std::vector<Move
     return false;
 }
 
+/**
+ * @brief checks if two boxes are in the same unit
+ * 
+ * @param i_1 first box row
+ * @param j_1 first box column
+ * @param i_2 second box row
+ * @param j_2 second box column
+ * @return true if they are in the same unit
+ * @return false if they aren't in the same unit
+ */
 static bool canSee(char i_1, char j_1, char i_2, char j_2) {
     if (i_1 == i_2) return true;
     if (j_1 == j_2) return true;
@@ -790,9 +809,17 @@ static bool canSee(char i_1, char j_1, char i_2, char j_2) {
     return ((box_i_1 == box_i_2) && (box_j_1 == box_j_2));
 }
 
-// chain a starts with 1 item, chain b is empty
+/**
+ * @brief seperates the all vector into two chains that see each other
+ * 
+ * @param chain_a starts with one item in it
+ * @param chain_b empty vector
+ * @param all all the found doubles
+ * @return true if a link has been added to the chain
+ * @return false all links have been searched through
+ */
 static bool build_chain(std::vector<Coord> &chain_a, std::vector<Coord> &chain_b,  std::vector<Coord> &all) {
-    if (all.size() == 0)
+    if (all.size() == 0) return false;
     for (std::vector<Coord>::iterator link_itr = all.begin(); link_itr != all.end(); link_itr++) {
         for (auto a : chain_a) {
             if (canSee((*link_itr).i, (*link_itr).j, a.i, a.j)) {
@@ -812,6 +839,17 @@ static bool build_chain(std::vector<Coord> &chain_a, std::vector<Coord> &chain_b
     return false;
 }
 
+/**
+ * @brief looks for values that are seen by both chains and removes the pencil mark
+ * 
+ * @param board board that the chains have been found in
+ * @param num pair that forms the chain
+ * @param chain_a positions that see chain_b
+ * @param chain_b positions that see chain_a
+ * @param moves vector that found moves gets put into
+ * @return true if moves are found
+ * @return false if moves are not found
+ */
 static bool removedByChain(Board &board, const std::uint16_t num, std::vector<Coord> chain_a, std::vector<Coord> chain_b, std::vector<Move> &moves) {
     for (char i = 0; i < 9; i++) {
         for (char j = 0; j < 9; j++) {
@@ -847,6 +885,15 @@ static bool removedByChain(Board &board, const std::uint16_t num, std::vector<Co
     return false;
 }
 
+/**
+ * @brief Looks for a chain of pairs
+ * 
+ * @param board to search through
+ * @param num pair to search for. Each digit in the pair is a set bit in num
+ * @param moves vector that gets populated with found moves
+ * @return true if moves are found
+ * @return false if moves are not found
+ */
 bool findChainOfPairs(Board &board, const std::uint16_t num, std::vector<Move> &moves) {
     std::vector<Coord> all_doubles;
     for (auto i = 0; i < 9; i++) {
@@ -859,12 +906,14 @@ bool findChainOfPairs(Board &board, const std::uint16_t num, std::vector<Move> &
         }
     }
     if (all_doubles.size() < 3) return false;
+    int chain_idx = 0;
     for (auto link : all_doubles) {
         auto chain = all_doubles;
         std::vector<Coord> chain_a, chain_b;
         chain_a.push_back(link);
+        chain.erase(chain.begin() + chain_idx++);
         while (build_chain(chain_a, chain_b, chain)) {};
-        if (chain_a.size() + chain_b.size() < 3) continue;
+        if (chain_a.size() + chain_b.size() < 4) continue;
         if (removedByChain(board, num, chain_a, chain_b, moves)) {
             return true;
         }
