@@ -30,10 +30,12 @@ set(TEST_SOURCES
     src/Solver.cpp
     src/Board.cpp
     src/HumanSolve.cpp
+    src/Sudoku/Solve.cpp
 
     # Add unit tests here
     tests/file_test.cpp
     tests/humanSolve_test.cpp
+    tests/dancing_links.cpp
 )
 
 set(STATS_SOURCES
@@ -77,10 +79,10 @@ target_link_libraries(${UNIT_TESTS}
 include(GoogleTest)
 gtest_discover_tests(${UNIT_TESTS})
 
-add_custom_target(
-    run_gtest ALL
-    COMMENT "Running unit tests\n"
-    DEPENDS ${UNIT_TESTS}
-    COMMAND ${UNIT_TESTS}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build/
-)
+#add_custom_target(
+    #run_gtest ALL
+    #COMMENT "Running unit tests\n"
+    #DEPENDS ${UNIT_TESTS}
+    #COMMAND ${UNIT_TESTS}
+    #WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build/
+#)
