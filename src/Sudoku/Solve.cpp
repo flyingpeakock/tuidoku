@@ -1,6 +1,6 @@
-#include <sstream>
-#include <iostream>
 #include <algorithm>
+#include <random>
+#include <chrono>
 #include "Solve.h"
 #include "../config.h"
 
@@ -9,32 +9,6 @@
 #define SIZE           9
 #define BOX_SIZE       3
 #define SATISFIED   0xFF
-
-static void printBoard(puzzle grid) {
-    std::stringstream boardStream;
-    boardStream << TOPROW << '\n';
-    for (auto i = 0; i < 3; i++) {
-        boardStream << ROW1 << '\n';
-        boardStream << ROW2 << '\n';
-        boardStream << ROW1 << '\n';
-        boardStream << ROW2 << '\n';
-        boardStream << ROW1 << '\n';
-        if (i != 2)
-            boardStream << ROW3 << '\n';
-    }
-    boardStream << BOTROW << '\n';
-    std::string boardString = boardStream.str();
-    int idx = 0;
-    for (auto i = 0; i < 9; i++) {
-        idx += std::string{TOPROW}.size() + 5;
-        for (auto j = 0; j < 9; j++) {
-            if (grid[i][j] != 0)
-                boardString[idx] = grid[i][j] + '0';
-            idx += 6;
-        }
-    }
-    std::cout << boardString << '\n';
-}
 
 /**
  * @brief Dancing link which is a quadruply linked list
@@ -54,6 +28,10 @@ struct DancingLink {
     virtual void uncover(){}
 };
 
+/**
+ * @brief overrides the virtual methods
+ * 
+ */
 struct DancingLinkHeader : DancingLink {
     void cover() {
         DancingLink *i;
@@ -85,35 +63,12 @@ struct DancingLinkHeader : DancingLink {
     }
 };
 
-
-/**
- * @brief vector to hold the found solution
- * 
- */
-static puzzle solution;
-
-/**
- * @brief vector that holds potential solution
- * 
- */
-static std::array<DancingLink *, SIZE*SIZE> solutionSet;
-
-
 /**
  * @brief find the column with the fewest amount of rows
  * 
  * @return ColHeader 
  */
 static DancingLink *smallestColumn(DancingLink *root);
-
-/**
- * @brief Gets the solution from the puzzle
- * 
- * @return puzzle 
- */
-puzzle Sudoku::getSolution() {
-    return solution;
-}
 
 /**
  * @brief 
@@ -123,14 +78,22 @@ puzzle Sudoku::getSolution() {
  * @return true if solutions found are greater than one
  * @return false no solutions found
  */
-static bool backTrack(int depth, int &solutions, DancingLink *root);
+static bool backTrack(int depth, int &solutions, DancingLink *root, puzzle &grid, DancingLink **solutionSet);
 
 /**
  * @brief Create a Puzzle from a solutionset
  * 
  * @return puzzle 
  */
-static puzzle createPuzzle(int depth);
+static void createPuzzle(int depth, puzzle &grid, DancingLink **solutionSet);
+
+/**
+ * @brief randomly order the rows in a column
+ * 
+ * @param col 
+ * @return std::vector<DancingLink *>  of the randomly ordered rows
+ */
+static std::vector<DancingLink *> randomlyOrderRows(DancingLink *col);
 
 /**
  * @brief Solves a sudoku puzzle
@@ -139,10 +102,7 @@ static puzzle createPuzzle(int depth);
  * @return true if there is one solution
  * @return false if there are multiple solutions or if no solutions were found
  */
-bool Sudoku::solve(puzzle grid) {
-    // Clear any previous solutions found
-    solution = {};
-    
+bool Sudoku::solve(puzzle &grid) {
     // Set up buffers that will hold the grid
     DancingLink* root = new DancingLink;
     root->colHeader = root;
@@ -235,15 +195,11 @@ bool Sudoku::solve(puzzle grid) {
         }
     }
 
-    int startDepth = 0;
-    // Adding the givens in grid to solutionSet
+    // Covering the clues given in the grid
     for (auto row = 0; row < grid.size(); row++) {
         for (auto col = 0; col < grid[0].size(); col++) {
             if (grid[row][col] == 0) continue;
             auto num = grid[row][col] - 1;
-            row_idx = (row * SIZE * SIZE) + (col * SIZE) + num;
-            solutionSet[startDepth++] = &rowHeaders[row_idx];
-
             int box_idx = BOX_SIZE * (row / BOX_SIZE) + (col / BOX_SIZE);
 
             int constraints[4];
@@ -258,36 +214,46 @@ bool Sudoku::solve(puzzle grid) {
         }
     }
 
+    // Creating a buffer that holds rows in the solution set
+    DancingLink *solutionSet[SIZE * SIZE];
+
     // Solving the board
     int solutions = 0;
-    bool foundSolution = backTrack(startDepth, solutions, root);
+    bool foundSolution = backTrack(0, solutions, root, grid, solutionSet);
     delete root;
-    return foundSolution && solutions == 1;
+    return solutions == 1;
 }
 
-static bool backTrack(int depth, int &solutions, DancingLink *root) {
+/**
+ * @brief Actual DLX algorithm
+ * 
+ * @param depth current depth, used for creating the board
+ * @param solutions number of solutions found
+ * @param root root of the constraint grid
+ * @return true if a solution is found
+ * @return false if no solution is found
+ */
+static bool backTrack(int depth, int &solutions, DancingLink *root, puzzle &grid, DancingLink **solutionSet) {
     if (root->right == root) {
         solutions++;
-        solution = createPuzzle(depth);
-        printBoard(solution);
+        createPuzzle(depth, grid, solutionSet);
         return true;
     }
 
-    puzzle current_step = createPuzzle(depth);
-    printBoard(current_step);
-
     DancingLink *col = smallestColumn(root);
 
-    DancingLink *row;
+    //DancingLink *row;
     DancingLink *cur_col;
 
     col->cover();
-    for (row = col->down; row != col; row=row->down) {
+    std::vector<DancingLink *>randomlyOrderedRows = randomlyOrderRows(col);
+    //for (row = col->down; row != col; row=row->down) {
+    for (DancingLink *row : randomlyOrderedRows) {
         solutionSet[depth] = row;
         for (cur_col = row->right; cur_col != row; cur_col = cur_col->right) {
             cur_col->colHeader->cover();
         }
-        if (backTrack(depth + 1, solutions, root) && solutions > 2) {
+        if (backTrack(depth + 1, solutions, root, grid, solutionSet) && solutions > 1) {
             return true;
         }
         for (cur_col = row->left; cur_col != row; cur_col = cur_col->left) {
@@ -298,13 +264,17 @@ static bool backTrack(int depth, int &solutions, DancingLink *root) {
     return false;
 }
 
-static puzzle createPuzzle(int depth) {
-    puzzle ret = {};
+/**
+ * @brief Create a Puzzle from rows in the constraint grid
+ * 
+ * @param depth that has been searched
+ * @param grid to put the pieces into
+ */
+static void createPuzzle(int depth, puzzle &grid, DancingLink **solutionSet) {
     for (auto i = 0; i < depth; i++) {
         DancingLink *row = solutionSet[i];
-        ret[row->row][row->col] = row->count;
+        grid[row->row][row->col] = row->count;
     }
-    return ret;
 }
 
 static DancingLink *smallestColumn(DancingLink *root) {
@@ -319,5 +289,15 @@ static DancingLink *smallestColumn(DancingLink *root) {
                 break;
         }
     }
+    return ret;
+}
+
+static std::vector<DancingLink *> randomlyOrderRows(DancingLink *col) {
+    std::vector<DancingLink *> ret;
+    for (DancingLink *current = col->down; current != col; current = current->down) {
+        ret.push_back(current);
+    }
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    shuffle(ret.begin(), ret.end(), std::default_random_engine(seed));
     return ret;
 }

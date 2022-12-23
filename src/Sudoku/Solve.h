@@ -3,6 +3,5 @@
 
 namespace Sudoku
 {
-    bool solve(puzzle grid);
-    puzzle getSolution();
+    bool solve(puzzle &grid);
 } // namespace Sudoku
