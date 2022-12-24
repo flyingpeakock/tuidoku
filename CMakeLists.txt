@@ -31,6 +31,7 @@ set(TEST_SOURCES
     src/Board.cpp
     src/HumanSolve.cpp
     src/Sudoku/Solve.cpp
+    src/Sudoku/Generate.cpp
 
     # Add unit tests here
     tests/file_test.cpp

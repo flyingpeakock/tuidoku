@@ -44,3 +44,26 @@ TEST(dancingLinks, can_solve) {
     EXPECT_EQ(res, true);
     EXPECT_EQ(board.getSolution(), grid);
 }
+
+TEST(dancingLinks, can_generate) {
+    puzzle grid = Sudoku::generate();
+    printBoard(grid, std::cout);
+    Solver solver(grid);
+    solver.solve();
+    EXPECT_TRUE(solver.isUnique());
+}
+
+TEST(dancingLinks, can_generate_given_unknowns) {
+    for (auto i = 1; i < 45; i++) {
+        puzzle grid = Sudoku::generate(i);
+        printBoard(grid, std::cout);
+
+        int unknowns = 0;
+        for (auto &r : grid) {
+            for (auto &c : r) {
+                if (c == 0) unknowns++;
+            }
+        }
+        EXPECT_EQ(unknowns, i);
+    }
+}
