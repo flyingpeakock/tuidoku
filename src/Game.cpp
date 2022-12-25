@@ -162,7 +162,7 @@ int InteractiveSolver::mainLoop() {
                     Sudoku::puzzle solveGrid = board->getPlayGrid();
                     bool isUnique = Sudoku::solve(solveGrid);
                     if (isUnique) {
-                        board->swapStartGrid(board->getPlayGrid());
+                        board->swapStartGrid(solveGrid);
                         solve();
                         window->printBoard();
                         getch();

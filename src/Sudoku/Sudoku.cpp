@@ -1,5 +1,7 @@
 #include "Sudoku.h"
 #include <cmath>
+#include <string>
+#include <iostream>
 
 bool Sudoku::isSafe(puzzle grid, int row, int col, int num) {
     // Checking in the box

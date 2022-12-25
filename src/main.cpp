@@ -12,7 +12,6 @@
 void generate(int, bool, std::string);
 void solve(bool, std::string);
 void play(bool, std::string, int, bool);
-void test(bool, std::string, int, bool);
 void startCurses();
 void endCurses();
 WINDOW * createWindow();
