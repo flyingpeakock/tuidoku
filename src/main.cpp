@@ -1,7 +1,7 @@
 #include "Game.h"
 #include "File.h"
 #include "Arguments.h"
-#include "Generator.h"
+#include "Sudoku/Sudoku.h"
 #include "config.h"
 #include "HumanSolve.h"
 #include <fstream>
@@ -57,14 +57,16 @@ WINDOW * createWindow() {
 }
 
 Board makeNotSimpleBoard(SimpleBoard &board) {
-    puzzle grid = board.getPlayGrid();
+    Sudoku::puzzle grid = board.getPlayGrid();
     std::stringstream gridStringStream;
     for (size_t i = 0; i < grid.size(); i++) {
         for (size_t j = 0; j < grid[i].size(); j++) {
             gridStringStream << grid[i][j];
         }
     }
-    return Generator{gridStringStream.str().c_str()}.createBoard();
+    Sudoku::puzzle sol = grid;
+    Sudoku::solve(sol);
+    return Board(grid, sol);
 }
 
 Board selectBoard(std::vector<SimpleBoard> boards) {
@@ -83,14 +85,16 @@ Board selectBoard(std::vector<SimpleBoard> boards) {
 
 
 void generate(int empty, bool file, std::string fileName) {
-    Generator gen = (empty) ? Generator(empty) : Generator();
+    //Generator gen = (empty) ? Generator(empty) : Generator();
+    SimpleBoard board = Sudoku::generate(empty);
     if (file) {
         std::ofstream fileStream;
         fileStream.open(fileName);
-        gen.createBoard().printBoard(fileStream);
+        board.printBoard(fileStream);
+        fileStream.close();
         return;
     }
-    gen.createBoard().printBoard();
+    board.printBoard();
     return;
 }
 
@@ -107,7 +111,8 @@ void solve(bool file, std::string fileName) {
     for (auto i = 0; i < 81; i++) {
         gridString << '0';
     }
-    Board b = Generator(gridString.str().c_str()).createBoard();;
+    //Board b = Generator(gridString.str().c_str()).createBoard();;
+    Board b = Board(gridString.str());
     startCurses();
     SolveWindow window = SolveWindow(&b, createWindow());
     InteractiveSolver game(&window);
@@ -129,10 +134,7 @@ Board createBoard(bool file, std::string fileName, int empty) {
         // no file attempting to get string board from fileName
         return selectBoard(file::getStringPuzzle(fileName.c_str()));
     }
-    if (empty) {
-        return Generator(empty).createBoard();
-    }
-    return Generator().createBoard();
+    return Board(Sudoku::generate(empty));
 }
 
 void play(bool file, std::string fileName, int empty, bool big) {

@@ -33,6 +33,10 @@ SingleStats gradeBoard(Board &board) {
         }
         hint = solveHuman(board);
     }
+    if (board.getPlayGrid() != board.getSolution()) {
+        stats.difficulty = hint.difficulty;
+        std::cout << "---> Did not solve\n";
+    }
     std::cout << "---> Difficulty " << stats.difficulty << '\n';
     std::cout << "---> Empty cells " << stats.emptyGrids << '\n';
     std::cout << "---> Moves to solve " << stats.movesToSolve << "\n";

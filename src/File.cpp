@@ -1,6 +1,6 @@
 #include "File.h"
 #include <iostream>
-#include "Generator.h"
+#include "Sudoku/Sudoku.h"
 #include <fstream>
 #include <chrono>
 #include <random>
@@ -91,7 +91,8 @@ std::vector<SimpleBoard> file::getSDKPuzzle(std::istream &file) {
             }
         }
     }
-    return std::vector<SimpleBoard>{Generator{stringStream.str().c_str()}.createSimpleBoard()};
+    //return std::vector<SimpleBoard>{Generator{stringStream.str().c_str()}.createSimpleBoard()};
+    return std::vector<SimpleBoard>{SimpleBoard(stringStream.str())};
 }
 
 std::vector<SimpleBoard> file::getXMLPuzzle(std::istream &file) {
@@ -108,7 +109,8 @@ std::vector<SimpleBoard> file::getXMLPuzzle(std::istream &file) {
         std::size_t end = line.rfind("'");
         if (end == std::string::npos)
             end = line.rfind("\"");
-        SimpleBoard b = Generator{(line.substr(begin+1, end- begin - 1)).c_str()}.createSimpleBoard();
+        //SimpleBoard b = Generator{(line.substr(begin+1, end- begin - 1)).c_str()}.createSimpleBoard();
+        SimpleBoard b = SimpleBoard(line.substr(begin+1, end - begin - 1).c_str());
         puzzles.push_back(b);
     }
     return puzzles;
@@ -125,8 +127,8 @@ std::vector<SimpleBoard> file::getSDMPuzzle(std::istream &file) {
     std::vector<SimpleBoard> puzzles;
     std::string line;
     while(getline(file, line)) {
-        Generator g = Generator(line.c_str());
-        puzzles.emplace_back(g.createSimpleBoard());
+        //Generator g = Generator(line.c_str());
+        puzzles.emplace_back(SimpleBoard(line));
     }
     return puzzles;
 }
@@ -149,7 +151,8 @@ std::vector<SimpleBoard> file::getSSPuzzle(std::istream &file) {
             puzzle << '0';
         }
     }
-    return std::vector<SimpleBoard>{Generator{puzzle.str().c_str()}.createSimpleBoard()};
+    //return std::vector<SimpleBoard>{Generator{puzzle.str().c_str()}.createSimpleBoard()};
+    return std::vector<SimpleBoard>{SimpleBoard(puzzle.str())};
 }
 
 std::vector<SimpleBoard> file::getTuidokuPuzzle(std::istream &file) {
@@ -173,5 +176,6 @@ std::vector<SimpleBoard> file::getTuidokuPuzzle(std::istream &file) {
             break;
         }
     }
-    return std::vector<SimpleBoard>{Generator{puzzleStream.str().c_str()}.createSimpleBoard()};
+    //return std::vector<SimpleBoard>{Generator{puzzleStream.str().c_str()}.createSimpleBoard()};
+    return std::vector<SimpleBoard>{SimpleBoard(puzzleStream.str())};
 }

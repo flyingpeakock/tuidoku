@@ -15,31 +15,32 @@ set(SOURCES
     src/Board.cpp
     src/File.cpp
     src/Game.cpp
-    src/Generator.cpp
     src/HumanSolve.cpp
     src/main.cpp
-    src/Solver.cpp
     src/Stopwatch.cpp
     src/Window.cpp
+    src/Sudoku/Generate.cpp
+    src/Sudoku/Solve.cpp
+    src/Sudoku/Sudoku.cpp
 )
 
 set(TEST_SOURCES
     # Add files to be tested here
     src/File.cpp
-    src/Generator.cpp
-    src/Solver.cpp
     src/Board.cpp
     src/HumanSolve.cpp
+    src/Sudoku/Solve.cpp
+    src/Sudoku/Generate.cpp
+    src/Sudoku/Sudoku.cpp
 
     # Add unit tests here
     tests/file_test.cpp
     tests/humanSolve_test.cpp
+    tests/dancing_links.cpp
 )
 
 set(STATS_SOURCES
     # Add project source files here
-    src/Generator.cpp
-    src/Solver.cpp
     src/Board.cpp
     src/HumanSolve.cpp
 
@@ -52,7 +53,7 @@ set(STATS_SOURCES
 add_executable(${PROJECT_NAME} ${SOURCES})
 add_executable(${STATS_EXE} EXCLUDE_FROM_ALL ${STATS_SOURCES})
 
-find_package(GTest REQUIRED)
+find_package(GTest)
 
 set(CURSES_NEED_WIDE true)
 find_package( Curses REQUIRED)
@@ -77,9 +78,10 @@ target_link_libraries(${UNIT_TESTS}
 include(GoogleTest)
 gtest_discover_tests(${UNIT_TESTS})
 
-add_custom_target(
-    run_gtest ALL
-    COMMENT "Running unit tests\n"
-    DEPENDS ${UNIT_TESTS}
-    COMMAND ${UNIT_TESTS}
-)
+#add_custom_target(
+    #run_gtest ALL
+    #COMMENT "Running unit tests\n"
+    #DEPENDS ${UNIT_TESTS}
+    #COMMAND ${UNIT_TESTS}
+    #WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build/
+#)
