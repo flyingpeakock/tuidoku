@@ -15,23 +15,23 @@ set(SOURCES
     src/Board.cpp
     src/File.cpp
     src/Game.cpp
-    src/Generator.cpp
     src/HumanSolve.cpp
     src/main.cpp
-    src/Solver.cpp
     src/Stopwatch.cpp
     src/Window.cpp
+    src/Sudoku/Generate.cpp
+    src/Sudoku/Solve.cpp
+    src/Sudoku/Sudoku.cpp
 )
 
 set(TEST_SOURCES
     # Add files to be tested here
     src/File.cpp
-    src/Generator.cpp
-    src/Solver.cpp
     src/Board.cpp
     src/HumanSolve.cpp
     src/Sudoku/Solve.cpp
     src/Sudoku/Generate.cpp
+    src/Sudoku/Sudoku.cpp
 
     # Add unit tests here
     tests/file_test.cpp
@@ -41,8 +41,6 @@ set(TEST_SOURCES
 
 set(STATS_SOURCES
     # Add project source files here
-    src/Generator.cpp
-    src/Solver.cpp
     src/Board.cpp
     src/HumanSolve.cpp
 

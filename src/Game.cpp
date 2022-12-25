@@ -130,7 +130,6 @@ InteractiveSolver::InteractiveSolver(SolveWindow *win): Controller(win) {
 int InteractiveSolver::mainLoop() {
     board->startPlaying();
     while(board->isPlaying()) {
-        solver.changeGrid(board->getPlayGrid());
         window->printBoard();
         int ch = wgetch(stdscr);
         switch(ch) {
@@ -158,12 +157,12 @@ int InteractiveSolver::mainLoop() {
             break;
         default:
             if ((ch >= START_CHAR - 1 && ch <= START_CHAR + 8) || ch == ERASE_KEY) {
-                if (solver.isSafe(row, col, ch - '0')) {
+                if (Sudoku::isSafe(board->getPlayGrid(), row, col, ch - '0')) {
                     board->insert(ch, row, col);
-                    solver.changeGrid(board->getPlayGrid());
-                    solver.solve();
-                    if (solver.isUnique()) {
-                        board->swapStartGrid(solver.getGrid());
+                    Sudoku::puzzle solveGrid = board->getPlayGrid();
+                    bool isUnique = Sudoku::solve(solveGrid);
+                    if (isUnique) {
+                        board->swapStartGrid(board->getPlayGrid());
                         solve();
                         window->printBoard();
                         getch();
@@ -180,7 +179,8 @@ int InteractiveSolver::mainLoop() {
 }
 
 void InteractiveSolver::solve() {
-    auto solution = solver.getGrid();
+    auto solution = board->getPlayGrid();
+    Sudoku::solve(solution);
     for (auto i = 0; i < solution.size(); i++) {
         for (auto j = 0; j < solution[i].size(); j++) {
             board->insert(solution[i][j] + '0', i, j);

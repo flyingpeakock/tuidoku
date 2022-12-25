@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <sstream>
 
-void GenerateBoard(std::string puzzleString, std::string solutionString, puzzle &grid, puzzle &solution) {
+void GenerateBoard(std::string puzzleString, std::string solutionString, Sudoku::puzzle &grid, Sudoku::puzzle &solution) {
     for (auto i = 0; i < Sudoku::SIZE; i++) {
         for (auto j = 0; j < Sudoku::SIZE; j++) {
             auto str_index = (i * Sudoku::SIZE) + j;
@@ -13,7 +13,7 @@ void GenerateBoard(std::string puzzleString, std::string solutionString, puzzle 
     }
 }
 
-void printBoard(puzzle grid, std::ostream &stream) {
+void printBoard(Sudoku::puzzle grid, std::ostream &stream) {
     std::stringstream boardStream;
     boardStream << TOPROW << '\n';
     for (auto i = 0; i < 3; i++) {
@@ -41,10 +41,10 @@ void printBoard(puzzle grid, std::ostream &stream) {
 
 TEST(dancingLinks, solve_empty) {
     for (auto i = 0; i < 1000; i++) {
-        puzzle grid = {};
+        Sudoku::puzzle grid = {};
         bool res = Sudoku::solve(grid, false);
         EXPECT_EQ(res, false);
-        EXPECT_NE(grid, puzzle());
+        EXPECT_NE(grid, Sudoku::puzzle());
         printBoard(grid, std::cout);
     }
 }
@@ -83,8 +83,8 @@ TEST(dancingLinks, can_solve) {
     };
 
     for (auto &test : test_table) {
-        puzzle grid;
-        puzzle solution;
+        Sudoku::puzzle grid;
+        Sudoku::puzzle solution;
         GenerateBoard(test.puzzle, test.solution, grid, solution);
         bool ret = Sudoku::solve(grid, false);
         EXPECT_TRUE(ret);
@@ -93,8 +93,8 @@ TEST(dancingLinks, can_solve) {
 }
 
 TEST(dancingLinks, generate_then_solve) {
-    puzzle grid = Sudoku::generate(0);
-    puzzle solved = grid;
+    Sudoku::puzzle grid = Sudoku::generate(0);
+    Sudoku::puzzle solved = grid;
     Sudoku::solve(solved, false);
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 0; j++) {
@@ -106,7 +106,7 @@ TEST(dancingLinks, generate_then_solve) {
 
 TEST(dancingLinks, generate_numb_of_unknowns) {
     for (auto unknowns = 1; unknowns < 60; unknowns++) {
-        puzzle grid = Sudoku::generate(unknowns);
+        Sudoku::puzzle grid = Sudoku::generate(unknowns);
         auto un = 0;
         for (auto &i : grid) {
             for (auto &j : i) {
@@ -122,7 +122,7 @@ TEST(dancingLinks, generate_numb_of_unknowns) {
 
 TEST(dancingLinks, generate_not_too_slow) {
     for (auto i = 0; i < 0xFF; i++) {
-        puzzle grid = Sudoku::generate();
+        Sudoku::puzzle grid = Sudoku::generate();
         printBoard(grid, std::cout);
     }
 }

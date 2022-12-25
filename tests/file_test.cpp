@@ -33,8 +33,8 @@ void FileTest::runTests(file_test_t *test_table, size_t size) {
  * @param array c style array that should be transformed
  * @return puzzle
  */
-puzzle buildPuzzle(int array[9][9]) {
-    puzzle ret;
+Sudoku::puzzle buildPuzzle(int array[9][9]) {
+    Sudoku::puzzle ret;
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
             ret[i][j] = array[i][j];

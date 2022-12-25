@@ -8,4 +8,5 @@ namespace Sudoku {
     bool solve(puzzle &grid);
     puzzle generate(int unknowns);
     puzzle generate();
+    bool isSafe(puzzle grid, int row, int col, int val);
 }

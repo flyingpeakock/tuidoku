@@ -1,10 +1,15 @@
-#include "Solver.h"
 #include "Board.h"
 #include "config.h"
 #include <iostream>
 #include <sstream>
 
-SimpleBoard::SimpleBoard(puzzle startGrid) : playGrid(startGrid) {
+SimpleBoard::SimpleBoard(Sudoku::puzzle startGrid) : playGrid(startGrid) {
+}
+
+SimpleBoard::SimpleBoard(std::string gridString) {
+    for (auto i = 0; i < Sudoku::SIZE * Sudoku::SIZE; i++) {
+        playGrid[i / Sudoku::SIZE][i % Sudoku::SIZE] = gridString[i] - '0';
+    }
 }
 
 void SimpleBoard::startPlaying() {
@@ -19,7 +24,7 @@ bool SimpleBoard::isPlaying() const{
     return playing;
 }
 
-const puzzle &SimpleBoard::getPlayGrid() const{
+const Sudoku::puzzle &SimpleBoard::getPlayGrid() const{
     return playGrid;
 }
 
@@ -39,7 +44,7 @@ bool SimpleBoard::insert(char val, int row, int col) {
     return false;
 }
 
-void SimpleBoard::printBoard(puzzle grid, std::ostream &stream) const{
+void SimpleBoard::printBoard(Sudoku::puzzle grid, std::ostream &stream) const{
     std::stringstream boardStream;
     boardStream << TOPROW << '\n';
     for (auto i = 0; i < 3; i++) {
@@ -77,16 +82,30 @@ bool SimpleBoard::isEmpty(int row, int col) const{
     return playGrid[row][col] == 0;
 }
 
-Board::Board(puzzle startGrid,
-             puzzle finishGrid
+Board::Board(Sudoku::puzzle startGrid,
+             Sudoku::puzzle finishGrid
             ) : SimpleBoard(startGrid),
                 startGrid(startGrid), 
                 solutionGrid(finishGrid) {
-    for (auto &array : pencilMarks) {
-        for (auto &marks : array) {
-            marks = 0;
+    pencilMarks = {};
+    for (auto i = 1; i <= 9; i++) {
+        count.insert({i, 0});
+    }
+
+    for (auto i = 0; i < 9; i++) {
+        for (auto j = 0; j < 9; j++) {
+            int val = startGrid[i][j];
+            if (val != 0) {
+                count[val]++;
+            }
         }
     }
+}
+
+Board::Board(Sudoku::puzzle startGrid) : SimpleBoard(startGrid), startGrid(startGrid) {
+    pencilMarks = {};
+    solutionGrid = startGrid;
+    Sudoku::solve(solutionGrid);
 
     for (auto i = 1; i <= 9; i++) {
         count.insert({i, 0});
@@ -102,6 +121,24 @@ Board::Board(puzzle startGrid,
     }
 }
 
+Board::Board(std::string gridString) : SimpleBoard(gridString) {
+    startGrid = playGrid;
+    solutionGrid = playGrid;
+    Sudoku::solve(solutionGrid);
+
+    for (auto i = 1; i <= 9; i++) {
+        count.insert({i, 0});
+    }
+
+    for (auto i = 0; i < 9; i++) {
+        for (auto j = 0; j < 9; j++) {
+            int val = startGrid[i][j];
+            if (val != 0) {
+                count[val]++;
+            }
+        }
+    }
+}
 
 bool Board::isWon(){
     if (playGrid == solutionGrid) {
@@ -115,11 +152,11 @@ const std::array<std::array<std::uint16_t, 9>, 9> &Board::getPencilMarks() {
     return pencilMarks;
 }
 
-const puzzle &Board::getStartGrid() const{
+const Sudoku::puzzle &Board::getStartGrid() const{
     return startGrid;
 }
 
-const puzzle &Board::getSolution() const{
+const Sudoku::puzzle &Board::getSolution() const{
     return solutionGrid;
 }
 
@@ -161,7 +198,7 @@ void Board::autoPencil() {
             auto &marks = pencilMarks[i][j];
             marks = 0;
             for (unsigned char k = START_CHAR; k < START_CHAR + 9; k++) {
-                if (Solver::isSafe(playGrid, i, j, k - START_CHAR + 1)) {
+                if (Sudoku::isSafe(playGrid, i, j, k - START_CHAR + 1)) {
                     marks |= (1 << (k - START_CHAR));
                 }
             }
@@ -264,7 +301,7 @@ void Board::swapStartGrid(){
     startGrid = playGrid;
 }
 
-void Board::swapStartGrid(puzzle solution){
+void Board::swapStartGrid(Sudoku::puzzle solution){
     startGrid = playGrid;
     solutionGrid = solution;
 }

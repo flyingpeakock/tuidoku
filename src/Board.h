@@ -4,8 +4,7 @@
 #include <map>
 #include <iosfwd>
 #include <cstdint>
-
-typedef std::array<std::array<int, 9>, 9> puzzle;
+#include "Sudoku/Sudoku.h"
 
 class SimpleBoard {
     protected:
@@ -19,18 +18,19 @@ class SimpleBoard {
                 return row == r.row && col == r.col;
             }
         };
-        puzzle playGrid;
+        Sudoku::puzzle playGrid;
         bool playing;
-        void printBoard(puzzle grid, std::ostream &stream) const;
+        void printBoard(Sudoku::puzzle grid, std::ostream &stream) const;
 
     public:
-        SimpleBoard(puzzle startGrid);
+        SimpleBoard(Sudoku::puzzle startGrid);
+        SimpleBoard(std::string gridString);
         void startPlaying();
         void stopPlaying();
         bool isPlaying() const;
         bool isEmpty(int row, int col) const;
 
-        const puzzle &getPlayGrid() const;
+        const Sudoku::puzzle &getPlayGrid() const;
 
         virtual bool insert(char val, int row, int col);
 
@@ -40,8 +40,8 @@ class SimpleBoard {
 
 class Board : public SimpleBoard {
     private:
-        puzzle startGrid;
-        puzzle solutionGrid;
+        Sudoku::puzzle startGrid;
+        Sudoku::puzzle solutionGrid;
 
         std::array<std::array<std::uint16_t, 9>, 9> pencilMarks;
         std::array<std::array<std::map<cell, char>, 9>, 9> pencilHistory;
@@ -52,13 +52,15 @@ class Board : public SimpleBoard {
         void restoreMarks(int row, int col);
 
     public:
-        Board(puzzle startGrid, puzzle finishGrid);
+        Board(Sudoku::puzzle startGrid);
+        Board(Sudoku::puzzle startGrid, Sudoku::puzzle finishGrid);
+        Board(std::string gridString);
         bool isWon();
         bool isRemaining(char val) const;
 
         const std::array<std::array<std::uint16_t, 9>, 9> &getPencilMarks();
-        const puzzle &getStartGrid() const;
-        const puzzle &getSolution() const;
+        const Sudoku::puzzle &getStartGrid() const;
+        const Sudoku::puzzle &getSolution() const;
 
         bool insert(char val, int row, int col);
         bool pencil(const char val, int row, int col);
@@ -71,5 +73,5 @@ class Board : public SimpleBoard {
         void printStart() const;
 
         void swapStartGrid();
-        void swapStartGrid(puzzle solution);
+        void swapStartGrid(Sudoku::puzzle solution);
 };

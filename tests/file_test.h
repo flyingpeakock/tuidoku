@@ -20,4 +20,4 @@ class FileTest : public ::testing::Test {
         void runTests(file_test_t *test_table, size_t size);
 };
 
-puzzle buildPuzzle(int array[9][9]);
+Sudoku::puzzle buildPuzzle(int array[9][9]);

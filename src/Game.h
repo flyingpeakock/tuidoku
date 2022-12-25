@@ -2,7 +2,7 @@
 
 #include "Window.h"
 #include "Board.h"
-#include "Solver.h"
+#include "Sudoku/Sudoku.h"
 #include "HumanSolve.h"
 #include <vector>
 
@@ -25,7 +25,6 @@ class Controller {
 class InteractiveSolver : public Controller {
     private:
         SolveWindow *window;
-        Solver solver;
         void solve();
     public:
         InteractiveSolver(SolveWindow *win);
