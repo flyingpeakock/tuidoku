@@ -75,6 +75,16 @@ bool backTrack(int depth, int &solutions, DancingLink *root, Sudoku::puzzle &gri
 static void createPuzzle(int depth, Sudoku::puzzle &grid, DancingLink **solutionSet);
 
 /**
+ * @brief calculate the constraint columns for a given row, columns and number
+ * 
+ * @param columns array that gets filled with the correct values
+ * @param row 0-(SIZE - 1)
+ * @param col 0-(SIZE - 1)
+ * @param num 0-(SIZE - 1)
+ */
+static void calculateConstraintColumns(int columns[4], int row, int col, int num);
+
+/**
  * @brief Solves a sudoku puzzle
  * 
  * @param grid puzzle to be solved
@@ -116,13 +126,8 @@ bool Sudoku::solve(puzzle &grid, bool randomize) {
     for (auto row = 0; row < SIZE; row++) {
         for (auto col = 0; col < SIZE; col++) {
             for (auto num = 0; num < SIZE; num++) {
-                int box_idx = BOX_SIZE * (row / BOX_SIZE) + (col / BOX_SIZE);
-
                 int constraints[4];
-                constraints[0] = (row * SIZE) + col;
-                constraints[1] = (SIZE * SIZE) + (row * SIZE) + num;
-                constraints[2] = (SIZE * SIZE) + (SIZE * SIZE) + (col * SIZE) + num;
-                constraints[3] = (SIZE * SIZE) + (SIZE * SIZE) + (SIZE * SIZE) + (box_idx * SIZE) + num;
+                calculateConstraintColumns(constraints, row, col, num);
 
                 current = &buffer[buffer_idx + 3]; // since all rows have 4 columns we can start the loop here
                 for (auto i = 0; i < 4; i++) {
@@ -165,14 +170,8 @@ bool Sudoku::solve(puzzle &grid, bool randomize) {
         for (auto col = 0; col < grid[0].size(); col++) {
             if (grid[row][col] == 0) continue;
             auto num = grid[row][col] - 1;
-            int box_idx = BOX_SIZE * (row / BOX_SIZE) + (col / BOX_SIZE);
-
             int constraints[4];
-            constraints[0] = (row * SIZE) + col;
-            constraints[1] = (SIZE * SIZE) + (row * SIZE) + num;
-            constraints[2] = (SIZE * SIZE) + (SIZE * SIZE) + (col * SIZE) + num;
-            constraints[3] = (SIZE * SIZE) + (SIZE * SIZE) + (SIZE * SIZE) + (box_idx * SIZE) + num;
-
+            calculateConstraintColumns(constraints, row, col, num);
             for (auto &con : constraints) {
                 colHeaders[con].cover();
             }
@@ -264,4 +263,13 @@ static DancingLink *smallestColumn(DancingLink *root) {
         }
     }
     return ret;
+}
+
+static void calculateConstraintColumns(int columns[4], int row, int col, int num) {
+    const int box_idx = BOX_SIZE * (row / BOX_SIZE) + (col / BOX_SIZE);
+    const int constraintSection = Sudoku::SIZE * Sudoku::SIZE;
+    columns[0] = (row * Sudoku::SIZE) + col;
+    columns[1] = constraintSection + (row * Sudoku::SIZE) + num;
+    columns[2] = (constraintSection * 2) + (col * Sudoku::SIZE) + num;
+    columns[3] = (constraintSection * 3) + (box_idx * Sudoku::SIZE) + num;
 }
