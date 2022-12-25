@@ -13,6 +13,7 @@ Sudoku::puzzle Sudoku::generate(int unknown) {
     if (unknown < 0) {
         unknown = 0;
     }
+    puzzle grid = {};
 
     struct Cell
     {
@@ -21,14 +22,15 @@ Sudoku::puzzle Sudoku::generate(int unknown) {
     };
 
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    /*
     std::array<int, 9> firstRow;
     for (auto i = 1; i <= 9; i++) {
         firstRow[i - 1] = i;
     }
     shuffle(firstRow.begin(), firstRow.end(), std::default_random_engine(seed));
-    puzzle grid = {};
     grid[0] = firstRow;
-    solve(grid);
+    */
+    solve(grid, true);
     std::array<Cell, SIZE*SIZE> cells;
     int count = 0;
     for (auto i = 0; i < SIZE; i++) {
@@ -48,7 +50,7 @@ Sudoku::puzzle Sudoku::generate(int unknown) {
         int removed = grid[cell.row][cell.col];
         grid[cell.row][cell.col] = 0;
         copy = grid;
-        bool isUnique = solve(copy);
+        bool isUnique = solve(copy, false);
         if (!isUnique) {
             // Removal made it a bad move, put it back
             grid[cell.row][cell.col] = removed;
@@ -59,6 +61,9 @@ Sudoku::puzzle Sudoku::generate(int unknown) {
         if (unknown != 0 && i >= unknown) {
             break;
         }
+    }
+    if (unknown != 0 && i < unknown) { // Could't find a puzzle with the given unknowns
+        return generate(unknown); // trying again
     }
     return grid;
 }

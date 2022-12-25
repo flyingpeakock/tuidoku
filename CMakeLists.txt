@@ -55,7 +55,7 @@ set(STATS_SOURCES
 add_executable(${PROJECT_NAME} ${SOURCES})
 add_executable(${STATS_EXE} EXCLUDE_FROM_ALL ${STATS_SOURCES})
 
-find_package(GTest REQUIRED)
+find_package(GTest)
 
 set(CURSES_NEED_WIDE true)
 find_package( Curses REQUIRED)
