@@ -119,10 +119,10 @@ bool Sudoku::solve(puzzle &grid, bool randomize) {
                 int box_idx = BOX_SIZE * (row / BOX_SIZE) + (col / BOX_SIZE);
 
                 int constraints[4];
-                constraints[0] = BOX_SIZE * SIZE * num + row;
-                constraints[1] = BOX_SIZE * SIZE * num + SIZE + col;
-                constraints[2] = BOX_SIZE * SIZE * num + 2 * SIZE + box_idx;
-                constraints[3] = BOX_SIZE * SIZE * SIZE + (col + SIZE * row);
+                constraints[0] = (row * SIZE) + col;
+                constraints[1] = (SIZE * SIZE) + (row * SIZE) + num;
+                constraints[2] = (SIZE * SIZE) + (SIZE * SIZE) + (col * SIZE) + num;
+                constraints[3] = (SIZE * SIZE) + (SIZE * SIZE) + (SIZE * SIZE) + (box_idx * SIZE) + num;
 
                 current = &buffer[buffer_idx + 3]; // since all rows have 4 columns we can start the loop here
                 for (auto i = 0; i < 4; i++) {
@@ -168,10 +168,10 @@ bool Sudoku::solve(puzzle &grid, bool randomize) {
             int box_idx = BOX_SIZE * (row / BOX_SIZE) + (col / BOX_SIZE);
 
             int constraints[4];
-            constraints[0] = BOX_SIZE * SIZE * num + row;
-            constraints[1] = BOX_SIZE * SIZE * num + SIZE + col;
-            constraints[2] = BOX_SIZE * SIZE * num + 2 * SIZE + box_idx;
-            constraints[3] = BOX_SIZE * SIZE * SIZE + (col + SIZE * row);
+            constraints[0] = (row * SIZE) + col;
+            constraints[1] = (SIZE * SIZE) + (row * SIZE) + num;
+            constraints[2] = (SIZE * SIZE) + (SIZE * SIZE) + (col * SIZE) + num;
+            constraints[3] = (SIZE * SIZE) + (SIZE * SIZE) + (SIZE * SIZE) + (box_idx * SIZE) + num;
 
             for (auto &con : constraints) {
                 colHeaders[con].cover();
