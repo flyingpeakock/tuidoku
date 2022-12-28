@@ -7,7 +7,7 @@
  * 
  * @param f the function
  */
-void FileTest::setFunc(std::vector<SimpleBoard> (*f)(std::istream&)) {
+void FileTest::setFunc(std::vector<Sudoku::puzzle> (*f)(std::istream&)) {
     func = f;
 }
 
@@ -23,7 +23,7 @@ void FileTest::runTests(file_test_t *test_table, size_t size) {
         file.open((test_table + i)->fileName);
         auto puzzle = func(file);
         ASSERT_GT(puzzle.size(), 0);
-        EXPECT_EQ(puzzle[0].getPlayGrid(), buildPuzzle((test_table + i)->puzzle));
+        EXPECT_EQ(puzzle[0], Sudoku::puzzle((test_table + i)->puzzle));
     }
 }
 
@@ -52,7 +52,7 @@ TEST_F(FileTest, getSDKPuzzle) {
         {
             TEST_PUZZLES_ROOT_DIR "sdkpuzzle1.sdk",
             {
-                {2, 0, 0, 1, 0, 5, 0, 0, 3},
+               {{2, 0, 0, 1, 0, 5, 0, 0, 3},
                 {0, 5, 4, 0, 0, 0, 7, 1, 0},
                 {0, 1, 0, 2, 0, 3, 0, 8, 0},
                 {6, 0, 2, 8, 0, 7, 3, 0, 4},
@@ -60,7 +60,7 @@ TEST_F(FileTest, getSDKPuzzle) {
                 {1, 0, 5, 3, 0, 9, 8, 0, 6},
                 {0, 2, 0, 7, 0, 1, 0, 6, 0},
                 {0, 8, 1, 0, 0, 0, 2, 4, 0},
-                {7, 0, 0, 4, 0, 2, 0, 0, 1}
+                {7, 0, 0, 4, 0, 2, 0, 0, 1}}
             }
         },
     };
@@ -79,7 +79,7 @@ TEST_F(FileTest, getSDMPuzzle) {
         {
             TEST_PUZZLES_ROOT_DIR "sdmpuzzle1.sdm",
             {
-                {0, 1, 6, 4, 0, 0, 0, 0, 0},
+               {{0, 1, 6, 4, 0, 0, 0, 0, 0},
                 {2, 0, 0, 0, 0, 9, 0, 0, 0},
                 {4, 0, 0, 0, 0, 0, 0, 6, 2},
                 {0, 7, 0, 2, 3, 0, 1, 0, 0},
@@ -87,7 +87,7 @@ TEST_F(FileTest, getSDMPuzzle) {
                 {0, 0, 3, 0, 8, 7, 0, 4, 0},
                 {9, 6, 0, 0, 0, 0, 0, 0, 5},
                 {0, 0, 0, 8, 0, 0, 0, 0, 7},
-                {0, 0, 0, 0, 0, 6, 8, 2, 0}
+                {0, 0, 0, 0, 0, 6, 8, 2, 0}}
             }
         },
     };
@@ -101,7 +101,7 @@ TEST_F(FileTest, getSSPuzzle) {
         {
             TEST_PUZZLES_ROOT_DIR "sspuzzle1.ss",
             {
-                {1, 0, 0, 0, 0, 0, 7, 0, 0},
+               {{1, 0, 0, 0, 0, 0, 7, 0, 0},
                 {0, 2, 0, 0, 0, 0, 5, 0, 0},
                 {6, 0, 0, 3, 8, 0, 0, 0, 0},
                 {0, 7, 8, 0, 0, 0, 0, 0, 0},
@@ -109,13 +109,13 @@ TEST_F(FileTest, getSSPuzzle) {
                 {0, 0, 0, 0, 0, 0, 1, 4, 0},
                 {0, 0, 0, 0, 2, 5, 0, 0, 9},
                 {0, 0, 3, 0, 0, 0, 0, 6, 0},
-                {0, 0, 4, 0, 0, 0, 0, 0, 2}
+                {0, 0, 4, 0, 0, 0, 0, 0, 2}}
             }
         },
         {
             TEST_PUZZLES_ROOT_DIR "sspuzzle2.ss",
             {
-                {0, 6, 0, 1, 0, 4, 0, 5, 0},
+               {{0, 6, 0, 1, 0, 4, 0, 5, 0},
                 {0, 0, 8, 3, 0, 5, 6, 0, 0},
                 {2, 0, 0, 0, 0, 0, 0, 0, 1},
                 {8, 0, 0, 4, 0, 7, 0, 0, 6},
@@ -123,7 +123,7 @@ TEST_F(FileTest, getSSPuzzle) {
                 {7, 0, 0, 9, 0, 1, 0, 0, 4},
                 {5, 0, 0, 0, 0, 0, 0, 0, 2},
                 {0, 0, 7, 2, 0, 6, 9, 0, 0},
-                {0, 4, 0, 5, 0, 8, 0, 7, 0}
+                {0, 4, 0, 5, 0, 8, 0, 7, 0}}
             }
         },
     };

@@ -1,22 +1,54 @@
-#include "Game.h"
-#include "File.h"
-#include "Arguments.h"
 #include "Sudoku/Sudoku.h"
-#include "config.h"
 #include "HumanSolve.h"
+#include "Tui/Tui.h"
+#include "Play.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <unistd.h>
+#include <random>
 
-void generate(int, bool, std::string);
-void solve(bool, std::string);
-void play(bool, std::string, int, bool);
 void startCurses();
 void endCurses();
 WINDOW * createWindow();
 
+WINDOW *initialize_tui();
+Tui::main_menu_choices mainMenu(WINDOW *parentWin);
+void play(WINDOW *mainWindow);
+void solve(WINDOW *mainWindow);
+void generate(WINDOW *mainWindow);
+
 int main(int argc, char *argv[]) {
+    SCREEN *screen = Tui::init_curses();
+    WINDOW *main_window = initialize_tui();
+    if (!main_window) {
+        std::cout << "This terminal does not support color." << std::endl;
+        return 1;
+    }
+    while (true) {
+        Tui::addMessage(main_window, Tui::title);
+        Tui::main_menu_choices choice = mainMenu(main_window);
+        Tui::printOutline(main_window);
+        switch (choice) {
+            case Tui::PLAY:
+                play(main_window);
+                break;
+            case Tui::SOLVE:
+                solve(main_window);
+                break;
+            case Tui::GENERATE:
+                generate(main_window);
+                break;
+            case Tui::EXIT:
+            Tui::end_curses(screen, main_window);
+                return 0;
+            default:
+                break;
+        }
+    }
+    Tui::end_curses(screen, main_window);
+    return 0;
+    /*
     arguments args = arguments(argc, argv);
     if (args.printHelp()) {
         return 0;
@@ -26,129 +58,183 @@ int main(int argc, char *argv[]) {
     }
     switch(args.getFeature()) {
         case feature::Generate:
-        generate(args.getArgInt(), args.fileArgSet(), args.getFileName());
+        //generate(args.getArgInt(), args.fileArgSet(), args.getFileName());
         break;
         case feature::Solve:
-        solve(args.fileArgSet(), args.getFileName());
+        //solve(args.fileArgSet(), args.getFileName());
         break;
         case feature::Play:
-        play(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
+        //play(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
         //test(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
         break;
     }
+    */
 }
 
-void startCurses() {
-    setlocale(LC_ALL, ""),
-    initscr();
-}
-
-void endCurses() {
-    endwin();
-}
-
-WINDOW * createWindow() {
-    int maxY, maxX;
-    getmaxyx(stdscr, maxY, maxX);
-    WINDOW * ret = newwin(maxY, maxX, 0, 0);
-    refresh();
+WINDOW *initialize_tui() {
+    WINDOW * ret = Tui::createMainWindow();
+    if (!ret) {
+        return ret;
+    }
+    Tui::printOutline(ret);
     return ret;
 }
 
-Board makeNotSimpleBoard(SimpleBoard &board) {
-    Sudoku::puzzle grid = board.getPlayGrid();
-    std::stringstream gridStringStream;
-    for (size_t i = 0; i < grid.size(); i++) {
-        for (size_t j = 0; j < grid[i].size(); j++) {
-            gridStringStream << grid[i][j];
+Tui::main_menu_choices mainMenu(WINDOW *parentWin) {
+    std::vector<Tui::MenuItem<Tui::main_menu_choices>> mainMenu = {
+        {"Play", '1', Tui::PLAY},
+        {"Solve", '2', Tui::SOLVE},
+        {"Generate", '3', Tui::GENERATE},
+        {"Exit", '9', Tui::EXIT},
+    };
+
+    WINDOW *menuWin = Tui::printMenu<Tui::main_menu_choices>(parentWin, mainMenu, Tui::title);
+    Tui::main_menu_choices choice = Tui::handleMenu<Tui::main_menu_choices>(menuWin, mainMenu);
+    delwin(menuWin);
+    return choice;
+}
+
+void play(WINDOW *mainWindow) {
+    // Will be based on number of unknowns for now
+    std::vector<Tui::MenuItem<Sudoku::difficulty>> playMenu = {
+        {"Any", '1', Sudoku::ANY},
+        {"Beginner", '2', Sudoku::BEGINNER},
+        {"Easy", '3', Sudoku::EASY},
+        {"Normal", '4', Sudoku::MEDIUM},
+        {"Difficult", '5', Sudoku::HARD},
+        {"Expert", '6', Sudoku::EXPERT},
+    };
+
+    WINDOW *menuWin = Tui::printMenu<Sudoku::difficulty>(mainWindow, playMenu, "Select difficulty");
+    Sudoku::difficulty choice = Tui::handleMenu<Sudoku::difficulty>(menuWin, playMenu);
+    delwin(menuWin);
+    Tui::printOutline(mainWindow);
+    wrefresh(mainWindow);
+
+    Sudoku::puzzle grid;
+    if (choice == Sudoku::ANY) {
+        grid = Sudoku::generate();
+    }
+    else {
+        int min, max;
+        switch (choice) {
+            case Sudoku::BEGINNER:
+                min = 30;
+                max = 40;
+                break;
+            case Sudoku::EASY:
+                min = 40;
+                max = 45;
+                break;
+            case Sudoku::MEDIUM:
+                min = 45;
+                max = 50;
+                break;
+            case Sudoku::HARD:
+                min = 50;
+                max = 56;
+                break;
+            case Sudoku::EXPERT:
+                min = 56;
+                max = 60;
+                break;
         }
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> distrib(min, max);
+        grid = Sudoku::generate(distrib(gen));
     }
-    Sudoku::puzzle sol = grid;
-    Sudoku::solve(sol);
-    return Board(grid, sol);
-}
-
-Board selectBoard(std::vector<SimpleBoard> boards) {
-    if (boards.size() <= 1) {
-        return makeNotSimpleBoard(boards[0]);
+    try {
+        Play game(grid, mainWindow);
+        game.play();
     }
-    int maxY, maxX;
-    getmaxyx(stdscr, maxY, maxX);
-    SelectionWindow *win = new SelectionWindow(boards, createWindow());
-    Selection game(win);
-    int index = game.mainLoop();
-    delete win;
-
-    return makeNotSimpleBoard(boards[index]);
-}
-
-
-void generate(int empty, bool file, std::string fileName) {
-    //Generator gen = (empty) ? Generator(empty) : Generator();
-    SimpleBoard board = Sudoku::generate(empty);
-    if (file) {
-        std::ofstream fileStream;
-        fileStream.open(fileName);
-        board.printBoard(fileStream);
-        fileStream.close();
+    catch (const std::invalid_argument& e) {
         return;
     }
-    board.printBoard();
-    return;
 }
 
-void solve(bool file, std::string fileName) {
-    if (file) {
-        selectBoard(file::getPuzzle(fileName.c_str())).printSolution();
-        return;
+void solve(WINDOW *window) {
+    Tui::addMessage(window, "Insert numbers until the puzzle is unique");
+    Sudoku::puzzle grid = {};
+    Sudoku::puzzle solved;
+    int row = 0;
+    int col = 0;
+    bool isUnique = false;
+    while (!isUnique){
+        Tui::printPuzzle(window, grid, A_NORMAL);
+        Tui::highlightCell(window, row, col);
+        int c = wgetch(window);
+        switch (c) {
+            case KEY_UP:
+            case 'k':
+                row--;
+                break;
+            case KEY_DOWN:
+            case 'j':
+                row++;
+                break;
+            case KEY_LEFT:
+            case 'h':
+                col--;
+                break;
+            case KEY_RIGHT:
+            case 'l':
+                col++;
+                break;
+            case KEY_BACKSPACE:
+            case ' ':
+                grid[row][col] = 0;
+            case 'q':
+            case 'Q':
+            case 27:
+                return;
+            default:
+                if (c >= '0' && c <= '9') {
+                    grid[row][col] = c - '0';
+                }
+                break;
+        }
+        if (col < 0) {
+            col = Sudoku::SIZE - 1;
+        }
+        if (col >= Sudoku::SIZE) {
+            col = 0;
+        }
+        if (row < 0) {
+            row = Sudoku::SIZE - 1;
+        }
+        if (row >= Sudoku::SIZE) {
+            row = 0;
+        }
+        solved = grid;
+        isUnique = Sudoku::solve(solved);
     }
-    else if (fileName != "404" && !fileName.empty()) {
-        selectBoard(file::getStringPuzzle(fileName.c_str())).printSolution();
-        return;
-    }
-    std::ostringstream gridString;
-    for (auto i = 0; i < 81; i++) {
-        gridString << '0';
-    }
-    //Board b = Generator(gridString.str().c_str()).createBoard();;
-    Board b = Board(gridString.str());
-    startCurses();
-    SolveWindow window = SolveWindow(&b, createWindow());
-    InteractiveSolver game(&window);
-    game.mainLoop();
-    endCurses();
-    std::cout << "Puzzle:\n";
-    b.printStart();
-    std::cout << "Solution:\n";
-    b.printSolution();
-    std::cout << std::endl;
-    return;
+    Tui::highlightCell(window, row, col);
+    Tui::printPuzzle(window, solved, A_NORMAL);
+    Tui::addMessage(window, "Solved!");
+    getch();
 }
 
-Board createBoard(bool file, std::string fileName, int empty) {
-    if (file) {
-        return selectBoard(file::getPuzzle(fileName.c_str()));
+void generate(WINDOW *mainWindow) {
+    int numb_of_puzzles = Tui::userInputBox(mainWindow, "No. of puzzles:");
+    Tui::printOutline(mainWindow);
+    Tui::addMessage(mainWindow, "Printing puzzles to stdout");
+    Sudoku::puzzle grid = {};
+    for (auto i = 0; i < numb_of_puzzles; i++) {
+        grid = Sudoku::generate();
+        Tui::printPuzzle(mainWindow, grid, A_UNDERLINE);
+        std::stringstream gridStrstream;
+        for (auto &r : grid) {
+            for (auto &n : r) {
+                gridStrstream << n;
+            }
+        }
+        def_prog_mode();
+        endwin();
+        std::cout << gridStrstream.str() << '\n';
+        reset_prog_mode();
+        wrefresh(mainWindow);
+        Tui::printOutline(mainWindow);
     }
-    if (fileName != "404" && !fileName.empty()) {
-        // no file attempting to get string board from fileName
-        return selectBoard(file::getStringPuzzle(fileName.c_str()));
-    }
-    return Board(Sudoku::generate(empty));
-}
-
-void play(bool file, std::string fileName, int empty, bool big) {
-    startCurses();
-    Board b = createBoard(file, fileName, empty);
-    Window *win = big ? new BigWindow(&b, createWindow()) : new Window(&b, createWindow());
-    Game game(win, big);
-    int playTime = game.mainLoop();
-    delete win;
-    endCurses();
-    std::cout << "Puzzle:\n";
-    b.printStart();
-    std::cout << "\nSolution:\n";
-    b.printSolution();
-    if (playTime > 0) {
-        std::cout << "\nSeconds played: " << playTime << std::endl;
-    }
+    Tui::printPuzzle(mainWindow, grid, A_UNDERLINE);
 }

@@ -24,3 +24,24 @@ bool Sudoku::isSafe(puzzle grid, int row, int col, int num) {
 
     return true; // All checks passed
 }
+
+Sudoku::puzzle Sudoku::fromString(std::string string) {
+    if (string.size() != Sudoku::SIZE * Sudoku::SIZE)
+        throw std::invalid_argument("Not the correct number of characters to create a sudoku board");
+
+    Sudoku::puzzle ret;
+    int row = 0;
+    int col = 0;
+    for (auto i = 0; i < string.size(); i++) {
+        if (string[i] > '9' || string[i] < '0') {
+            throw std::invalid_argument("Invalid character in puzzle");
+        }
+        ret[row][col] = string[i] - '0';
+        col++;
+        if (col == 9) {
+            col = 0;
+            row++;
+        }
+    }
+    return ret;
+}

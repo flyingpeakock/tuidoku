@@ -1,5 +1,5 @@
 #pragma once
-
+#include "../src/Play.h"
 #include "../src/HumanSolve.h"
 
 struct single_digit_human_solve_t {

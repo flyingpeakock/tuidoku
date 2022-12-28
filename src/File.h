@@ -1,13 +1,14 @@
 #pragma once
-#include "Board.h"
+#include "Sudoku/Sudoku.h"
 #include <vector>
+#include <iosfwd>
 
 namespace file {
-    std::vector<SimpleBoard> getSDKPuzzle(std::istream &file);
-    std::vector<SimpleBoard> getXMLPuzzle(std::istream &file);
-    std::vector<SimpleBoard> getSDMPuzzle(std::istream &file);
-    std::vector<SimpleBoard> getSSPuzzle(std::istream &file);
-    std::vector<SimpleBoard> getPuzzle(const char *fileName);
-    std::vector<SimpleBoard> getStringPuzzle(const char *puzzleString);
-    std::vector<SimpleBoard> getTuidokuPuzzle(std::istream &file);
+    std::vector<Sudoku::puzzle> getSDKPuzzle(std::istream &file);
+    std::vector<Sudoku::puzzle> getXMLPuzzle(std::istream &file);
+    std::vector<Sudoku::puzzle> getSDMPuzzle(std::istream &file);
+    std::vector<Sudoku::puzzle> getSSPuzzle(std::istream &file);
+    std::vector<Sudoku::puzzle> getPuzzle(const char *fileName);
+    std::vector<Sudoku::puzzle> getStringPuzzle(const char *puzzleString);
+    std::vector<Sudoku::puzzle> getTuidokuPuzzle(std::istream &file);
 }

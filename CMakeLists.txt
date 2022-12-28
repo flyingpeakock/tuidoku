@@ -11,27 +11,26 @@ set(STATS_EXE tuidoku_run_stats)
 project(${PROJECT_NAME} C CXX)
 
 set(SOURCES
-    src/Arguments.cpp
-    src/Board.cpp
     src/File.cpp
-    src/Game.cpp
     src/HumanSolve.cpp
     src/main.cpp
     src/Stopwatch.cpp
-    src/Window.cpp
     src/Sudoku/Generate.cpp
     src/Sudoku/Solve.cpp
     src/Sudoku/Sudoku.cpp
+    src/Tui/Tui.cpp
+    src/Play.cpp
 )
 
 set(TEST_SOURCES
     # Add files to be tested here
     src/File.cpp
-    src/Board.cpp
     src/HumanSolve.cpp
     src/Sudoku/Solve.cpp
     src/Sudoku/Generate.cpp
     src/Sudoku/Sudoku.cpp
+    src/Play.cpp
+    src/Tui/Tui.cpp
 
     # Add unit tests here
     tests/file_test.cpp
@@ -41,7 +40,6 @@ set(TEST_SOURCES
 
 set(STATS_SOURCES
     # Add project source files here
-    src/Board.cpp
     src/HumanSolve.cpp
 
     # Add statistics source files here
@@ -72,7 +70,7 @@ add_executable(${UNIT_TESTS} ${TEST_SOURCES})
 add_compile_definitions(TEST_PUZZLES_ROOT_DIR=\"${PROJECT_SOURCE_DIR}/tests/puzzles/\")
 target_link_libraries(${UNIT_TESTS}
     # PRIVATE Threads::Threads
-    # ${CURSES_LIBRARIES}
+    ${CURSES_LIBRARIES}
     GTest::gtest_main
 )
 include(GoogleTest)

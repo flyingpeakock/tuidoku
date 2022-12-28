@@ -1,15 +1,15 @@
 #pragma once
-#include "Board.h"
-#include "config.h"
+#include "Sudoku/Sudoku.h"
+#include "Play.h"
 #include <string>
 
 struct Move {
-    char val;
-    char row;
-    char col;
-    bool (Board::*move)(char, int, int);
-    bool operator()(Board *board) {
-        if (move == NULL) return false;
+    int val;
+    int row;
+    int col;
+    void (Play::*move)(int, int, int);
+    void operator()(Play *board) {
+        if (move == NULL) return;
         return (board->*move)(val, row, col);
     }
 };
@@ -21,14 +21,14 @@ struct Hint {
     std::vector<Move> moves;
 };
 
-Hint solveHuman(Board &board);
-bool findNakedSingles(Board &board, const std::uint16_t num, Move *move);
-bool findHiddenSingles(Board &board, const std::uint16_t num, Move *move);
-bool findPointingBox(Board &board, char i_start, char j_start, std::vector<Move> &moves);
-bool findLockedCandidates(Board &board, std::vector<Move> &moves);
-bool findHidden(Board &board, const std::uint16_t num, std::vector<Move> &moves);
-bool findNaked(Board &board, const std::uint16_t num, std::vector<Move> &moves);
-bool findBug(Board &board, Move *move);
-bool findXwing(Board &board, const std::uint16_t num, std::vector<Move> &moves);
-bool findUniqueRectangle(Board &board, const std::uint16_t num, std::vector<Move> &moves);
-bool findChainOfPairs(Board &board, const std::uint16_t num, std::vector<Move> &move);
+Hint solveHuman(Play &board);
+bool findNakedSingles(Play &board, const std::uint16_t num, Move *move);
+bool findHiddenSingles(Play &board, const std::uint16_t num, Move *move);
+bool findPointingBox(Play &board, int i_start, int j_start, std::vector<Move> &moves);
+bool findLockedCandidates(Play &board, std::vector<Move> &moves);
+bool findHidden(Play &board, const std::uint16_t num, std::vector<Move> &moves);
+bool findNaked(Play &board, const std::uint16_t num, std::vector<Move> &moves);
+bool findBug(Play &board, Move *move);
+bool findXwing(Play &board, const std::uint16_t num, std::vector<Move> &moves);
+bool findUniqueRectangle(Play &board, const std::uint16_t num, std::vector<Move> &moves);
+bool findChainOfPairs(Play &board, const std::uint16_t num, std::vector<Move> &move);
