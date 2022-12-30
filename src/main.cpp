@@ -25,10 +25,11 @@ int main(int argc, char *argv[]) {
         std::cout << "This terminal does not support color." << std::endl;
         return 1;
     }
+    Tui::printOutline(main_window);
+    wrefresh(main_window);
     while (true) {
         Tui::addMessage(main_window, Tui::title);
         Tui::main_menu_choices choice = mainMenu(main_window);
-        Tui::printOutline(main_window);
         switch (choice) {
             case Tui::PLAY:
                 play(main_window);
@@ -48,27 +49,6 @@ int main(int argc, char *argv[]) {
     }
     Tui::end_curses(screen, main_window);
     return 0;
-    /*
-    arguments args = arguments(argc, argv);
-    if (args.printHelp()) {
-        return 0;
-    }
-    if (args.shouldExit()) {
-        return 1;
-    }
-    switch(args.getFeature()) {
-        case feature::Generate:
-        //generate(args.getArgInt(), args.fileArgSet(), args.getFileName());
-        break;
-        case feature::Solve:
-        //solve(args.fileArgSet(), args.getFileName());
-        break;
-        case feature::Play:
-        //play(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
-        //test(args.fileArgSet(), args.getFileName(), args.getArgInt(), args.bigBoard());
-        break;
-    }
-    */
 }
 
 WINDOW *initialize_tui() {

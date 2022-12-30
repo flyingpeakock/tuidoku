@@ -73,8 +73,6 @@ WINDOW *Tui::printMenu(WINDOW *parentWin, std::vector<MenuItem<T>> items, std::s
     wattroff(win, COLOR_MENU);
 
     overlay(win, parentWin);
-    wrefresh(win);
-    wrefresh(parentWin);
     return win;
 }
 

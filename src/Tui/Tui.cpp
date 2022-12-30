@@ -60,7 +60,7 @@ WINDOW *Tui::createMainWindow() {
 void Tui::printOutline(WINDOW * win) {
     int startHeight = 0;
     int startCol = 0;
-    wclear(win);
+    werase(win);
     wattron(win, A_BOLD);
     mvwprintw(win, startHeight++, startCol, topRowString.c_str());
     for (auto i = 0; i < 3; i++) {
@@ -81,7 +81,6 @@ void Tui::printOutline(WINDOW * win) {
     }
     mvwprintw(win, startHeight, startCol, botRowString.c_str());
     wattroff(win, A_BOLD);
-    wrefresh(win);
 }
 
 void Tui::addMessage(WINDOW *win, std::string message) {
@@ -94,7 +93,6 @@ void Tui::addMessage(WINDOW *win, std::string message) {
         waddch(win, ' ');
     }
     mvwprintw(win, maxY - 1, 1, message.c_str());
-    wrefresh(win);
 }
 
 void Tui::printPuzzle(WINDOW *win, Sudoku::puzzle grid, int attr) {
@@ -207,8 +205,6 @@ void Tui::highlightCell(WINDOW *win, int current_row, int current_col) {
 
     prev_row = current_row;
     prev_col = current_col;
-
-    wrefresh(win);
 }
 
 int Tui::userInputBox(WINDOW *win, std::string text) {
@@ -241,8 +237,6 @@ int Tui::userInputBox(WINDOW *win, std::string text) {
     mvwprintw(inputBox, 1, 1, " %s ", text.c_str());
     wchgat(inputBox, width - text.size() - 4, A_BOLD, 2, NULL);
     overlay(inputBox, win);
-    wrefresh(inputBox);
-    wrefresh(win);
     
     std::string ret = "";
     wattron(inputBox, COLOR_MENU_SELECT);

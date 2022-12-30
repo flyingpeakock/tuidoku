@@ -87,6 +87,8 @@ void Play::play() {
             row_idx = 0;
         }
     }
+    printBoard();
+    getch();
 }
 
 void Play::printBoard() {
