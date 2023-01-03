@@ -14,7 +14,7 @@ TEST(HumanSolve_test, findNakedSingle) {
 
     for (auto &test : test_table) {
         Move move = {};
-        Play board(Sudoku::fromString(test.gridString), NULL);
+        Play board({}, Sudoku::fromString(test.gridString), NULL);
         board.autoPencil();
 
         EXPECT_EQ(findNakedSingles(board, test.num, &move), test.ret);
@@ -38,7 +38,7 @@ TEST(HumanSolve_test, findHiddenSingle) {
 
     for (auto &test : test_table) {
         Move move = {};
-        Play board(Sudoku::fromString(test.gridString), NULL);
+        Play board({}, Sudoku::fromString(test.gridString), NULL);
         board.autoPencil();
 
         EXPECT_EQ(findHiddenSingles(board, test.num, &move), test.ret);
@@ -59,7 +59,7 @@ TEST(HumanSolve_test, findXwing) {
 
     for (auto &test : test_table) {
         std::vector<Move> moves;
-        Play board(Sudoku::fromString(test.gridString), NULL);
+        Play board({}, Sudoku::fromString(test.gridString), NULL);
         board.autoPencil();
 
         std::stringstream boardstrstream;
@@ -81,7 +81,7 @@ TEST(HumanSolve_test, findUniqueRectangle) {
 
     for (auto &test : test_table) {
         std::vector<Move> moves;
-        Play board(Sudoku::fromString(test.gridString), NULL);
+        Play board({}, Sudoku::fromString(test.gridString), NULL);
         board.autoPencil();
 
         EXPECT_EQ(findUniqueRectangle(board, test.num, moves), test.ret);
@@ -104,7 +104,7 @@ TEST(HumanSolve_test, findChainOfPairs) {
 
     for (auto &test : test_table) {
         std::vector<Move> moves;
-        Play board(Sudoku::fromString(test.gridString), NULL);
+        Play board({}, Sudoku::fromString(test.gridString), NULL);
         board.autoPencil();
 
         std::stringstream boardstrstr;

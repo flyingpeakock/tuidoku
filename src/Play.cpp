@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <cmath>
 
-Play::Play(Sudoku::puzzle grid, WINDOW *window) : startGrid(grid), currentGrid(grid), solutionGrid(grid), gridWindow(window) {
+Play::Play(std::vector<keymap> keymap, Sudoku::puzzle grid, WINDOW *window) : startGrid(grid), currentGrid(grid), solutionGrid(grid), gridWindow(window) {
     startGrid = currentGrid = solutionGrid = grid;
     if (!Sudoku::solve(solutionGrid)) {
         throw std::invalid_argument("Puzzle does not have a unique solution");
@@ -15,12 +15,28 @@ Play::Play(Sudoku::puzzle grid, WINDOW *window) : startGrid(grid), currentGrid(g
     selectedNum = -1;
     row_idx = 0;
     col_idx = 0;
-    state = INSERT;
+    state = State::INSERT;
     for (auto &i : currentGrid) {
         for (auto &j: i) {
             if (j == 0) continue;
             count[j - 1]++;
         }
+    }
+
+    std::map<keys, int *> inputs_map = {
+        {UP, &up_key},
+        {DOWN, &down_key},
+        {LEFT, &left_key},
+        {RIGHT, &right_key},
+        {keys::PENCIL, &pencil_key},
+        {keys::INSERT, &insert_key},
+        {CLEAR, &erase_key},
+        {FILLPENCIL, &erase_key},
+        {EXIT, &exit_key},
+    };
+
+    for (const auto &key : keymap) {
+        *(inputs_map[key.input]) = key.value;
     }
 }
 
@@ -28,51 +44,42 @@ void Play::play() {
     while (currentGrid != solutionGrid) {
         printBoard();
         int c = getch();
-        
-        switch (c) {
-            case KEY_UP:
-            case 'k':
-                row_idx--;
-                break;
-            case KEY_DOWN:
-            case 'j':
-                row_idx++;
-                break;
-            case KEY_LEFT:
-            case 'h':
-                col_idx--;
-                break;
-            case KEY_RIGHT:
-            case 'l':
-                col_idx++;
-                break;
-            case 'p':
-                state = PENCIL;
-                break;
-            case 'i':
-                state = INSERT;
-                break;
-            case 'q':
-                return;
-            case KEY_BACKSPACE:
-            case 127:
-            case ' ':
-                insert(0, row_idx, col_idx);
-                break;
-            case 'a':
-                autoPencil();
-                break;
-            default:
-                if (c >= '0' && c <= '9') {
-                    selectedNum = c - '0';
-                    if (state == PENCIL) {
-                        pencil(c - '0', row_idx, col_idx);
-                    }
-                    else {
-                        insert(c - '0', row_idx, col_idx);
-                    }
-                }
-                break;
+
+        if (c == KEY_UP || c == up_key) {
+            row_idx--;
+        }
+        else if (c == KEY_DOWN || c == down_key) {
+            row_idx++;
+        }
+        else if (c == KEY_LEFT || c == left_key) {
+            col_idx--;
+        }
+        else if (c == KEY_RIGHT || c == right_key) {
+            col_idx++;
+        }
+        else if (c == pencil_key) {
+            state = State::PENCIL;
+        }
+        else if (c == insert_key) {
+            state = State::INSERT;
+        }
+        else if (c == KEY_BACKSPACE || c == ' ' || c == erase_key) {
+            insert(0, row_idx, col_idx);
+        }
+        else if (c == fillpencil_key) {
+            autoPencil();
+        }
+        else if (c >= '0' && c <= '9') {
+            selectedNum = c - '0';
+            if (state == State::PENCIL) {
+                pencil(c - '0', row_idx, col_idx);
+            }
+            else {
+                insert(c - '0', row_idx, col_idx);
+            }
+        }
+        else if (c == exit_key) {
+            return;
         }
 
         if (col_idx < 0) {

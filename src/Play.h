@@ -2,6 +2,7 @@
 #include <map>
 #include "Sudoku/Sudoku.h"
 #include "Tui/Tui.h"
+#include "Config.h"
 
 typedef std::array<std::array<std::uint16_t, Sudoku::SIZE>, Sudoku::SIZE> PencilMarks;
 
@@ -11,6 +12,7 @@ class Play {
         INSERT,
         PENCIL
     };
+
     Sudoku::puzzle startGrid;
     Sudoku::puzzle currentGrid;
     Sudoku::puzzle solutionGrid;
@@ -23,13 +25,20 @@ class Play {
     int col_idx;
     State state;
 
+    int up_key, down_key, left_key, right_key, pencil_key, insert_key, erase_key, fillpencil_key, exit_key;
+
     void printBoard();
 
     void removeMarks(int val, int row, int col);
     void restoreMarks(int row, int col);
 
     public:
-    Play(Sudoku::puzzle grid, WINDOW *window);
+    struct keymap {
+        keys input;
+        int value;
+    };
+
+    Play(std::vector<keymap> keys, Sudoku::puzzle grid, WINDOW *window);
     void play();
 
     

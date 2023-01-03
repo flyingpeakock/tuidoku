@@ -136,7 +136,18 @@ void play(WINDOW *mainWindow) {
         grid = Sudoku::generate(distrib(gen));
     }
     try {
-        Play game(grid, mainWindow);
+        std::vector<Play::keymap> keys = {
+            {UP, config.keyBind(UP)},
+            {DOWN, config.keyBind(DOWN)},
+            {LEFT, config.keyBind(LEFT)},
+            {RIGHT, config.keyBind(RIGHT)},
+            {PENCIL, config.keyBind(PENCIL)},
+            {INSERT, config.keyBind(INSERT)},
+            {CLEAR, config.keyBind(CLEAR)},
+            {FILLPENCIL, config.keyBind(FILLPENCIL)},
+            {EXIT, config.keyBind(EXIT)},
+        };
+        Play game(keys, grid, mainWindow);
         game.play();
     }
     catch (const std::invalid_argument& e) {
