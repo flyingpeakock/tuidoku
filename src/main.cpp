@@ -7,10 +7,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <random>
-
-void startCurses();
-void endCurses();
-WINDOW * createWindow();
+#include "Config.h"
 
 WINDOW *initialize_tui();
 Tui::main_menu_choices mainMenu(WINDOW *parentWin);
@@ -19,7 +16,21 @@ void solve(WINDOW *mainWindow);
 void generate(WINDOW *mainWindow);
 
 int main(int argc, char *argv[]) {
-    SCREEN *screen = Tui::init_curses();
+    if (!config.init())
+        return EXIT_FAILURE;
+    
+    Tui::Colors colors = {
+        {config.getColor(MENU, "foreground"), config.getColor(MENU, "background")},
+        {config.getColor(MENU_SELECTED, "foreground"), config.getColor(MENU_SELECTED, "background")},
+        {config.getColor(HIGHLIGHT_PENCIL, "foreground"), config.getColor(HIGHLIGHT_PENCIL, "background")},
+        {config.getColor(HIGHLIGHT_FILLED, "foreground"), config.getColor(HIGHLIGHT_FILLED, "background")},
+        {config.getColor(ERROR, "foreground"), config.getColor(ERROR, "background")},
+        {config.getColor(GRID, "foreground"), config.getColor(GRID, "background")},
+        {config.getColor(NUMBERS, "foreground"), config.getColor(NUMBERS, "background")},
+        {config.getColor(PENCIL_NUM, "foreground"), config.getColor(PENCIL_NUM, "background")}
+    };
+
+    SCREEN *screen = Tui::init_curses(colors);
     WINDOW *main_window = initialize_tui();
     if (!main_window) {
         std::cout << "This terminal does not support color." << std::endl;
@@ -134,45 +145,44 @@ void play(WINDOW *mainWindow) {
 }
 
 void solve(WINDOW *window) {
+    const int up_key = config.keyBind(UP);
+    const int down_key = config.keyBind(DOWN);
+    const int left_key = config.keyBind(LEFT);
+    const int right_key = config.keyBind(RIGHT);
+    const int erase_key = config.keyBind(CLEAR);
+    const int exit_key = config.keyBind(EXIT);
+
     Tui::addMessage(window, "Insert numbers until the puzzle is unique");
+    wrefresh(window);
     Sudoku::puzzle grid = {};
     Sudoku::puzzle solved;
     int row = 0;
     int col = 0;
     bool isUnique = false;
     while (!isUnique){
-        Tui::printPuzzle(window, grid, A_NORMAL);
         Tui::highlightCell(window, row, col);
+        Tui::printPuzzle(window, grid, A_NORMAL);
         int c = wgetch(window);
-        switch (c) {
-            case KEY_UP:
-            case 'k':
-                row--;
-                break;
-            case KEY_DOWN:
-            case 'j':
-                row++;
-                break;
-            case KEY_LEFT:
-            case 'h':
-                col--;
-                break;
-            case KEY_RIGHT:
-            case 'l':
-                col++;
-                break;
-            case KEY_BACKSPACE:
-            case ' ':
-                grid[row][col] = 0;
-            case 'q':
-            case 'Q':
-            case 27:
-                return;
-            default:
-                if (c >= '0' && c <= '9') {
-                    grid[row][col] = c - '0';
-                }
-                break;
+        if (c == KEY_UP || c == up_key) {
+            row--;
+        }
+        else if (c == KEY_DOWN || c == down_key) {
+            row++;
+        }
+        else if (c == KEY_LEFT || c == left_key) {
+            col--;
+        }
+        else if (c == KEY_RIGHT || c == right_key) {
+            col++;
+        }
+        else if (c == KEY_BACKSPACE || c == ' ' || c == erase_key) {
+            grid[row][col] = 0;
+        }
+        else if (c == 27 || c == exit_key) {
+            return;
+        }
+        else if (c >= '0' && c <= '9') {
+            grid[row][col] = c- '0';
         }
         if (col < 0) {
             col = Sudoku::SIZE - 1;

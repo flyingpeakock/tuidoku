@@ -3,8 +3,7 @@
 #include <locale.h>
 #include <string>
 #include <iostream>
-
-#define _ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
+#include "../Config.h"
 
 static const std::string topRowString = "╔═══════╤═══════╤═══════╦═══════╤═══════╤═══════╦═══════╤═══════╤═══════╗";
 static const std::string row1String   = "║       │       │       ║       │       │       ║       │       │       ║";
@@ -12,7 +11,7 @@ static const std::string row2String   = "╟───────┼────
 static const std::string row3String   = "╠═══════╪═══════╪═══════╬═══════╪═══════╪═══════╬═══════╪═══════╪═══════╣";
 static const std::string botRowString = "╚═══════╧═══════╧═══════╩═══════╧═══════╧═══════╩═══════╧═══════╧═══════╝";
 
-SCREEN* Tui::init_curses() {
+SCREEN* Tui::init_curses(Colors col) {
     setlocale(LC_ALL, "");
     //initscr();
     char termname[] = "xterm-256color";
@@ -29,10 +28,14 @@ SCREEN* Tui::init_curses() {
     // Setting up colors
     use_default_colors();
     start_color();
-    init_pair(1, COLOR_BLACK, COLOR_GREEN);
-    init_pair(2, COLOR_BLACK, COLOR_YELLOW);
-    init_pair(3, COLOR_BLACK, COLOR_BLUE);
-    init_pair(4, COLOR_BLACK, COLOR_GREEN);
+    init_pair(1, col.menu[0], col.menu[1]);
+    init_pair(2, col.menu_selected[0], col.menu_selected[1]);
+    init_pair(3, col.highlight_pencil[0], col.highlight_pencil[1]);
+    init_pair(4, col.highlight_filled[0], col.highlight_filled[1]);
+    init_pair(5, col.error[0], col.error[1]);
+    init_pair(6, col.grid[0], col.grid[1]);
+    init_pair(7, col.numbers[0], col.numbers[1]);
+    init_pair(8, col.pencil[0], col.pencil[1]);
     return my_terminal;
 }
 
@@ -62,6 +65,7 @@ void Tui::printOutline(WINDOW * win) {
     int startCol = 0;
     werase(win);
     wattron(win, A_BOLD);
+    wattron(win, COLOR_GRID);
     mvwprintw(win, startHeight++, startCol, topRowString.c_str());
     for (auto i = 0; i < 3; i++) {
         for (auto j = 0; j < 3; j++) {
@@ -80,6 +84,7 @@ void Tui::printOutline(WINDOW * win) {
         }
     }
     mvwprintw(win, startHeight, startCol, botRowString.c_str());
+    wattroff(win, COLOR_GRID);
     wattroff(win, A_BOLD);
 }
 
@@ -98,6 +103,7 @@ void Tui::addMessage(WINDOW *win, std::string message) {
 void Tui::printPuzzle(WINDOW *win, Sudoku::puzzle grid, int attr) {
     int start_row = 2;
     wattron(win, attr);
+    wattron(win, COLOR_NUM);
     for (auto i = 0; i < Sudoku::SIZE; i++) {
         int start_col = 4;
         for (auto j = 0; j < Sudoku::SIZE; j++) {
@@ -108,6 +114,7 @@ void Tui::printPuzzle(WINDOW *win, Sudoku::puzzle grid, int attr) {
         }
         start_row += 4;
     }
+    wattroff(win, COLOR_NUM);
     wattroff(win, attr);
 }
 
@@ -117,6 +124,7 @@ void Tui::printPencilMark(WINDOW *win, int row, int col, std::uint16_t marks) {
     int startCol = col;
 
     wattron(win, A_DIM);
+    wattron(win, COLOR_PENCIL);
     for (auto i = 0; i < 9; i++) {
         if ((marks & (1 << i)) != 0) {
             mvwaddch(win, row, col, i + '1');
@@ -127,6 +135,7 @@ void Tui::printPencilMark(WINDOW *win, int row, int col, std::uint16_t marks) {
             col = startCol;
         }
     }
+    wattroff(win, COLOR_PENCIL);
     wattroff(win, A_DIM);
 }
 
@@ -187,6 +196,7 @@ void Tui::highlightCell(WINDOW *win, int current_row, int current_col) {
     }
 
     wattron(win, A_BOLD);
+    wattron(win, COLOR_GRID);
     mvwprintw(win, row, col, tl.c_str());
     for (auto i = 0; i < 7; i++) {
         wprintw(win, t.c_str());
@@ -201,6 +211,7 @@ void Tui::highlightCell(WINDOW *win, int current_row, int current_col) {
         wprintw(win, b.c_str());
     }
     wprintw(win, br.c_str());
+    wattroff(win, COLOR_GRID);
     wattroff(win, A_BOLD);
 
     prev_row = current_row;

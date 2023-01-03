@@ -8,10 +8,29 @@
 #define COLOR_MENU_SELECT    COLOR_PAIR(2)
 #define COLOR_HIGHLIGHT      COLOR_PAIR(3)
 #define COLOR_HIGHLIGH_NUM   3
-#define COLOR_FILLED          COLOR_PAIR(4);
-#define COLOR_FILLED_NUM      4
+#define COLOR_FILLED         COLOR_PAIR(4)
+#define COLOR_FILLED_NUM     4
+#define COLOR_ERROR          COLOR_PAIR(5)
+#define COLOR_ERROR_NUM      5
+#define COLOR_GRID           COLOR_PAIR(6)
+#define COLOR_GRID_NUM       6
+#define COLOR_NUM            COLOR_PAIR(7)
+#define COLOR_NUM_NUM        7
+#define COLOR_PENCIL         COLOR_PAIR(8)
+#define COLOR_PENCIL_NUM     8
 
 namespace Tui {
+    struct Colors {
+        int menu[2];
+        int menu_selected[2];
+        int highlight_pencil[2];
+        int highlight_filled[2];
+        int error[2];
+        int grid[2];
+        int numbers[2];
+        int pencil[2];
+    };
+
     const std::string title = "Tuidoku";
 
     template <typename T>
@@ -28,7 +47,7 @@ namespace Tui {
         EXIT
     };
 
-    SCREEN* init_curses();
+    SCREEN* init_curses(Colors col);
     void end_curses(SCREEN *screen, WINDOW *window);
 
     WINDOW *createMainWindow();

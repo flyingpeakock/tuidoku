@@ -20,6 +20,7 @@ set(SOURCES
     src/Sudoku/Sudoku.cpp
     src/Tui/Tui.cpp
     src/Play.cpp
+    src/Config.cpp
 )
 
 set(TEST_SOURCES
@@ -52,6 +53,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 add_executable(${STATS_EXE} EXCLUDE_FROM_ALL ${STATS_SOURCES})
 
 find_package(GTest)
+find_package(libconfig)
 
 set(CURSES_NEED_WIDE true)
 find_package( Curses REQUIRED)
@@ -63,6 +65,7 @@ find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME}
     PRIVATE Threads::Threads
     ${CURSES_LIBRARIES}
+    config++
 )
 
 enable_testing()

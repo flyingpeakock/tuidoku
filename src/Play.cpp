@@ -56,6 +56,7 @@ void Play::play() {
                 return;
             case KEY_BACKSPACE:
             case 127:
+            case ' ':
                 insert(0, row_idx, col_idx);
                 break;
             case 'a':
@@ -107,6 +108,19 @@ void Play::printBoard() {
             if (currentGrid[i][j] == 0 && pencilMarks[i][j] != 0) {
                 Tui::printPencilMark(gridWindow, i, j, pencilMarks[i][j]);
             }
+            if (startGrid[i][j] != 0) continue;
+            if (currentGrid[i][j] != 0 && !Sudoku::isSafe(currentGrid, i, j, currentGrid[i][j])) {
+                Tui::highlightNum(gridWindow, i, j, currentGrid[i][j], A_BOLD, COLOR_ERROR_NUM);
+            }
+            else if (currentGrid[i][j] == 0 && pencilMarks[i][j] != 0) {
+                for (auto num = 0; num < Sudoku::SIZE; num++) {
+                    if ((pencilMarks[i][j] & (1 << num)) != 0) {
+                        if (!Sudoku::isSafe(currentGrid, i, j, num + 1)) {
+                            Tui::highlightNum(gridWindow, i, j, num + 1, A_NORMAL, COLOR_ERROR_NUM);
+                        }
+                    }
+                }
+            }
         }
     }
     if (selectedNum != 0) {
@@ -115,10 +129,10 @@ void Play::printBoard() {
                 if (startGrid[i][j] == selectedNum) {
                     Tui::highlightNum(gridWindow, i, j, selectedNum, A_UNDERLINE, COLOR_FILLED_NUM);
                 }
-                else if (currentGrid[i][j] == selectedNum) {
+                else if (currentGrid[i][j] == selectedNum && Sudoku::isSafe(currentGrid, i, j, currentGrid[i][j])) {
                     Tui::highlightNum(gridWindow, i, j,selectedNum, A_NORMAL, COLOR_FILLED_NUM);
                 }
-                else if ((pencilMarks[i][j] & (1 << (selectedNum - 1))) != 0) {
+                else if ((pencilMarks[i][j] & (1 << (selectedNum - 1))) != 0 && Sudoku::isSafe(currentGrid, i, j, selectedNum)) {
                     Tui::highlightNum(gridWindow, i, j, selectedNum, A_DIM, COLOR_HIGHLIGH_NUM);
                 }
             }
