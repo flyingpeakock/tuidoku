@@ -12,6 +12,7 @@ enum keys {
     EXIT,
     CLEAR,
     FILLPENCIL,
+    HINT,
 };
 
 enum Colors {

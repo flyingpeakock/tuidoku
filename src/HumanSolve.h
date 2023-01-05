@@ -3,24 +3,6 @@
 #include "Play.h"
 #include <string>
 
-struct Move {
-    int val;
-    int row;
-    int col;
-    void (Play::*move)(int, int, int);
-    void operator()(Play *board) {
-        if (move == NULL) return;
-        return (board->*move)(val, row, col);
-    }
-};
-
-struct Hint {
-    std::string hint1;
-    std::string hint2;
-    int difficulty;
-    std::vector<Move> moves;
-};
-
 Hint solveHuman(Play &board);
 bool findNakedSingles(Play &board, const std::uint16_t num, Move *move);
 bool findHiddenSingles(Play &board, const std::uint16_t num, Move *move);

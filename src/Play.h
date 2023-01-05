@@ -6,6 +6,26 @@
 
 typedef std::array<std::array<std::uint16_t, Sudoku::SIZE>, Sudoku::SIZE> PencilMarks;
 
+class Play;
+
+struct Move {
+    int val;
+    int row;
+    int col;
+    void (Play::*move)(int, int, int);
+    void operator()(Play *board) {
+        if (move == NULL) return;
+        return (board->*move)(val, row, col);
+    }
+};
+
+struct Hint {
+    std::string hint1;
+    std::string hint2;
+    int difficulty;
+    std::vector<Move> moves;
+};
+
 class Play {
     private:
     enum State {
@@ -25,9 +45,14 @@ class Play {
     int col_idx;
     State state;
 
-    int up_key, down_key, left_key, right_key, pencil_key, insert_key, erase_key, fillpencil_key, exit_key;
+    int hintCounter;
+    Hint hint;
+    std::string message;
+
+    int up_key, down_key, left_key, right_key, pencil_key, insert_key, erase_key, fillpencil_key, exit_key, hint_key;
 
     void printBoard();
+    void showHint();
 
     void removeMarks(int val, int row, int col);
     void restoreMarks(int row, int col);

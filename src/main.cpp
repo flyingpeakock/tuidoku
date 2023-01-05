@@ -9,6 +9,11 @@
 #include <random>
 #include "Config.h"
 
+/*global declaration of certain keys used in tui functions*/
+int Tui::up_key;
+int Tui::down_key;
+int Tui::select_key;
+
 WINDOW *initialize_tui();
 Tui::main_menu_choices mainMenu(WINDOW *parentWin);
 void play(WINDOW *mainWindow);
@@ -16,8 +21,12 @@ void solve(WINDOW *mainWindow);
 void generate(WINDOW *mainWindow);
 
 int main(int argc, char *argv[]) {
-    if (!config.init())
+    if (!config.init()){
         return EXIT_FAILURE;
+    }
+    Tui::up_key = config.keyBind(UP);
+    Tui::down_key = config.keyBind(DOWN);
+    Tui::select_key = '\n';
     
     Tui::Colors colors = {
         {config.getColor(MENU, "foreground"), config.getColor(MENU, "background")},
@@ -146,6 +155,7 @@ void play(WINDOW *mainWindow) {
             {CLEAR, config.keyBind(CLEAR)},
             {FILLPENCIL, config.keyBind(FILLPENCIL)},
             {EXIT, config.keyBind(EXIT)},
+            {HINT, config.keyBind(HINT)},
         };
         Play game(keys, grid, mainWindow);
         game.play();

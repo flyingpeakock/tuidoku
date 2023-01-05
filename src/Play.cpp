@@ -3,6 +3,7 @@
 #include "Tui/Tui.h"
 #include <stdexcept>
 #include <cmath>
+#include "HumanSolve.h"
 
 Play::Play(std::vector<keymap> keymap, Sudoku::puzzle grid, WINDOW *window) : startGrid(grid), currentGrid(grid), solutionGrid(grid), gridWindow(window) {
     startGrid = currentGrid = solutionGrid = grid;
@@ -15,7 +16,9 @@ Play::Play(std::vector<keymap> keymap, Sudoku::puzzle grid, WINDOW *window) : st
     selectedNum = -1;
     row_idx = 0;
     col_idx = 0;
+    hintCounter = 0;
     state = State::INSERT;
+    message = "Insert";
     for (auto &i : currentGrid) {
         for (auto &j: i) {
             if (j == 0) continue;
@@ -31,8 +34,9 @@ Play::Play(std::vector<keymap> keymap, Sudoku::puzzle grid, WINDOW *window) : st
         {keys::PENCIL, &pencil_key},
         {keys::INSERT, &insert_key},
         {CLEAR, &erase_key},
-        {FILLPENCIL, &erase_key},
+        {FILLPENCIL, &fillpencil_key},
         {EXIT, &exit_key},
+        {HINT, &hint_key},
     };
 
     for (const auto &key : keymap) {
@@ -59,9 +63,11 @@ void Play::play() {
         }
         else if (c == pencil_key) {
             state = State::PENCIL;
+            message = "Pencil";
         }
         else if (c == insert_key) {
             state = State::INSERT;
+            message = "Insert";
         }
         else if (c == KEY_BACKSPACE || c == ' ' || c == erase_key) {
             insert(0, row_idx, col_idx);
@@ -69,7 +75,12 @@ void Play::play() {
         else if (c == fillpencil_key) {
             autoPencil();
         }
+        else if (c == hint_key) {
+            hintCounter++;
+            showHint();
+        }
         else if (c >= '0' && c <= '9') {
+            hintCounter = 0;
             selectedNum = c - '0';
             if (state == State::PENCIL) {
                 pencil(c - '0', row_idx, col_idx);
@@ -104,12 +115,7 @@ void Play::printBoard() {
     Tui::highlightCell(gridWindow, row_idx, col_idx); // clears everything from last loop
     Tui::printPuzzle(gridWindow, currentGrid, A_NORMAL);
     Tui::printPuzzle(gridWindow, startGrid, A_UNDERLINE); // Underline givens
-    if (state == PENCIL) {
-        Tui::addMessage(gridWindow, "Pencil");
-    }
-    else {
-        Tui::addMessage(gridWindow, "Insert");
-    }
+    Tui::addMessage(gridWindow, message);
     for (auto i = 0; i < Sudoku::SIZE; i++) {
         for (auto j = 0; j < Sudoku::SIZE; j++) {
             if (currentGrid[i][j] == 0 && pencilMarks[i][j] != 0) {
@@ -259,4 +265,22 @@ std::uint16_t Play::getPencil(int row, int col) {
 
 bool Play::isWon() {
     return currentGrid == solutionGrid;
+}
+
+void Play::showHint() {
+    if (hintCounter == 1) {
+        hint = solveHuman(*this);
+        message = hint.hint1;
+    }
+    else if (hintCounter == 2) {
+        message = hint.hint2;
+    }
+    else {
+        if (hint.moves.size() != 0) {
+            for (auto &move : hint.moves) {
+                move(this);
+            }
+            hintCounter = 0;
+        }
+    }
 }

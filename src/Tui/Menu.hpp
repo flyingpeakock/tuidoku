@@ -2,6 +2,10 @@
 #include "Tui.h"
 #include <ncurses.h>
 
+extern int up_key;
+extern int down_key;
+extern int select_key;
+
 template <typename T>
 WINDOW *Tui::printMenu(WINDOW *parentWin, std::vector<MenuItem<T>> items, std::string title) {
 
@@ -88,30 +92,23 @@ T Tui::handleMenu(WINDOW *menuWin, std::vector<MenuItem<T>> items) {
         mvwchgat(menuWin, row_to_highlight, 1, maxX - 2, A_BOLD | A_BLINK, 2, NULL);
         wrefresh(menuWin);
         int c = wgetch(menuWin);
-        switch (c) {
-            case KEY_UP:
-            case 'k':
-                past_selected = currently_selected;
-                currently_selected--;
-                break;
-            case KEY_DOWN:
-            case 'j':
-                past_selected = currently_selected;
-                currently_selected++;
-                break;
-            case '\n':
-            case KEY_ENTER:
-                return items[currently_selected].choice;
-                break;
-            default:
-                if (c >= '1' && c <= '9') {
-                    for (auto i = 0; i < items.size(); i++) {
-                        if (items[i].keyBind == c) {
-                            return items[i].choice;
-                        }
-                    }
+        if (c == KEY_UP || c == up_key) {
+            past_selected = currently_selected;
+            currently_selected--;
+        }
+        else if (c == KEY_DOWN || c == down_key) {
+            past_selected = currently_selected;
+            currently_selected++;
+        }
+        else if (c == KEY_ENTER || c == select_key) {
+            return items[currently_selected].choice;
+        }
+        else if (c >= '1' && c <= '9') {
+            for (auto i = 0; i < items.size(); i++) {
+                if (items[i].keyBind == c) {
+                    return items[i].choice;
                 }
-                break;
+            }
         }
         if (currently_selected < 0) {
             currently_selected = items.size() - 1;

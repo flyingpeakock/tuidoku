@@ -44,6 +44,7 @@ static const setting_t allBinds[] = {
     {"insert", "i"},
     {"erase", std::string(1, (char)127)},
     {"fillPencils", "a"},
+    {"hint", "?"},
 
     // Other
     {"exit", "q"},
@@ -259,6 +260,9 @@ int Conf::keyBind(keys key) {
             break;
         case FILLPENCIL:
             key_string = keybinds.lookup("fillPencils").c_str();
+            break;
+        case HINT:
+            key_string = keybinds.lookup("hint").c_str();
             break;
         default:
             return 0;
