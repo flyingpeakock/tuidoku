@@ -230,78 +230,15 @@ bool Conf::verifyValues() {
     return true;
 }
 
-int Conf::keyBind(keys key) {
-    std::string key_string;
+int Conf::keyBind(std::string key) {
     libconfig::Setting &keybinds = cfg.lookup("keybinds");
-    switch (key) {
-        case UP:
-            key_string = keybinds.lookup("up").c_str();
-            break;
-        case DOWN:
-            key_string = keybinds.lookup("down").c_str();
-            break;
-        case LEFT:
-            key_string = keybinds.lookup("left").c_str();
-            break;
-        case RIGHT:
-            key_string = keybinds.lookup("right").c_str();
-            break;
-        case INSERT:
-            key_string = keybinds.lookup("insert").c_str();
-            break;
-        case PENCIL:
-            key_string = keybinds.lookup("pencil").c_str();
-            break;
-        case EXIT:
-            key_string = keybinds.lookup("exit").c_str();
-            break;
-        case CLEAR:
-            key_string = keybinds.lookup("erase").c_str();
-            break;
-        case FILLPENCIL:
-            key_string = keybinds.lookup("fillPencils").c_str();
-            break;
-        case HINT:
-            key_string = keybinds.lookup("hint").c_str();
-            break;
-        default:
-            return 0;
-    }
+    std::string key_string = keybinds.lookup(key);
     return (int)key_string[0];
 }
 
-int Conf::getColor(Colors col, std::string fgOrBg) {
-    std::string color_string;
+int Conf::getColor(std::string col, std::string fgOrBg) {
     libconfig::Setting &colors = cfg.lookup("colors");
-
-    switch(col) {
-        case MENU:
-            color_string = colors.lookup("menu").lookup(fgOrBg).c_str();
-            break;
-        case MENU_SELECTED:
-            color_string = colors.lookup("menuSelected").lookup(fgOrBg).c_str();
-            break;
-        case HIGHLIGHT_PENCIL:
-            color_string = colors.lookup("highlightPencil").lookup(fgOrBg).c_str();
-            break;
-        case HIGHLIGHT_FILLED:
-            color_string = colors.lookup("highlightFilled").lookup(fgOrBg).c_str();
-            break;
-        case ERROR:
-            color_string = colors.lookup("error").lookup(fgOrBg).c_str();
-            break;
-        case GRID:
-            color_string = colors.lookup("grid").lookup(fgOrBg).c_str();
-            break;
-        case NUMBERS:
-            color_string = colors.lookup("numbers").lookup(fgOrBg).c_str();
-            break;
-        case PENCIL_NUM:
-            color_string = colors.lookup("marks").lookup(fgOrBg).c_str();
-            break;
-        default:
-            return -1;
-    }
+    std::string color_string = colors.lookup(col).lookup(fgOrBg).c_str();
     return color_map[color_string];
 }
 

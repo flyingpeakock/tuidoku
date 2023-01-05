@@ -26,17 +26,17 @@ Play::Play(std::vector<keymap> keymap, Sudoku::puzzle grid, WINDOW *window) : st
         }
     }
 
-    std::map<keys, int *> inputs_map = {
-        {UP, &up_key},
-        {DOWN, &down_key},
-        {LEFT, &left_key},
-        {RIGHT, &right_key},
-        {keys::PENCIL, &pencil_key},
-        {keys::INSERT, &insert_key},
-        {CLEAR, &erase_key},
-        {FILLPENCIL, &fillpencil_key},
-        {EXIT, &exit_key},
-        {HINT, &hint_key},
+    std::map<std::string, int *> inputs_map = {
+        {"up", &up_key},
+        {"down", &down_key},
+        {"left", &left_key},
+        {"right", &right_key},
+        {"pencil", &pencil_key},
+        {"insert", &insert_key},
+        {"erase", &erase_key},
+        {"fillPencils", &fillpencil_key},
+        {"exit", &exit_key},
+        {"hint", &hint_key},
     };
 
     for (const auto &key : keymap) {

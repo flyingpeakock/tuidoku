@@ -24,19 +24,19 @@ int main(int argc, char *argv[]) {
     if (!config.init()){
         return EXIT_FAILURE;
     }
-    Tui::up_key = config.keyBind(UP);
-    Tui::down_key = config.keyBind(DOWN);
+    Tui::up_key = config.keyBind("up");
+    Tui::down_key = config.keyBind("down");
     Tui::select_key = '\n';
     
     Tui::Colors colors = {
-        {config.getColor(MENU, "foreground"), config.getColor(MENU, "background")},
-        {config.getColor(MENU_SELECTED, "foreground"), config.getColor(MENU_SELECTED, "background")},
-        {config.getColor(HIGHLIGHT_PENCIL, "foreground"), config.getColor(HIGHLIGHT_PENCIL, "background")},
-        {config.getColor(HIGHLIGHT_FILLED, "foreground"), config.getColor(HIGHLIGHT_FILLED, "background")},
-        {config.getColor(ERROR, "foreground"), config.getColor(ERROR, "background")},
-        {config.getColor(GRID, "foreground"), config.getColor(GRID, "background")},
-        {config.getColor(NUMBERS, "foreground"), config.getColor(NUMBERS, "background")},
-        {config.getColor(PENCIL_NUM, "foreground"), config.getColor(PENCIL_NUM, "background")}
+        {config.getColor("menu", "foreground"), config.getColor("menu", "background")},
+        {config.getColor("menuSelected", "foreground"), config.getColor("menuSelected", "background")},
+        {config.getColor("highlightPencil", "foreground"), config.getColor("highlightPencil", "background")},
+        {config.getColor("highlightFilled", "foreground"), config.getColor("highlightFilled", "background")},
+        {config.getColor("error", "foreground"), config.getColor("error", "background")},
+        {config.getColor("grid", "foreground"), config.getColor("grid", "background")},
+        {config.getColor("numbers", "foreground"), config.getColor("numbers", "background")},
+        {config.getColor("marks", "foreground"), config.getColor("marks", "background")}
     };
 
     SCREEN *screen = Tui::init_curses(colors);
@@ -146,16 +146,16 @@ void play(WINDOW *mainWindow) {
     }
     try {
         std::vector<Play::keymap> keys = {
-            {UP, config.keyBind(UP)},
-            {DOWN, config.keyBind(DOWN)},
-            {LEFT, config.keyBind(LEFT)},
-            {RIGHT, config.keyBind(RIGHT)},
-            {PENCIL, config.keyBind(PENCIL)},
-            {INSERT, config.keyBind(INSERT)},
-            {CLEAR, config.keyBind(CLEAR)},
-            {FILLPENCIL, config.keyBind(FILLPENCIL)},
-            {EXIT, config.keyBind(EXIT)},
-            {HINT, config.keyBind(HINT)},
+            {"up", config.keyBind("up")},
+            {"down", config.keyBind("down")},
+            {"left", config.keyBind("left")},
+            {"right", config.keyBind("right")},
+            {"pencil", config.keyBind("pencil")},
+            {"insert", config.keyBind("insert")},
+            {"erase", config.keyBind("erase")},
+            {"fillPencils", config.keyBind("fillPencils")},
+            {"exit", config.keyBind("exit")},
+            {"hint", config.keyBind("hint")},
         };
         Play game(keys, grid, mainWindow);
         game.play();
@@ -166,12 +166,12 @@ void play(WINDOW *mainWindow) {
 }
 
 void solve(WINDOW *window) {
-    const int up_key = config.keyBind(UP);
-    const int down_key = config.keyBind(DOWN);
-    const int left_key = config.keyBind(LEFT);
-    const int right_key = config.keyBind(RIGHT);
-    const int erase_key = config.keyBind(CLEAR);
-    const int exit_key = config.keyBind(EXIT);
+    const int up_key = config.keyBind("up");
+    const int down_key = config.keyBind("down");
+    const int left_key = config.keyBind("left");
+    const int right_key = config.keyBind("right");
+    const int erase_key = config.keyBind("erase");
+    const int exit_key = config.keyBind("exit");
 
     Tui::addMessage(window, "Insert numbers until the puzzle is unique");
     wrefresh(window);

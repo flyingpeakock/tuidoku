@@ -59,7 +59,7 @@ class Play {
 
     public:
     struct keymap {
-        keys input;
+        std::string input;
         int value;
     };
 

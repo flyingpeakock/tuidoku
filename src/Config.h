@@ -2,6 +2,7 @@
 #include <libconfig.h++>
 #include <string>
 
+/*
 enum keys {
     UP,
     DOWN,
@@ -25,6 +26,7 @@ enum Colors {
     NUMBERS,
     PENCIL_NUM,
 };
+*/
 
 class Conf {
     private:
@@ -36,8 +38,8 @@ class Conf {
     Conf();
     Conf(std::string locate);
     bool init();
-    int keyBind(keys key);
-    int getColor(Colors col, std::string fgOrBg);
+    int keyBind(std::string key);
+    int getColor(std::string col, std::string fgOrBg);
     void write();
 };
 
