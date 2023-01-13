@@ -32,6 +32,7 @@ set(TEST_SOURCES
     src/Sudoku/Sudoku.cpp
     src/Play.cpp
     src/Tui/Tui.cpp
+    src/Config.cpp
 
     # Add unit tests here
     tests/file_test.cpp
@@ -53,7 +54,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 add_executable(${STATS_EXE} EXCLUDE_FROM_ALL ${STATS_SOURCES})
 
 find_package(GTest)
-find_package(libconfig)
+find_package(libconfig REQUIRED)
 
 set(CURSES_NEED_WIDE true)
 find_package( Curses REQUIRED)
@@ -74,6 +75,7 @@ add_compile_definitions(TEST_PUZZLES_ROOT_DIR=\"${PROJECT_SOURCE_DIR}/tests/puzz
 target_link_libraries(${UNIT_TESTS}
     # PRIVATE Threads::Threads
     ${CURSES_LIBRARIES}
+    config++
     GTest::gtest_main
 )
 include(GoogleTest)

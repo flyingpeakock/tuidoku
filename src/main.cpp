@@ -14,6 +14,7 @@ int Tui::up_key;
 int Tui::down_key;
 int Tui::select_key;
 
+
 WINDOW *initialize_tui();
 Tui::main_menu_choices mainMenu(WINDOW *parentWin);
 void play(WINDOW *mainWindow);
@@ -21,25 +22,12 @@ void solve(WINDOW *mainWindow);
 void generate(WINDOW *mainWindow);
 
 int main(int argc, char *argv[]) {
-    if (!config.init()){
-        return EXIT_FAILURE;
-    }
-    Tui::up_key = config.keyBind("up");
-    Tui::down_key = config.keyBind("down");
+    Conf::init();
+    Tui::up_key =Conf::keyBind("up");
+    Tui::down_key = Conf::keyBind("down");
     Tui::select_key = '\n';
     
-    Tui::Colors colors = {
-        {config.getColor("menu", "foreground"), config.getColor("menu", "background")},
-        {config.getColor("menuSelected", "foreground"), config.getColor("menuSelected", "background")},
-        {config.getColor("highlightPencil", "foreground"), config.getColor("highlightPencil", "background")},
-        {config.getColor("highlightFilled", "foreground"), config.getColor("highlightFilled", "background")},
-        {config.getColor("error", "foreground"), config.getColor("error", "background")},
-        {config.getColor("grid", "foreground"), config.getColor("grid", "background")},
-        {config.getColor("numbers", "foreground"), config.getColor("numbers", "background")},
-        {config.getColor("marks", "foreground"), config.getColor("marks", "background")}
-    };
-
-    SCREEN *screen = Tui::init_curses(colors);
+    SCREEN *screen = Tui::init_curses();
     WINDOW *main_window = initialize_tui();
     if (!main_window) {
         std::cout << "This terminal does not support color." << std::endl;
@@ -146,16 +134,16 @@ void play(WINDOW *mainWindow) {
     }
     try {
         std::vector<Play::keymap> keys = {
-            {"up", config.keyBind("up")},
-            {"down", config.keyBind("down")},
-            {"left", config.keyBind("left")},
-            {"right", config.keyBind("right")},
-            {"pencil", config.keyBind("pencil")},
-            {"insert", config.keyBind("insert")},
-            {"erase", config.keyBind("erase")},
-            {"fillPencils", config.keyBind("fillPencils")},
-            {"exit", config.keyBind("exit")},
-            {"hint", config.keyBind("hint")},
+            {"up", Conf::keyBind("up")},
+            {"down", Conf::keyBind("down")},
+            {"left", Conf::keyBind("left")},
+            {"right", Conf::keyBind("right")},
+            {"pencil", Conf::keyBind("pencil")},
+            {"insert", Conf::keyBind("insert")},
+            {"erase", Conf::keyBind("erase")},
+            {"fillPencils", Conf::keyBind("fillPencils")},
+            {"exit", Conf::keyBind("exit")},
+            {"hint", Conf::keyBind("hint")},
         };
         Play game(keys, grid, mainWindow);
         game.play();
@@ -166,12 +154,12 @@ void play(WINDOW *mainWindow) {
 }
 
 void solve(WINDOW *window) {
-    const int up_key = config.keyBind("up");
-    const int down_key = config.keyBind("down");
-    const int left_key = config.keyBind("left");
-    const int right_key = config.keyBind("right");
-    const int erase_key = config.keyBind("erase");
-    const int exit_key = config.keyBind("exit");
+    const int up_key = Conf::keyBind("up");
+    const int down_key = Conf::keyBind("down");
+    const int left_key = Conf::keyBind("left");
+    const int right_key = Conf::keyBind("right");
+    const int erase_key = Conf::keyBind("erase");
+    const int exit_key = Conf::keyBind("exit");
 
     Tui::addMessage(window, "Insert numbers until the puzzle is unique");
     wrefresh(window);

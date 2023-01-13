@@ -11,7 +11,7 @@ static const std::string row2String   = "╟───────┼────
 static const std::string row3String   = "╠═══════╪═══════╪═══════╬═══════╪═══════╪═══════╬═══════╪═══════╪═══════╣";
 static const std::string botRowString = "╚═══════╧═══════╧═══════╩═══════╧═══════╧═══════╩═══════╧═══════╧═══════╝";
 
-SCREEN* Tui::init_curses(Colors col) {
+SCREEN* Tui::init_curses() {
     setlocale(LC_ALL, "");
     //initscr();
     char termname[] = "xterm-256color";
@@ -28,14 +28,14 @@ SCREEN* Tui::init_curses(Colors col) {
     // Setting up colors
     use_default_colors();
     start_color();
-    init_pair(1, col.menu[0], col.menu[1]);
-    init_pair(2, col.menu_selected[0], col.menu_selected[1]);
-    init_pair(3, col.highlight_pencil[0], col.highlight_pencil[1]);
-    init_pair(4, col.highlight_filled[0], col.highlight_filled[1]);
-    init_pair(5, col.error[0], col.error[1]);
-    init_pair(6, col.grid[0], col.grid[1]);
-    init_pair(7, col.numbers[0], col.numbers[1]);
-    init_pair(8, col.pencil[0], col.pencil[1]);
+    init_pair(1, Conf::getColor("menu", "foreground"), Conf::getColor("menu", "background"));
+    init_pair(2, Conf::getColor("menuSelected", "foreground"), Conf::getColor("menuSelected", "background"));
+    init_pair(3, Conf::getColor("highlightPencil", "foreground"), Conf::getColor("highlightPencil", "background"));
+    init_pair(4, Conf::getColor("highlightFilled", "foreground"), Conf::getColor("highlightFilled", "background"));
+    init_pair(5, Conf::getColor("error", "foreground"), Conf::getColor("error", "background"));
+    init_pair(6, Conf::getColor("grid", "foreground"), Conf::getColor("grid", "background"));
+    init_pair(7, Conf::getColor("numbers", "foreground"), Conf::getColor("numbers", "background"));
+    init_pair(8, Conf::getColor("marks", "foreground"), Conf::getColor("marks", "background"));
     return my_terminal;
 }
 

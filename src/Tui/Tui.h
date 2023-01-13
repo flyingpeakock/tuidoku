@@ -20,17 +20,6 @@
 #define COLOR_PENCIL_NUM     8
 
 namespace Tui {
-    struct Colors {
-        int menu[2];
-        int menu_selected[2];
-        int highlight_pencil[2];
-        int highlight_filled[2];
-        int error[2];
-        int grid[2];
-        int numbers[2];
-        int pencil[2];
-    };
-
     const std::string title = "Tuidoku";
 
     template <typename T>
@@ -47,7 +36,7 @@ namespace Tui {
         EXIT
     };
 
-    SCREEN* init_curses(Colors col);
+    SCREEN* init_curses();
     void end_curses(SCREEN *screen, WINDOW *window);
 
     WINDOW *createMainWindow();

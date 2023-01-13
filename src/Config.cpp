@@ -4,10 +4,11 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
-#include <map>
 #include <ncurses.h>
+#include <libconfig.h++>
 
-Conf config;
+libconfig::Config cfg;
+static std::string location;
 
 static std::map<std::string, int> color_map = {
     {"black", COLOR_BLACK},
@@ -33,7 +34,7 @@ struct Colors_t {
     setting_t background;
 };
 
-static const setting_t allBinds[] = {
+static setting_t allBinds[] = {
     {"up", "k"},
     {"down", "j"},
     {"left", "h"},
@@ -50,7 +51,7 @@ static const setting_t allBinds[] = {
     {"exit", "q"},
 };
 
-static const Colors_t allColors[] = {
+static Colors_t allColors[] = {
     {
         "menu",
         {"foreground", "black"},
@@ -99,9 +100,7 @@ static std::string getDefaultLocation();
 
 static bool exists(const std::string &file);
 
-Conf::Conf(){}
-
-Conf::Conf(std::string locate){
+void Conf::setLocation(std::string locate){
     location = locate;
 }
 
@@ -130,7 +129,8 @@ bool Conf::init() {
             try {
                 cfg.readFile(locate);
                 location = locate;
-                return verifyValues();
+                verifyValues();
+                return true;
             }
             catch (const libconfig::FileIOException &fioex) {
                 std::cerr << "I/O error while reading file." << std::endl;
@@ -164,6 +164,7 @@ bool Conf::init() {
 }
 
 bool Conf::verifyValues() {
+    bool ret = true;
     try {
         libconfig::Setting &binds = cfg.lookup("keybinds");
     }
@@ -180,14 +181,15 @@ bool Conf::verifyValues() {
     }
 
     libconfig::Setting &binds = cfg.lookup("keybinds");
-    for (const auto &b : allBinds) {
+    for (auto &b : allBinds) {
         try {
             libconfig::Setting &setting = binds.lookup(b.name);
+            b = {b.name, setting.c_str()};
         }
         catch (const libconfig::SettingNotFoundException &nfex) {
             std::cerr << "No keybind for " << b.name << " found in " << location << std::endl;
             binds.add(b.name, libconfig::Setting::TypeString) = b.value;
-            return false;
+            ret = false;
         }
     }
     libconfig::Setting &colors = cfg.lookup("colors");
@@ -200,12 +202,12 @@ bool Conf::verifyValues() {
                 if (color_map.count(fg) == 0) {
                     std::cerr << "Color " << fg << " is not known" << std::endl;
                     col.lookup("foreground") = c.foreground.value;
-                    return false;
+                    ret = false;
                 }
                 if (color_map.count(bg) == 0) {
                     std::cerr << "Color " << bg << " is not known" << std::endl;
                     col.lookup("background") = c.background.value;
-                    return false;
+                    ret = false;
                 }
             }
             catch (const libconfig::SettingNotFoundException &nfex) {
@@ -216,7 +218,7 @@ bool Conf::verifyValues() {
                 if (!col.exists("background")) {
                     col.add("background", libconfig::Setting::TypeString) = c.background.value;
                 }
-                return false;
+                ret = false;
             }
         }
         catch (const libconfig::SettingNotFoundException &nfex) {
@@ -227,7 +229,7 @@ bool Conf::verifyValues() {
         }
     }
 
-    return true;
+    return ret;
 }
 
 int Conf::keyBind(std::string key) {
@@ -258,24 +260,24 @@ static std::string getEnvVar(const std::string &key) {
 }
 
 static std::string getDefaultLocation() {
-    std::string location = getEnvVar("XDG_CONFIG_HOME");
-    if (location != "" && exists(location)) {
-        return location + "/tuidoku/tuidoku.conf";
+    std::string l = getEnvVar("XDG_CONFIG_HOME");
+    if (l != "" && exists(l)) {
+        return l+ "/tuidoku/tuidoku.conf";
     }
 
-    location = getEnvVar("HOME");
-    if (location != "") {
-        if (exists(location + "/.config")) {
-            return location + "/.config/tuidoku/tuidoku.conf";
+    l = getEnvVar("HOME");
+    if (l != "") {
+        if (exists(l + "/.config")) {
+            return l + "/.config/tuidoku/tuidoku.conf";
         }
-        if (exists(location)) {
-            return location + ".tuidoku.conf";
+        if (exists(l)) {
+            return l + ".tuidoku.conf";
         }
     }
 
-    location = "/etc/";
-    if (exists(location)) {
-        return location + "/tuidoku/tuidoku.conf";
+    l = "/etc/";
+    if (exists(l)) {
+        return l + "/tuidoku/tuidoku.conf";
     }
 
     return "";
