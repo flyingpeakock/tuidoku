@@ -1,5 +1,5 @@
 #pragma once
-#include "../src/Board.h"
+#include "../src/Play.h"
 
 struct SingleStats {
     int emptyGrids;
@@ -7,6 +7,6 @@ struct SingleStats {
     int movesToSolve;
 };
 
-SingleStats gradeBoard(Board &board);
+SingleStats gradeBoard(Play &board);
 
 void accumulateBoardGrades(int count);

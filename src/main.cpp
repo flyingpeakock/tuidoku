@@ -6,7 +6,6 @@
 #include <sstream>
 #include <iostream>
 #include <unistd.h>
-#include <random>
 #include "Config.h"
 
 /*global declaration of certain keys used in tui functions*/
@@ -100,38 +99,7 @@ void play(WINDOW *mainWindow) {
     wrefresh(mainWindow);
 
     Sudoku::puzzle grid;
-    if (choice == Sudoku::ANY) {
-        grid = Sudoku::generate();
-    }
-    else {
-        int min, max;
-        switch (choice) {
-            case Sudoku::BEGINNER:
-                min = 30;
-                max = 40;
-                break;
-            case Sudoku::EASY:
-                min = 40;
-                max = 45;
-                break;
-            case Sudoku::MEDIUM:
-                min = 45;
-                max = 50;
-                break;
-            case Sudoku::HARD:
-                min = 50;
-                max = 56;
-                break;
-            case Sudoku::EXPERT:
-                min = 56;
-                max = 60;
-                break;
-        }
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> distrib(min, max);
-        grid = Sudoku::generate(distrib(gen));
-    }
+    grid = Sudoku::generate(choice);
     try {
         std::vector<Play::keymap> keys = {
             {"up", Conf::keyBind("up")},

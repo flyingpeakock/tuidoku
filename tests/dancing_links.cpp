@@ -65,7 +65,7 @@ TEST(dancingLinks, can_solve) {
 }
 
 TEST(dancingLinks, generate_then_solve) {
-    Sudoku::puzzle grid = Sudoku::generate(0);
+    Sudoku::puzzle grid = Sudoku::generate();
     Sudoku::puzzle solved = grid;
     Sudoku::solve(solved, false);
     for (auto i = 0; i < 9; i++) {
@@ -73,21 +73,6 @@ TEST(dancingLinks, generate_then_solve) {
             if (grid[i][j] == 0) continue;
             EXPECT_EQ(grid[i][j], solved[i][j]);
         }
-    }
-}
-
-TEST(dancingLinks, generate_numb_of_unknowns) {
-    for (auto unknowns = 1; unknowns < 60; unknowns++) {
-        Sudoku::puzzle grid = Sudoku::generate(unknowns);
-        auto un = 0;
-        for (auto &i : grid) {
-            for (auto &j : i) {
-                if (j == 0) {
-                    un++;
-                }
-            }
-        }
-        EXPECT_EQ(un, unknowns);
     }
 }
 

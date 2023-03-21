@@ -12,6 +12,7 @@ struct Move {
     int val;
     int row;
     int col;
+    Sudoku::difficulty difficulty;
     void (Play::*move)(int, int, int);
     void operator()(Play *board) {
         if (move == NULL) return;
@@ -22,7 +23,6 @@ struct Move {
 struct Hint {
     std::string hint1;
     std::string hint2;
-    int difficulty;
     std::vector<Move> moves;
 };
 
@@ -71,10 +71,10 @@ class Play {
     void pencil(int val, int row, int col);
     void autoPencil();
 
-    bool isEmpty(int row, int col);
-    bool isWon();
+    bool isEmpty(int row, int col) const;
+    bool isWon() const;
 
-    std::uint16_t getPencil(int row, int col);
+    std::uint16_t getPencil(int row, int col) const;
 
     /*
     void autoPencil();

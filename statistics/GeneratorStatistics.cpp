@@ -1,20 +1,21 @@
 #include "GeneratorStatistics.h"
-#include "../src/Generator.h"
+#include "../src/Sudoku/Sudoku.h"
 #include "../src/HumanSolve.h"
 #include <iostream>
 
-static int countEmptyCells(const Board &board) {
+static int countEmptyCells(const Play &board) {
     int count = 0;
-    auto grid = board.getPlayGrid();
-    for (auto &row : grid) {
-        for (auto &cell : row) {
-            if (cell == 0) count++;
+    for (auto i = 0; i < Sudoku::SIZE; i++) {
+        for (auto j = 0; j < Sudoku::SIZE; j++) {
+            if (board.isEmpty(i, j)) {
+                count++;
+            }
         }
     }
     return count;
 }
 
-SingleStats gradeBoard(Board &board) {
+SingleStats gradeBoard(Play &board) {
     static int count = 0;
     count++;
     SingleStats stats = {};
@@ -33,7 +34,7 @@ SingleStats gradeBoard(Board &board) {
         }
         hint = solveHuman(board);
     }
-    if (board.getPlayGrid() != board.getSolution()) {
+    if (!board.isWon()) {
         stats.difficulty = hint.difficulty;
         std::cout << "---> Did not solve\n";
     }
@@ -50,7 +51,7 @@ void accumulateBoardGrades(int count) {
 
     for (auto i = 0; i < count; i++) {
         std::cout << "\nGenerating board " << i + 1 << '\n';
-        Board board = Generator().createBoard();
+        Play board({}, Sudoku::generate(), NULL);
         board.autoPencil();
         auto stats = gradeBoard(board);
         cum_difficulty += stats.difficulty;

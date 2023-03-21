@@ -255,15 +255,15 @@ void Play::autoPencil() {
     }
 }
 
-bool Play::isEmpty(int row, int col) {
+bool Play::isEmpty(int row, int col) const {
     return currentGrid[row][col] == 0;
 }
 
-std::uint16_t Play::getPencil(int row, int col) {
+std::uint16_t Play::getPencil(int row, int col) const {
     return pencilMarks[row][col];
 }
 
-bool Play::isWon() {
+bool Play::isWon() const {
     return currentGrid == solutionGrid;
 }
 

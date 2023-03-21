@@ -1,11 +1,11 @@
 #include "HumanSolverPercentage.h"
 #include "../src/HumanSolve.h"
-#include "../src/Generator.h"
+#include "../src/Sudoku/Sudoku.h"
 #include <iostream>
 #include <chrono>
 #include <ctime>
 
-bool HumanSolveUntilFailed(Board &board) {
+bool HumanSolveUntilFailed(Play &board) {
     Hint hint = solveHuman(board);
 
     // get the hint and make the moves until there are none left
@@ -16,9 +16,7 @@ bool HumanSolveUntilFailed(Board &board) {
         hint = solveHuman(board);
     }
 
-    puzzle grid = board.getPlayGrid();
-    puzzle sol = board.getSolution();
-    return grid == sol;
+    return board.isWon();
 }
 
 void getSolvedPercentage(int count) {
@@ -26,7 +24,7 @@ void getSolvedPercentage(int count) {
     for (auto i = 0; i < count; i++) {
         std::cout << "Generating board " << i + 1 << '\n';
         auto start_gen = std::chrono::system_clock::now();
-        Board board = Generator().createBoard();
+        Play board({}, Sudoku::generate(), NULL);
         auto end_gen = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsed_gen = end_gen - start_gen;
         std::cout << "--> Took: " << elapsed_gen.count() << "s\n";

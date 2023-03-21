@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../src/Board.h"
+#include "../src/Play.h"
 
-bool HumanSolveUntilFailed(Board &board);
+bool HumanSolveUntilFailed(Play &board);
 
 void getSolvedPercentage(int count);

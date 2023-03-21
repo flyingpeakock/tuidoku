@@ -43,6 +43,12 @@ set(TEST_SOURCES
 set(STATS_SOURCES
     # Add project source files here
     src/HumanSolve.cpp
+    src/Play.cpp
+    src/Sudoku/Generate.cpp
+    src/Sudoku/Solve.cpp
+    src/Sudoku/Sudoku.cpp
+    src/Tui/Tui.cpp
+    src/Config.cpp
 
     # Add statistics source files here
     statistics/main.cpp
@@ -65,6 +71,11 @@ find_package(Threads REQUIRED)
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE Threads::Threads
+    ${CURSES_LIBRARIES}
+    config++
+)
+
+target_link_libraries(${STATS_EXE}
     ${CURSES_LIBRARIES}
     config++
 )

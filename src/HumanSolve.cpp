@@ -109,10 +109,25 @@ static bool removedOccurrencesNaked(Play &board, std::uint16_t bits, char i_min,
             marks &= bits; // marks == bits that should be removed
             if ((marks) == 0) continue; // no marks set here
             auto set_bits = getSetBits(marks);
+            Sudoku::difficulty difficulty;
+            switch (countBits(bits)) {
+                case 1:
+                    difficulty = Sudoku::BEGINNER;
+                    break;
+                case 2:
+                    difficulty = Sudoku::EASY;
+                    break;
+                case 3:
+                case 4:
+                    difficulty = Sudoku::MEDIUM;
+                    break;
+                default:
+                    difficulty = Sudoku::ANY;
+            }
             for (auto &num : set_bits) {
                 //board.pencil(num + START_CHAR, i, j);
                 Move move = {
-                    (num + 1), i, j, &Play::pencil
+                    (num + 1), i, j, difficulty, &Play::pencil
                 };
                 moves.push_back(move);
                 ret = true;
@@ -131,10 +146,27 @@ static bool removedOccurrencesHidden(Play &board, std::uint16_t bits, char i_min
             if ((marks & bits) == 0) continue;
             marks &= ~bits;
             auto set_bits = getSetBits(marks);
+            Sudoku::difficulty difficulty;
+            switch (countBits(bits)) {
+                case 1:
+                case 2:
+                    difficulty = Sudoku::EASY;
+                    break;
+                case 3:
+                    difficulty = Sudoku::MEDIUM;
+                    break;
+                case 4:
+                case 5:
+                    difficulty = Sudoku::HARD;
+                    break;
+                default:
+                    difficulty = Sudoku::ANY;
+                    break;
+            }
             for (auto &num : set_bits) {
                 //board->pencil(num + START_CHAR, i, j);
                 Move move = {
-                    num + 1, i, j, &Play::pencil
+                    num + 1, i, j, difficulty, &Play::pencil
                 };
                 moves.push_back(move);
                 ret = true;
@@ -149,7 +181,6 @@ Hint solveHuman(Play &board) {
     Hint hint = {
         "",
         "",
-        0,
         {},
     };
 
@@ -174,7 +205,6 @@ Hint solveHuman(Play &board) {
             hint_2_stream << "row " << hint.moves[0].row + 1 << " column " << hint.moves[0].col + 1 << " can only be " << hint.moves[0].val;
             hint.hint1 = hint_1_stream.str();
             hint.hint2 = hint_2_stream.str();
-            hint.difficulty = 1;
             return hint;
 
         }
@@ -186,7 +216,6 @@ Hint solveHuman(Play &board) {
             hint_2_stream << "row " << hint.moves[0].row + 1 << " column " << hint.moves[0].col + 1 << " is the only possible location for " << hint.moves[0].val;
             hint.hint1 = hint_1_stream.str();
             hint.hint2 = hint_2_stream.str();
-            hint.difficulty = 2;
             return hint;
         }
     }
@@ -200,7 +229,6 @@ Hint solveHuman(Play &board) {
                 hint_2_stream << "The digit " << hint.moves[0].val << " forms a pointing box.";
                 hint.hint1 = hint_1_stream.str();
                 hint.hint2 = hint_2_stream.str();
-                hint.difficulty = 3;
                 return hint;
             }
         }
@@ -210,13 +238,11 @@ Hint solveHuman(Play &board) {
         if (findNaked(board, num, hint.moves)) {
             hint.hint1 = "Look for a naked double";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.difficulty = 4;
             return hint;
         }
         if (findHidden(board, num, hint.moves)) {
             hint.hint1 = "Look for a hidden double";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.difficulty = 5;
             return hint;
         }
     }
@@ -226,7 +252,6 @@ Hint solveHuman(Play &board) {
         std::stringstream hint_2_stream;
         hint.hint1 = "Look for locked candidates";
         hint.hint2 = getGenericHint(hint.moves);
-        hint.difficulty = 6;
         return hint;
     }
     for (auto &triple : all_triples) {
@@ -234,7 +259,6 @@ Hint solveHuman(Play &board) {
             //return true;
             hint.hint1 = "Look for a naked triple";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.difficulty = 7;
             return hint;
         }
     }
@@ -243,7 +267,6 @@ Hint solveHuman(Play &board) {
             //return true;
             hint.hint1 = "Look for a naked quadtruple";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.difficulty = 8;
             return hint;
         }
     }
@@ -252,7 +275,6 @@ Hint solveHuman(Play &board) {
             //return true;
             hint.hint1 = "Look for a hidden triple";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.difficulty = 9;
             return hint;
         }
     }
@@ -261,7 +283,6 @@ Hint solveHuman(Play &board) {
             //return true;
             hint.hint1 = "Look for a hidden quadruple";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.difficulty = 10;
             return hint;
         }
     }
@@ -271,14 +292,12 @@ Hint solveHuman(Play &board) {
         hint.hint1 = "Look for a bug";
         std::stringstream hintStream;
         hintStream << "The digit " << hint.moves[0].val << "can only go in row " << hint.moves[0].row + 1 << "and in column " << hint.moves[0].col + 1;
-        hint.difficulty = 11;
         return hint;
     }
     for (auto &doub : all_doubles) {
         if (findChainOfPairs(board, doub, hint.moves)) {
             hint.hint1 = "Look for a chain of pairs";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.difficulty = 12;
             return hint;
         }
     }
@@ -287,7 +306,6 @@ Hint solveHuman(Play &board) {
             //return true;
             hint.hint1 = "Look for a unique rectangle";
             hint.hint2 = getGenericHint(hint.moves);
-            hint.difficulty = 13;
             return hint;
         }
     }
@@ -299,14 +317,12 @@ Hint solveHuman(Play &board) {
             hintstr << "Look closer at the digit ";
             hintstr << hint.moves[0].val;
             hint.hint2 = hintstr.str();
-            hint.difficulty = 14;
             return hint;
         }
     }
 
     hint.hint1 = "Unable to give any hints";
     hint.hint2 = "This is out of my league";
-    hint.difficulty = 15;
     return hint;
 }
 
@@ -329,6 +345,7 @@ bool findNakedSingles(Play &board, const std::uint16_t single, Move *move) {
                 (*move).row = i;
                 (*move).val = getSetBits(single)[0] + 1;
                 (*move).move = &Play::insert;
+                (*move).difficulty = Sudoku::BEGINNER;
                 return true;
             }
         }
@@ -360,6 +377,7 @@ bool findHiddenSingles(Play &board, const std::uint16_t single, Move *move) {
                 (*move).row = i;
                 (*move).val = getSetBits(single)[0] + 1;
                 (*move).move = &Play::insert;
+                (*move).difficulty = Sudoku::EASY;
                 return true;
             }
         }
@@ -440,7 +458,7 @@ static bool removeMarks_i_box(Play &board, char val, char i, char j_box, std::ve
         if (!board.isEmpty(i, idx)) continue;
         if ((board.getPencil(i, idx) & (1 << val)) != 0) {
             //board->pencil(val + START_CHAR, i, idx);
-            Move move = {val + 1, i, idx, &Play::pencil};
+            Move move = {val + 1, i, idx, Sudoku::MEDIUM, &Play::pencil};
             moves.push_back(move);
             return true;
         }
@@ -454,7 +472,7 @@ static bool removeMarks_j_box(Play &board, char val, char j, char i_box, std::ve
         if (!board.isEmpty(idx, j)) continue;
         if ((board.getPencil(idx, j) & (1 << val)) != 0) {
             //board->pencil(val + START_CHAR, idx, j);
-            Move move = {val + 1, idx, j, &Play::pencil};
+            Move move = {val + 1, idx, j, Sudoku::MEDIUM, &Play::pencil};
             moves.push_back(move);
             return true;
         }
@@ -535,7 +553,7 @@ static bool removedLockedIFromBox(Play &board, char box_i, char box_j, char lock
             if (i == locked_i) continue;
             if ((board.getPencil(i, j) & (1 << num)) != 0) {
                 //board->pencil(num + START_CHAR, i, j);
-                Move move = {num + 1, i, j, &Play::pencil};
+                Move move = {num + 1, i, j, Sudoku::MEDIUM, &Play::pencil};
                 moves.push_back(move);
                 ret = true;
             }
@@ -552,7 +570,7 @@ static bool removedLockedJFromBox(Play &board, char box_i, char box_j, char lock
             if (j == locked_j) continue;
             if ((board.getPencil(i, j) & (1 << num)) != 0) {
                 //board->pencil(num + START_CHAR, i, j);
-                Move move = {num + 1, i, j, &Play::pencil};
+                Move move = {num + 1, i, j, Sudoku::MEDIUM, &Play::pencil};
                 moves.push_back(move);
                 ret = true;
             }
@@ -670,8 +688,22 @@ static bool removeXwingByRows(Play &board, const std::uint16_t num, std::uint16_
             if (!board.isEmpty(i, j)) continue;
             auto marks = board.getPencil(i, j) & num;
             if (marks == 0) continue;
+            Sudoku::difficulty difficulty;
+            int indexes = i_indexes > j_indexes ? i_indexes : j_indexes;
+            switch (countBits(indexes)) {
+                case 2:
+                    difficulty = Sudoku::HARD;
+                    break;
+                case 3:
+                case 4:
+                    difficulty = Sudoku::EXPERT;
+                    break;
+                default:
+                    difficulty = Sudoku::ANY;
+                    break;
+            }
             for (auto unset : getSetBits(marks)) {
-                Move move = {unset + 1, i, j, &Play::pencil};
+                Move move = {unset + 1, i, j, difficulty, &Play::pencil};
                 moves.push_back(move);
                 ret = true;
             }
@@ -701,8 +733,22 @@ static bool removeXwingByCols(Play &board, const std::uint16_t num, std::uint16_
             if (!board.isEmpty(i, j)) continue;
             auto marks = board.getPencil(i, j) & num;
             if (marks == 0) continue;
+            Sudoku::difficulty difficulty;
+            int indexes = i_indexes > j_indexes ? i_indexes : j_indexes;
+            switch (countBits(indexes)) {
+                case 2:
+                    difficulty = Sudoku::HARD;
+                    break;
+                case 3:
+                case 4:
+                    difficulty = Sudoku::EXPERT;
+                    break;
+                default:
+                    difficulty = Sudoku::ANY;
+                    break;
+            }
             for (auto unset : getSetBits(marks)) {
-                Move move = {unset + 1, i, j, &Play::pencil};
+                Move move = {unset + 1, i, j, difficulty, &Play::pencil};
                 moves.push_back(move);
                 ret = true;
             }
@@ -788,7 +834,7 @@ bool findUniqueRectangle(Play &board, const std::uint16_t num, std::vector<Move>
             auto mark = board.getPencil(intersect_i, intersect_j) & num;
             if (mark == 0) continue;
             for (auto &unset : getSetBits(mark)) {
-                Move move = {unset + 1, intersect_i, intersect_j, &Play::pencil };
+                Move move = {unset + 1, intersect_i, intersect_j, Sudoku::HARD, &Play::pencil };
                 moves.push_back(move);
             }
             return true;
@@ -819,36 +865,6 @@ static bool canSee(char i_1, char j_1, char i_2, char j_2) {
 }
 
 /**
- * @brief seperates the all vector into two chains that see each other
- * 
- * @param chain_a starts with one item in it
- * @param chain_b empty vector
- * @param all all the found doubles
- * @return true if a link has been added to the chain
- * @return false all links have been searched through
- */
-static bool build_chain(std::vector<Coord> &chain_a, std::vector<Coord> &chain_b,  std::vector<Coord> &all) {
-    if (all.size() == 0) return false;
-    for (std::vector<Coord>::iterator link_itr = all.begin(); link_itr != all.end(); link_itr++) {
-        for (auto a : chain_a) {
-            if (canSee((*link_itr).i, (*link_itr).j, a.i, a.j)) {
-                chain_b.push_back(*link_itr);
-                link_itr = all.erase(link_itr);
-                return true;
-            }
-        }
-        for (auto b : chain_b) {
-            if (canSee((*link_itr).i, (*link_itr).j, b.i, b.j)) {
-                chain_a.push_back(*link_itr);
-                link_itr = all.erase(link_itr);
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-/**
  * @brief looks for values that are seen by both chains and removes the pencil mark
  * 
  * @param board board that the chains have been found in
@@ -859,7 +875,7 @@ static bool build_chain(std::vector<Coord> &chain_a, std::vector<Coord> &chain_b
  * @return true if moves are found
  * @return false if moves are not found
  */
-static bool removedByChain(Play &board, const std::uint16_t num, std::vector<Coord> chain_a, std::vector<Coord> chain_b, std::vector<Move> &moves) {
+static bool removedByChain(Play &board, const std::uint16_t num, std::vector<int> chain_a, std::vector<int> chain_b, std::vector<Move> &moves) {
     for (char i = 0; i < 9; i++) {
         for (char j = 0; j < 9; j++) {
             if (!board.isEmpty(i, j)) continue;
@@ -869,13 +885,13 @@ static bool removedByChain(Play &board, const std::uint16_t num, std::vector<Coo
             bool seen_a = false;
             bool seen_b = false;
             for (auto &a : chain_a) {
-                if (canSee(i, j, a.i, a.j)) {
+                if (canSee(i, j, a%9, a/9)) {
                     seen_a = true;
                     break;
                 }
             }
             for (auto &b : chain_b) {
-                if (canSee(i, j, b.i, b.j)) {
+                if (canSee(i, j, b%9, b/9)) {
                     seen_b = true;
                     break;
                 }
@@ -883,7 +899,7 @@ static bool removedByChain(Play &board, const std::uint16_t num, std::vector<Coo
             if (seen_a && seen_b) {
                 bool should_ret = false;
                 for (auto unset : getSetBits(marks)) {
-                    Move move = {unset + 1, i, j, &Play::pencil};
+                    Move move = {unset + 1, i, j, Sudoku::EXPERT, &Play::pencil};
                     moves.push_back(move);
                     should_ret = true;
                 }
@@ -892,6 +908,52 @@ static bool removedByChain(Play &board, const std::uint16_t num, std::vector<Coo
         }
     }
     return false;
+}
+
+template<typename T, template<typename, typename = std::allocator<T>> class C>
+inline bool contains(C<T> container, T data) {
+    for (const auto d : container) {
+        if (d == data) return true;
+    }
+    return false;
+}
+
+
+/**
+ * @brief build the two chains that are needed to create a chain of pairs
+ *        if any pairs are added to any chain the function calls itself
+ *        if no pairs are added the function returns
+ * 
+ * @param all all the pairs
+ * @param chain_a the pairs in chain a
+ * @param chain_b the pairs in chain b
+ * @param depth the depth of recursion (may not be needed)
+ */
+void build_chains(const std::vector<int> all, std::vector<int> &chain_a, std::vector<int> &chain_b, int depth) {
+    bool should_ret = true;
+    for (const auto pair : all) {
+        if (contains<int, std::vector>(chain_a, pair)) continue;
+        if (contains<int, std::vector>(chain_b, pair)) continue;
+        int i = pair % 9;
+        int j = pair / 9;
+        for (const auto a : chain_a) {
+            int i_a = a % 9;
+            int j_a = a / 9;
+            if (canSee(i, j, i_a, j_a)) {
+                chain_b.push_back(pair);
+                return build_chains(all, chain_a, chain_b, depth++);
+            }
+        }
+        for (const auto b : chain_b) {
+            int i_b = b % 9;
+            int j_b = b / 9;
+            if (canSee(i, j, i_b, j_b)) {
+                chain_a.push_back(pair);
+                return build_chains(all, chain_a, chain_b, depth++);
+            }
+        }
+    }
+    return;
 }
 
 /**
@@ -904,28 +966,25 @@ static bool removedByChain(Play &board, const std::uint16_t num, std::vector<Coo
  * @return false if moves are not found
  */
 bool findChainOfPairs(Play &board, const std::uint16_t num, std::vector<Move> &moves) {
-    std::vector<Coord> all_doubles;
+    std::vector<int> all_doubles;
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
             if (!board.isEmpty(i, j)) continue;
             if (board.getPencil(i, j) != num) continue;
-            // Double in this location
-            Coord here = {i, j};
+            int here = i + (j * 9);
             all_doubles.push_back(here);
         }
     }
+
+    // can't build chain with less than 3 doubles
     if (all_doubles.size() < 3) return false;
-    int chain_idx = 0;
-    for (auto link : all_doubles) {
-        auto chain = all_doubles;
-        std::vector<Coord> chain_a, chain_b;
-        chain_a.push_back(link);
-        chain.erase(chain.begin() + chain_idx++);
-        while (build_chain(chain_a, chain_b, chain)) {};
-        if (chain_a.size() + chain_b.size() < 4) continue;
-        if (removedByChain(board, num, chain_a, chain_b, moves)) {
-            return true;
-        }
+    std::vector<int> chain_a, chain_b;
+    chain_a.push_back(all_doubles[0]);
+    build_chains(all_doubles, chain_a, chain_b, 0);
+    if (chain_a.size() + chain_b.size() < 4) return false;
+    if (removedByChain(board, num, chain_a, chain_b, moves)) {
+        return true;
     }
+
     return false;
 }
