@@ -67,10 +67,16 @@ static Sudoku::puzzle removeGivens(Sudoku::puzzle filled) {
     return grid;
 }
 
+static Sudoku::difficulty gradePuzzle(Play &board, Sudoku::difficulty maxDiff);
+
 static Sudoku::difficulty gradePuzzle(Sudoku::puzzle &grid, Sudoku::difficulty maxDiff) {
-    // Ranking the board using the human solver
     Play board({}, grid, NULL);
     board.autoPencil();
+    return gradePuzzle(board, maxDiff);
+}
+
+static Sudoku::difficulty gradePuzzle(Play &board, Sudoku::difficulty maxDiff) {
+    // Ranking the board using the human solver
     Hint hint = solveHuman(board);
     std::vector<Hint> allHints;
     allHints.push_back(hint);
@@ -97,9 +103,8 @@ static Sudoku::difficulty gradePuzzle(Sudoku::puzzle &grid, Sudoku::difficulty m
 
             // filling in more difficult moves
             if (m.difficulty > maxDiff) {
-                //grid[m.row][m.col] = m.val;
-                grid[m.row][m.col] = board.getAnswer(m.row, m.col);
-                return gradePuzzle(grid, maxDiff);
+                board.insert(board.getAnswer(m.row, m.col), m.row, m.col);
+                return gradePuzzle(board, maxDiff);
             }
         }
     }
