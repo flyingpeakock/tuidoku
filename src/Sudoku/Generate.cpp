@@ -84,7 +84,7 @@ static Sudoku::difficulty gradePuzzle(Sudoku::puzzle &grid, Sudoku::difficulty m
 
     // Couldn't solve
     if (!board.isWon()) {
-        return Sudoku::ANY;
+        return Sudoku::HIGHEST;
     }
 
     Sudoku::difficulty highestDifficulty = Sudoku::BEGINNER;

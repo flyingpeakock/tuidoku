@@ -18,6 +18,9 @@ struct Move {
         if (move == NULL) return;
         return (board->*move)(val, row, col);
     }
+    const bool operator==(const Move &m) const{
+        return val == m.val && row == m.row && col == m.col && move == m.move;
+    }
 };
 
 struct Hint {

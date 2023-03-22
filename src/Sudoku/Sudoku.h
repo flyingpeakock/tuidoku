@@ -12,6 +12,7 @@ namespace Sudoku {
         HARD,
         EXPERT,
         ANY,
+        HIGHEST = EXPERT,
     };
 
     typedef std::array<std::array<int, SIZE>, SIZE> puzzle;

@@ -13,4 +13,6 @@ bool findNaked(Play &board, const std::uint16_t num, std::vector<Move> &moves);
 bool findBug(Play &board, Move *move);
 bool findXwing(Play &board, const std::uint16_t num, std::vector<Move> &moves);
 bool findUniqueRectangle(Play &board, const std::uint16_t num, std::vector<Move> &moves);
-bool findChainOfPairs(Play &board, const std::uint16_t num, std::vector<Move> &move);
+bool findChainOfPairs(Play &board, const std::uint16_t num, std::vector<Move> &moves);
+bool findXYwing(Play &board, const std::uint16_t num, std::vector<Move> &moves);
+bool findXYwing(Play &board, std::vector<Move> &moves);

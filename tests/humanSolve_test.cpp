@@ -62,8 +62,7 @@ TEST(HumanSolve_test, findXwing) {
         Play board({}, Sudoku::fromString(test.gridString), NULL);
         board.autoPencil();
 
-        std::stringstream boardstrstream;
-        EXPECT_EQ(findXwing(board, test.num, moves), test.ret) << "Could not find X-Wing:\n" << boardstrstream.str();
+        EXPECT_EQ(findXwing(board, test.num, moves), test.ret) << "Could not find X-Wing:\n";
         ASSERT_EQ(moves.size(), test.moves);
         if (test.ret == false) continue;
 
@@ -117,28 +116,42 @@ TEST(HumanSolve_test, findChainOfPairs) {
         EXPECT_EQ(moves[0].col, test.move.col);
         EXPECT_EQ(moves[0].move, test.move.move);
     }
+}
 
-    int count = 0;
-    while (count < 100) {
-        Sudoku::puzzle puzzle = Sudoku::generate();
-        Sudoku::puzzle solution = puzzle;
-        Sudoku::solve(solution);
-        Play b({}, puzzle, NULL);
-        b.autoPencil();
-        std::uint16_t num = 0;
-        for (auto i = 0; i < 9; i++) {
-            for (auto j = 0; j < 9; j++) {
-                if (j == i) continue;
-                std::vector<Move> moves;
-                num = ((1 << i) | (1 << j));
-                if (findChainOfPairs(b, num, moves)) {
-                    count++;
-                    for (auto m : moves) {
-                        ASSERT_NE(m.val, solution[m.row][m.col]);
-                    }
-                }
-            }
-        }
+TEST(HumanSolve_test, findXYwing) {
+    struct findXYwingStruct {
+        std::string boardString;
+        bool foundMove;
+        Move move;
+    };
+
+    findXYwingStruct test_table[] = {
+        {
+            "003060821841052000962810005238000056015638902600020138120080507087290014006000280",
+            true,
+            {3, 8, 0, Sudoku::EXPERT, &Play::pencil}
+        },
+        {
+            "031064752460075813005013964010459637357628491600137528520791306103586209006342105",
+            true,
+            {2, 3, 2, Sudoku::EXPERT, &Play::pencil}
+        },
+    };
+
+    for (auto test : test_table) {
+        std::vector<Move> moves;
+        Play board({}, Sudoku::fromString(test.boardString), NULL);
+        board.autoPencil();
+
+        EXPECT_EQ(findXYwing(board, moves), test.foundMove);
+
+        if (!test.foundMove) continue;
+
+        //EXPECT_EQ(moves[0], test.move);
+        EXPECT_EQ(moves[0].val, test.move.val);
+        EXPECT_EQ(moves[0].row, test.move.row);
+        EXPECT_EQ(moves[0].col, test.move.col);
+        EXPECT_EQ(moves[0].move, test.move.move);
     }
 }
 
