@@ -84,7 +84,8 @@ static Sudoku::difficulty gradePuzzle(Sudoku::puzzle &grid, Sudoku::difficulty m
 
     // Couldn't solve
     if (!board.isWon()) {
-        return Sudoku::HIGHEST;
+        //return Sudoku::HIGHEST;
+        return Sudoku::ANY;
     }
 
     Sudoku::difficulty highestDifficulty = Sudoku::BEGINNER;
@@ -96,7 +97,8 @@ static Sudoku::difficulty gradePuzzle(Sudoku::puzzle &grid, Sudoku::difficulty m
 
             // filling in more difficult moves
             if (m.difficulty > maxDiff) {
-                grid[m.row][m.col] = m.val;
+                //grid[m.row][m.col] = m.val;
+                grid[m.row][m.col] = board.getAnswer(m.row, m.col);
                 return gradePuzzle(grid, maxDiff);
             }
         }

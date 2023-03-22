@@ -78,6 +78,7 @@ class Play {
     bool isWon() const;
 
     std::uint16_t getPencil(int row, int col) const;
+    int getAnswer(int row, int col) const;
 
     /*
     void autoPencil();

@@ -263,6 +263,11 @@ std::uint16_t Play::getPencil(int row, int col) const {
     return pencilMarks[row][col];
 }
 
+int Play::getAnswer(int row, int col) const
+{
+    return solutionGrid[row][col];
+}
+
 bool Play::isWon() const {
     return currentGrid == solutionGrid;
 }

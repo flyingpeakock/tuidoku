@@ -984,13 +984,20 @@ bool findChainOfPairs(Play &board, const std::uint16_t num, std::vector<Move> &m
     }
 
     // can't build chain with less than 3 doubles
-    if (all_doubles.size() < 3) return false;
-    std::vector<int> chain_a, chain_b;
-    chain_a.push_back(all_doubles[0]);
-    build_chains(all_doubles, chain_a, chain_b, 0);
-    if (chain_a.size() + chain_b.size() < 4) return false;
-    if (removedByChain(board, num, chain_a, chain_b, moves)) {
-        return true;
+    if (all_doubles.size() <= 3) return false;
+    for (auto i = 0; i < all_doubles.size(); i++) {
+        std::vector<int> chain_a, chain_b;
+        chain_a.push_back(all_doubles[i]);
+        build_chains(all_doubles, chain_a, chain_b, 0);
+        if (chain_a.size() + chain_b.size() < 4) return false;
+        if (removedByChain(board, num, chain_a, chain_b, moves)) {
+            return true;
+        }
+
+        if ((all_doubles.size() - (chain_a.size() + chain_b.size())) <= 3) {
+            // Can't build another chain
+            return false;
+        }
     }
 
     return false;
