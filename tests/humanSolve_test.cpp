@@ -13,17 +13,17 @@ TEST(HumanSolve_test, findNakedSingle) {
     };
 
     for (auto &test : test_table) {
-        Move move = {};
+        std::vector<Move> move = {};
         Play board({}, Sudoku::fromString(test.gridString), NULL);
         board.autoPencil();
 
-        EXPECT_EQ(findNakedSingles(board, test.num, &move), test.ret);
+        EXPECT_EQ(findNakedSingles(board, move), test.ret);
         if (test.ret == false) continue;
 
-        EXPECT_EQ(move.val, test.move.val);
-        EXPECT_EQ(move.row, test.move.row);
-        EXPECT_EQ(move.col, test.move.col);
-        EXPECT_EQ(move.move, test.move.move);
+        EXPECT_EQ(move[0].val, test.move.val);
+        EXPECT_EQ(move[0].row, test.move.row);
+        EXPECT_EQ(move[0].col, test.move.col);
+        EXPECT_EQ(move[0].move, test.move.move);
     }
 }
 

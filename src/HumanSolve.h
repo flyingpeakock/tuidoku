@@ -4,7 +4,8 @@
 #include <string>
 
 Hint solveHuman(Play &board);
-bool findNakedSingles(Play &board, const std::uint16_t num, Move *move); // beginner
+//bool findNakedSingles(Play &board, const std::uint16_t num, Move *move); // beginner
+bool findNakedSingles(Play &board, std::vector<Move> &moves);
 bool findHiddenSingles(Play &board, const std::uint16_t num, Move *move); // easy
 bool findPointingBox(Play &board, int i_start, int j_start, std::vector<Move> &moves); // medium
 bool findLockedCandidates(Play &board, std::vector<Move> &moves); // medium

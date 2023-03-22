@@ -1,15 +1,6 @@
 #include "HumanSolve.h"
-#include <map>
-#include <unordered_set>
-#include <utility>
-#include <algorithm>
 #include <sstream>
 #include <bitset>
-
-struct Coord {
-    int i;
-    int j;
-};
 
 static std::string getGenericHint(std::vector<Move> moves) {
     std::stringstream ret;
@@ -50,9 +41,9 @@ static inline int countBits(std::uint16_t bits) {
 
  static std::vector<char> getSetBits(std::uint16_t bits) {
     std::vector<char> nums;
-    for (unsigned char num = 0; num < 9; num++) {
-        if ((bits & (1 << num)) != 0) {
-            nums.push_back(num);
+    for (auto num = 0u; num < 9; num++) {
+        if ((bits & (1u << num)) != 0) {
+            nums.emplace_back(num);
         }
     }
     return nums;
@@ -189,8 +180,18 @@ Hint solveHuman(Play &board) {
     static auto all_doubles = getCombinations(2);
     static auto all_triples = getCombinations(3);
     static auto all_quads = getCombinations(4);
+    if (findNakedSingles(board, hint.moves)) {
+        std::stringstream hint_1_stream;
+        std::stringstream hint_2_stream;
+        hint_1_stream << "Look closer at the digit " << hint.moves[0].val;
+        hint_2_stream << "row " << hint.moves[0].row + 1 << " column " << hint.moves[0].col + 1 << " can only be " << hint.moves[0].val;
+        hint.hint1 = hint_1_stream.str();
+        hint.hint2 = hint_2_stream.str();
+        return hint;
+    }
     for (auto &num : all_singles) {
         Move single_move;
+        /*
         if (findNakedSingles(board, num, &single_move)) {
             //return true;
             hint.moves.push_back(single_move);
@@ -203,6 +204,7 @@ Hint solveHuman(Play &board) {
             return hint;
 
         }
+        */
         if (findHiddenSingles(board, num, &single_move)) {
             hint.moves.push_back(single_move);
             std::stringstream hint_1_stream;
@@ -336,22 +338,21 @@ Hint solveHuman(Play &board) {
  * @return true when found a naked single
  * @return false otherwise
  */
-bool findNakedSingles(Play &board, const std::uint16_t single, Move *move) {
+bool findNakedSingles(Play &board, std::vector<Move> &moves) {
+    bool ret = false;
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
             if (!board.isEmpty(i, j)) continue;
-            if (board.getPencil(i, j) == single) {
-                //board->insert(getSetBits(single)[0] + START_CHAR, i ,j);
-                (*move).col = j;
-                (*move).row = i;
-                (*move).val = getSetBits(single)[0] + 1;
-                (*move).move = &Play::insert;
-                (*move).difficulty = Sudoku::BEGINNER;
-                return true;
+            auto marks = board.getPencil(i, j);
+            if (countBits(marks) != 1) continue;
+            for (auto bits : getSetBits(marks)) {
+                Move m = {bits + 1, i, j, Sudoku::BEGINNER, &Play::insert};
+                moves.push_back(m);
+                ret = true;
             }
         }
     }
-    return false;
+    return ret;
 }
 
 /**
