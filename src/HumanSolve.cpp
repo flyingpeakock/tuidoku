@@ -96,7 +96,7 @@ static bool removedOccurrencesNaked(Play &board, std::uint16_t bits, char i_min,
             if ((marks) == 0) continue; // no marks set here
             auto set_bits = getSetBits(marks);
             Sudoku::difficulty difficulty;
-            switch (countBits(bits)) {
+            switch (set_bits.size()) {
                 case 1:
                     difficulty = Sudoku::BEGINNER;
                     break;
@@ -110,7 +110,7 @@ static bool removedOccurrencesNaked(Play &board, std::uint16_t bits, char i_min,
                 default:
                     difficulty = Sudoku::HARD;
             }
-            for (auto &num : set_bits) {
+            for (const auto &num : set_bits) {
                 //board.pencil(num + START_CHAR, i, j);
                 Move move = {
                     (num + 1), i, j, difficulty, &Play::pencil
