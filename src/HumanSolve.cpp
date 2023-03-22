@@ -189,24 +189,7 @@ Hint solveHuman(Play &board) {
         hint.hint2 = hint_2_stream.str();
         return hint;
     }
-    for (auto &num : all_singles) {
-        Move single_move;
-        /*
-        if (findNakedSingles(board, num, &single_move)) {
-            //return true;
-            hint.moves.push_back(single_move);
-            std::stringstream hint_1_stream;
-            std::stringstream hint_2_stream;
-            hint_1_stream << "Look closer at the digit " << hint.moves[0].val;
-            hint_2_stream << "row " << hint.moves[0].row + 1 << " column " << hint.moves[0].col + 1 << " can only be " << hint.moves[0].val;
-            hint.hint1 = hint_1_stream.str();
-            hint.hint2 = hint_2_stream.str();
-            return hint;
-
-        }
-        */
-        if (findHiddenSingles(board, num, &single_move)) {
-            hint.moves.push_back(single_move);
+    if (findHiddenSingles(board, hint.moves)) {
             std::stringstream hint_1_stream;
             std::stringstream hint_2_stream;
             hint_1_stream << "Look closer at the digit " << hint.moves[0].val;
@@ -214,7 +197,6 @@ Hint solveHuman(Play &board) {
             hint.hint1 = hint_1_stream.str();
             hint.hint2 = hint_2_stream.str();
             return hint;
-        }
     }
     
     for (char i = 0; i < 9; i += 3) {
@@ -364,27 +346,28 @@ bool findNakedSingles(Play &board, std::vector<Move> &moves) {
  * @return true when a hidden single is found
  * @return false otherwise
  */
-bool findHiddenSingles(Play &board, const std::uint16_t single, Move *move) {
+bool findHiddenSingles(Play &board, std::vector<Move> &moves) {
+    bool ret = false;
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
             if (!board.isEmpty(i ,j)) continue;
-            if ((board.getPencil(i, j) & single) == 0) continue;
+            //if ((board.getPencil(i, j) & single) == 0) continue;
             auto i_box = (i / 3) * 3;
             auto j_box = (j / 3) * 3;
             std::uint16_t trash;
-            if ((countOccurrencesHidden(board, single, i_box, i_box + 3, j_box, j_box + 3, trash, trash) == 1)
-                || (countOccurrencesHidden(board, single, i, i + 1, 0, 9, trash, trash) == 1)
-                || (countOccurrencesHidden(board, single, 0, 9, j, j + 1, trash, trash) == 1)) {
-                (*move).col = j;
-                (*move).row = i;
-                (*move).val = getSetBits(single)[0] + 1;
-                (*move).move = &Play::insert;
-                (*move).difficulty = Sudoku::EASY;
-                return true;
+            for (auto b : getSetBits(board.getPencil(i, j))) {
+                std::uint16_t single = (1 << b);
+                if ((countOccurrencesHidden(board, single, i_box, i_box + 3, j_box, j_box + 3, trash, trash) == 1)
+                    || (countOccurrencesHidden(board, single, i, i + 1, 0, 9, trash, trash) == 1)
+                    || (countOccurrencesHidden(board, single, 0, 9, j, j + 1, trash, trash) == 1)) {
+                    Move m = {b + 1, i, j, Sudoku::EASY, &Play::insert};
+                    moves.push_back(m);
+                    ret = true;
+                }
             }
         }
     }
-    return false;
+    return ret;
 }
 
 bool findNaked(Play &board, const std::uint16_t num, std::vector<Move> &moves) {
