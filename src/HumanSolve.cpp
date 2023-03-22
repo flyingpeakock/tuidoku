@@ -4,6 +4,7 @@
 #include <utility>
 #include <algorithm>
 #include <sstream>
+#include <bitset>
 
 struct Coord {
     int i;
@@ -42,15 +43,9 @@ static std::vector<uint16_t> getCombinations(int k) {
     return final;
 }
 
-static int countBits(std::uint16_t bits) {
-    int count = 0;
-    while (bits != 0) {
-        if ((bits & 1) == 1) {
-            count++;
-        }
-        bits >>=1;
-    }
-    return count;
+static inline int countBits(std::uint16_t bits) {
+   const std::bitset<16> b(bits);
+   return b.count();
 }
 
  static std::vector<char> getSetBits(std::uint16_t bits) {
@@ -122,7 +117,7 @@ static bool removedOccurrencesNaked(Play &board, std::uint16_t bits, char i_min,
                     difficulty = Sudoku::MEDIUM;
                     break;
                 default:
-                    difficulty = Sudoku::ANY;
+                    difficulty = Sudoku::HARD;
             }
             for (auto &num : set_bits) {
                 //board.pencil(num + START_CHAR, i, j);
@@ -160,7 +155,7 @@ static bool removedOccurrencesHidden(Play &board, std::uint16_t bits, char i_min
                     difficulty = Sudoku::HARD;
                     break;
                 default:
-                    difficulty = Sudoku::ANY;
+                    difficulty = Sudoku::HIGHEST;
                     break;
             }
             for (auto &num : set_bits) {
@@ -262,26 +257,10 @@ Hint solveHuman(Play &board) {
             return hint;
         }
     }
-    for (auto &quad : all_quads) {
-        if (findNaked(board, quad, hint.moves)) {
-            //return true;
-            hint.hint1 = "Look for a naked quadtruple";
-            hint.hint2 = getGenericHint(hint.moves);
-            return hint;
-        }
-    }
     for (auto &triple : all_triples) {
         if (findHidden(board, triple, hint.moves)) {
             //return true;
             hint.hint1 = "Look for a hidden triple";
-            hint.hint2 = getGenericHint(hint.moves);
-            return hint;
-        }
-    }
-    for (auto &quad : all_quads) {
-        if (findHidden(board, quad, hint.moves)) {
-            //return true;
-            hint.hint1 = "Look for a hidden quadruple";
             hint.hint2 = getGenericHint(hint.moves);
             return hint;
         }
@@ -326,6 +305,21 @@ Hint solveHuman(Play &board) {
         hint.hint1 = "Look for an XY-wing";
         hint.hint2 = getGenericHint(hint.moves);
         return hint;
+    }
+
+    for (auto &quad : all_quads) {
+        if (findNaked(board, quad, hint.moves)) {
+            //return true;
+            hint.hint1 = "Look for a naked quadtruple";
+            hint.hint2 = getGenericHint(hint.moves);
+            return hint;
+        }
+        if (findHidden(board, quad, hint.moves)) {
+            //return true;
+            hint.hint1 = "Look for a hidden quadruple";
+            hint.hint2 = getGenericHint(hint.moves);
+            return hint;
+        }
     }
 
     hint.hint1 = "Unable to give any hints";
@@ -646,6 +640,7 @@ bool findBug(Play &board, Move *move) {
             (*move).col = row;
             (*move).row = col;
             (*move).val = num + 1;
+            (*move).difficulty = Sudoku::HARD;
             (*move).move = &Play::insert;
             return true;
         }
@@ -706,7 +701,7 @@ static bool removeXwingByRows(Play &board, const std::uint16_t num, std::uint16_
                     difficulty = Sudoku::EXPERT;
                     break;
                 default:
-                    difficulty = Sudoku::ANY;
+                    difficulty = Sudoku::HIGHEST;
                     break;
             }
             for (auto unset : getSetBits(marks)) {
@@ -751,7 +746,7 @@ static bool removeXwingByCols(Play &board, const std::uint16_t num, std::uint16_
                     difficulty = Sudoku::EXPERT;
                     break;
                 default:
-                    difficulty = Sudoku::ANY;
+                    difficulty = Sudoku::HIGHEST;
                     break;
             }
             for (auto unset : getSetBits(marks)) {
@@ -906,7 +901,7 @@ static bool removedByChain(Play &board, const std::uint16_t num, std::vector<int
             if (seen_a && seen_b) {
                 bool should_ret = false;
                 for (auto unset : getSetBits(marks)) {
-                    Move move = {unset + 1, i, j, Sudoku::EXPERT, &Play::pencil};
+                    Move move = {unset + 1, i, j, Sudoku::HARD, &Play::pencil};
                     moves.push_back(move);
                     should_ret = true;
                 }
@@ -1000,112 +995,6 @@ bool findChainOfPairs(Play &board, const std::uint16_t num, std::vector<Move> &m
         }
     }
 
-    return false;
-}
-
-struct findXYwingStruct {
-    int i_a;
-    int j_a;
-    int i_b;
-    int j_b;
-    std::uint16_t a;
-    std::uint16_t b;
-};
-
-static findXYwingStruct findXinXYwing(Play &board, const std::uint16_t num, int box_i, int box_j) {
-    findXYwingStruct ret = {-1, -1, -1, -1, 0, 0};
-    for (auto i = box_i; i < box_i + 3; i++) {
-        for (auto j = box_j; j < box_j + 3; j++) {
-            if (!board.isEmpty(i, j)) continue;
-            auto marks = board.getPencil(i, j);
-            if (countBits(marks) != 2) continue; // not a double
-            if ((num | marks) != num) continue; // contains marks we aren't looking for
-
-            if (ret.i_a == -1) { // first one found
-                ret.i_a = i;
-                ret.j_a = j;
-                ret.a = marks;
-            }
-            else if (marks != ret.a) { // found another double
-                ret.i_b = i;
-                ret.j_b = j;
-                ret.b = marks;
-                return ret;
-            }
-        }
-    }
-    ret.i_a = -1; // failure;
-    return ret;
-}
-
-static bool removeXYwingIntersect(Play &board, int i, int j, std::uint16_t match, std::vector<Move> &moves) {
-    if (!board.isEmpty(i, j)) return false;
-    auto marks = (board.getPencil(i, j) & match);
-    if (countBits(marks) < 1) return false;
-    for (auto b : getSetBits(marks)) {
-        Move m = {b + 1, i, j, Sudoku::EXPERT, &Play::pencil};
-        moves.push_back(m);
-    }
-    return true;
-}
-
-static bool findYinXYwing(Play &board, findXYwingStruct x, std::vector<Move> &move) {
-    std::uint16_t matcher = (x.a ^ x.b);
-    //finding matching a
-    for (auto i = 0; i < 9; i++) {
-        if (!(i == x.i_a || i == x.i_b)) {
-            auto marks = board.getPencil(i, x.j_a);
-            if (marks == matcher) {
-                if (removeXYwingIntersect(board, i, x.j_b, matcher & x.b, move)) {
-                    return true;
-                }
-            }
-        }
-
-        if (! (i == x.j_a || i == x.j_b)) {
-            auto marks = board.getPencil(x.i_a, i);
-            if (marks == matcher) {
-                int intersect_i = x.i_a;
-                int intersect_j = i;
-                if (removeXYwingIntersect(board, x.i_b, i, matcher & x.b, move)) {
-                    return true;
-                }
-            }
-        }
-    }
-
-    // finding matching b
-    for (auto i = 0; i < 9; i++) {
-        if (!(i == x.i_b || i == x.i_a)) {
-            auto marks = board.getPencil(i, x.j_b);
-            if (marks == matcher) {
-                if (removeXYwingIntersect(board, i, x.j_a, matcher & x.a, move)) {
-                    return true;
-                }
-            }
-        }
-
-        if (!(i == x.j_b || i == x.j_a)) {
-            auto marks = board.getPencil(x.i_b, i);
-            if (marks == matcher) {
-                if (removeXYwingIntersect(board, x.i_a, i, matcher & x.a, move)) {
-                    return true;
-                }
-            }
-        }
-    }
-
-    return false;
-}
-
-bool findXYwing(Play &board, const std::uint16_t num, std::vector<Move> &moves) {
-    for (auto box_i = 0; box_i < 9; box_i+=3) {
-        for (auto box_j = 0; box_j < 9; box_j+=3) {
-            findXYwingStruct possibleXpart = findXinXYwing(board, num, box_i, box_j);
-            if (possibleXpart.i_a == -1) continue; // nothing found here
-            if (findYinXYwing(board, possibleXpart, moves)) return true;
-        }
-    }
     return false;
 }
 
