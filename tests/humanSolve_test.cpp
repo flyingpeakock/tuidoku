@@ -8,13 +8,13 @@
  */
 TEST(HumanSolve_test, findNakedSingle) {
     single_digit_human_solve_t test_table[] = {
-        {(1 << 7), {8, 3, 2, Sudoku::BEGINNER, &Play::insert}, 0, true, "200150074001000020407600013040200095070480060010000430706000289004907350003000040"},
-        {(1 << 5), {6, 5, 6, Sudoku::BEGINNER, &Play::insert}, 0, true, "412736589000000106568010370000050210100000008087090000030070865800000000000908401"},
+        {(1 << 7), {8, 3, 2, Sudoku::BEGINNER, &Sudoku::SudokuObj::insert}, 0, true, "200150074001000020407600013040200095070480060010000430706000289004907350003000040"},
+        {(1 << 5), {6, 5, 6, Sudoku::BEGINNER, &Sudoku::SudokuObj::insert}, 0, true, "412736589000000106568010370000050210100000008087090000030070865800000000000908401"},
     };
 
     for (auto &test : test_table) {
         std::vector<Move> move = {};
-        Play board({}, Sudoku::fromString(test.gridString), NULL);
+        Sudoku::SudokuObj board(Sudoku::fromString(test.gridString));
         board.autoPencil();
 
         EXPECT_EQ(findNakedSingles(board, move), test.ret);
@@ -33,12 +33,12 @@ TEST(HumanSolve_test, findNakedSingle) {
  */
 TEST(HumanSolve_test, findHiddenSingle) {
     single_digit_human_solve_t test_table[] = {
-        {(1 << 0), {1, 6, 2, Sudoku::EASY, &Play::insert}, 0, true, "009032000000700000162000000010020560000900000050000107000000403026009000005870000"},
+        {(1 << 0), {1, 6, 2, Sudoku::EASY, &Sudoku::SudokuObj::insert}, 0, true, "009032000000700000162000000010020560000900000050000107000000403026009000005870000"},
     };
 
     for (auto &test : test_table) {
         std::vector<Move> move = {};
-        Play board({}, Sudoku::fromString(test.gridString), NULL);
+        Sudoku::SudokuObj board(Sudoku::fromString(test.gridString));
         board.autoPencil();
 
         EXPECT_EQ(findHiddenSingles(board, move), test.ret);
@@ -53,13 +53,13 @@ TEST(HumanSolve_test, findHiddenSingle) {
 
 TEST(HumanSolve_test, findXwing) {
     single_digit_human_solve_t test_table[] = {
-        {(1 << 4), {5, 3, 4, Sudoku::HARD, &Play::pencil}, 1, true, "041729030769003402032640719403900170607004903195370024214567398376090541958431267"},
-        {(1 << 0), {1, 1, 3, Sudoku::HARD, &Play::pencil}, 9, true, "980062753065003000327050006790030500050009000832045009673591428249087005518020007"},
+        {(1 << 4), {5, 3, 4, Sudoku::HARD, &Sudoku::SudokuObj::pencil}, 1, true, "041729030769003402032640719403900170607004903195370024214567398376090541958431267"},
+        {(1 << 0), {1, 1, 3, Sudoku::HARD, &Sudoku::SudokuObj::pencil}, 9, true, "980062753065003000327050006790030500050009000832045009673591428249087005518020007"},
     };
 
     for (auto &test : test_table) {
         std::vector<Move> moves;
-        Play board({}, Sudoku::fromString(test.gridString), NULL);
+        Sudoku::SudokuObj board(Sudoku::fromString(test.gridString));
         board.autoPencil();
 
         EXPECT_EQ(findXwing(board, test.num, moves), test.ret) << "Could not find X-Wing:\n";
@@ -75,12 +75,12 @@ TEST(HumanSolve_test, findXwing) {
 
 TEST(HumanSolve_test, findUniqueRectangle) {
     single_digit_human_solve_t test_table[] = {
-        {((1 << 7) | (1 << 8)), {8, 1, 1, Sudoku::HARD, &Play::pencil}, 2, true, "502008967100700452067500381213657849654891273700004615821900034306000098005083026"},
+        {((1 << 7) | (1 << 8)), {8, 1, 1, Sudoku::HARD, &Sudoku::SudokuObj::pencil}, 2, true, "502008967100700452067500381213657849654891273700004615821900034306000098005083026"},
     };
 
     for (auto &test : test_table) {
         std::vector<Move> moves;
-        Play board({}, Sudoku::fromString(test.gridString), NULL);
+        Sudoku::SudokuObj board(Sudoku::fromString(test.gridString));
         board.autoPencil();
 
         EXPECT_EQ(findUniqueRectangle(board, test.num, moves), test.ret);
@@ -96,14 +96,14 @@ TEST(HumanSolve_test, findUniqueRectangle) {
 
 TEST(HumanSolve_test, findChainOfPairs) {
     single_digit_human_solve_t test_table[] = {
-        {((1 << 3) | (1 << 4)), {5, 5, 6, Sudoku::EXPERT, &Play::pencil}, 1, true, "798452316603781092012030870370265048820143760060897023980014237107028050200070081"},
+        {((1 << 3) | (1 << 4)), {5, 5, 6, Sudoku::EXPERT, &Sudoku::SudokuObj::pencil}, 1, true, "798452316603781092012030870370265048820143760060897023980014237107028050200070081"},
         {((1 << 3) | (1 << 0)), {0, 0, 0, Sudoku::ANY, NULL}, 0, false, "798452316603781092012030870370265048820143760060897023980014237107028050200070081"},
-        {((1 << 1) | (1 << 6)), {7, 4, 8, Sudoku::EXPERT, &Play::pencil}, 1, true, "360859004519472386408613950146738295900541000005926401054387009093164500001295043"},
+        {((1 << 1) | (1 << 6)), {7, 4, 8, Sudoku::EXPERT, &Sudoku::SudokuObj::pencil}, 1, true, "360859004519472386408613950146738295900541000005926401054387009093164500001295043"},
     };
 
     for (auto &test : test_table) {
         std::vector<Move> moves;
-        Play board({}, Sudoku::fromString(test.gridString), NULL);
+        Sudoku::SudokuObj board(Sudoku::fromString(test.gridString));
         board.autoPencil();
 
         std::stringstream boardstrstr;
@@ -129,18 +129,18 @@ TEST(HumanSolve_test, findXYwing) {
         {
             "003060821841052000962810005238000056015638902600020138120080507087290014006000280",
             true,
-            {3, 8, 0, Sudoku::EXPERT, &Play::pencil}
+            {3, 8, 0, Sudoku::EXPERT, &Sudoku::SudokuObj::pencil}
         },
         {
             "031064752460075813005013964010459637357628491600137528520791306103586209006342105",
             true,
-            {2, 3, 2, Sudoku::EXPERT, &Play::pencil}
+            {2, 3, 2, Sudoku::EXPERT, &Sudoku::SudokuObj::pencil}
         },
     };
 
     for (auto test : test_table) {
         std::vector<Move> moves;
-        Play board({}, Sudoku::fromString(test.boardString), NULL);
+        Sudoku::SudokuObj board(Sudoku::fromString(test.boardString));
         board.autoPencil();
 
         EXPECT_EQ(findXYwing(board, moves), test.foundMove);

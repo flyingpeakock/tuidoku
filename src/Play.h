@@ -6,15 +6,13 @@
 
 typedef std::array<std::array<std::uint16_t, Sudoku::SIZE>, Sudoku::SIZE> PencilMarks;
 
-class Play;
-
 struct Move {
-    int val;
+    Sudoku::value val;
     int row;
     int col;
     Sudoku::difficulty difficulty;
-    void (Play::*move)(int, int, int);
-    void operator()(Play *board) {
+    void (Sudoku::SudokuObj::*move)(Sudoku::value, int, int);
+    void operator()(Sudoku::SudokuObj *board) {
         if (move == NULL) return;
         return (board->*move)(val, row, col);
     }
@@ -36,12 +34,7 @@ class Play {
         PENCIL
     };
 
-    Sudoku::puzzle startGrid;
-    Sudoku::puzzle currentGrid;
-    Sudoku::puzzle solutionGrid;
-    PencilMarks pencilMarks;
-    std::array<std::array<std::map<int, int>, Sudoku::SIZE>, Sudoku::SIZE> pencilHistory;
-    std::array<int, Sudoku::SIZE> count;
+    Sudoku::SudokuObj sudoku;
     WINDOW *gridWindow;
     int selectedNum;
     int row_idx;
@@ -68,19 +61,4 @@ class Play {
 
     Play(std::vector<keymap> keys, Sudoku::puzzle grid, WINDOW *window);
     void play();
-
-    
-    void insert(int val, int row, int col);
-    void pencil(int val, int row, int col);
-    void autoPencil();
-
-    bool isEmpty(int row, int col) const;
-    bool isWon() const;
-
-    std::uint16_t getPencil(int row, int col) const;
-    int getAnswer(int row, int col) const;
-
-    /*
-    void autoPencil();
-    */
 };

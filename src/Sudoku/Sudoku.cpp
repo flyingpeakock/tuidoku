@@ -45,3 +45,149 @@ Sudoku::puzzle Sudoku::fromString(std::string string) {
     }
     return ret;
 }
+
+Sudoku::SudokuObj::SudokuObj(puzzle grid) : startGrid(grid), currentGrid(grid), solutionGrid(grid) {
+    if (!solve(solutionGrid)) {
+        throw std::invalid_argument("Puzzle not does not have a valid solution");
+    }
+    pencilMarks = {};
+    pencilHistory = {};
+}
+
+void Sudoku::SudokuObj::insert(Sudoku::value val, int row, int col) {
+    if (startGrid[row][col] != 0) {
+        throw std::invalid_argument("Puzzle contains a clue at this location");
+    }
+
+    if ((val < 0) || (val > SIZE)) {
+        throw std::invalid_argument("Value is out of the range for this puzzle");
+    }
+
+    restoreMarks(row, col);
+    currentGrid[row][col] = val;
+    removeMarks(val, row, col);
+}
+
+void Sudoku::SudokuObj::pencil(Sudoku::value val, int row, int col) {
+    if (startGrid[row][col] != 0) {
+        throw std::invalid_argument("Puzzle contains a clue at this location");
+    }
+    if (currentGrid[row][col] != 0) {
+        throw std::invalid_argument("Can only place pencil marks in empty cells");
+    }
+
+    if ((val < 1) || (val > SIZE)) {
+        throw std::invalid_argument("Value is out of range for this puzzle");
+    }
+
+    pencilMarks[row][col] ^= (1 << (val - 1));
+}
+
+void Sudoku::SudokuObj::autoPencil() {
+    for (auto i = 0; i < SIZE; i++) {
+        for (auto j = 0; j < Sudoku::SIZE; j++) {
+            if (currentGrid[i][j] != 0) {
+                continue;
+            }
+            auto &marks = pencilMarks[i][j];
+            marks = 0;
+            for (int num = 1; num <= SIZE; num++) {
+                if (Sudoku::isSafe(currentGrid, i, j, num)) {
+                    marks |= (1 << (num - 1));
+                }
+            }
+        }
+    }
+}
+
+void Sudoku::SudokuObj::restoreMarks(int row, int col) {
+    int idx = (row * Sudoku::SIZE) + col;
+    for (auto i = 0; i < 9; i++) {
+        if (pencilHistory[row][i][idx] != 0) {
+            pencil(pencilHistory[row][i][idx], row, i);
+            pencilHistory[row][i][idx] = 0;
+        }
+        if (pencilHistory[i][col][idx] != 0) {
+            pencil(pencilHistory[i][col][idx], i, col);
+            pencilHistory[i][col][idx] = 0;
+        }
+    }
+
+    int boxSize = sqrt(Sudoku::SIZE);
+    int boxRow = (row / boxSize) * boxSize;
+    int boxCol = (col / boxSize) * boxSize;
+    for (auto i = boxRow; i < boxRow + boxSize; i++) {
+        for (auto j = boxCol; j < boxCol + boxSize; j++) {
+            if (pencilHistory[i][j][idx] != 0) {
+                pencil(pencilHistory[i][j][idx], i, j);
+                pencilHistory[i][j][idx] = 0;
+            }
+        }
+    }
+}
+
+void Sudoku::SudokuObj::removeMarks(Sudoku::value val, int row, int col) {
+    if (val == 0)
+        return;
+    // Since val is between 1-9 we need it 0-8
+    val--;
+    // Removing this mark from rows and cols
+    for (auto i = 0; i < 9; i++) {
+        if ((pencilMarks[row][i] & (1 << val)) != 0) {
+            pencilHistory[row][i][(row * Sudoku::SIZE) + col] = val + 1;
+            pencilMarks[row][i] &= ~(1 << val);
+        }
+        if ((pencilMarks[i][col] & (1 << val)) != 0) {
+            pencilHistory[i][col][(row * Sudoku::SIZE) + col] = val + 1;
+            pencilMarks[i][col] &= ~(1 << val);
+        }
+    }
+
+    int boxSize = sqrt(Sudoku::SIZE);
+    int boxRow = (row / boxSize) * boxSize;
+    int boxCol = (col / boxSize) * boxSize;
+    for (auto i = boxRow; i < boxRow + boxSize; i++) {
+        for (auto j = boxCol; j < boxCol + boxSize; j++) {
+            if ((pencilMarks[i][j] & (1 << val)) != 0) {
+                pencilHistory[i][j][(row * Sudoku::SIZE) + col] = val + 1;
+                pencilMarks[i][j] &= ~(1 << val);
+            }
+        }
+    }
+}
+
+bool Sudoku::SudokuObj::isEmpty(int row, int col) const {
+    return (currentGrid[row][col] == 0);
+}
+
+bool Sudoku::SudokuObj::isWon() const {
+    return (currentGrid == solutionGrid);
+}
+
+Sudoku::value Sudoku::SudokuObj::getPencil(int row, int col) const {
+    return pencilMarks[row][col];
+}
+
+Sudoku::value Sudoku::SudokuObj::getValue(int row, int col) const {
+    return currentGrid[row][col];
+}
+
+Sudoku::value Sudoku::SudokuObj::getAnswer(int row, int col) const {
+    return solutionGrid[row][col];
+}
+
+Sudoku::value Sudoku::SudokuObj::getStartValue(int row, int col) const {
+    return startGrid[row][col];
+}
+
+Sudoku::puzzle Sudoku::SudokuObj::getStartGrid() const {
+    return startGrid;
+}
+
+Sudoku::puzzle Sudoku::SudokuObj::getCurrentGrid() const {
+    return currentGrid;
+}
+
+Sudoku::puzzle Sudoku::SudokuObj::getSolutionGrid() const {
+    return solutionGrid;
+}

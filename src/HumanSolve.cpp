@@ -39,8 +39,8 @@ static inline int countBits(std::uint16_t bits) {
    return b.count();
 }
 
- static std::vector<char> getSetBits(std::uint16_t bits) {
-    std::vector<char> nums;
+ static std::vector<Sudoku::value> getSetBits(std::uint16_t bits) {
+    std::vector<Sudoku::value> nums;
     for (auto num = 0u; num < 9; num++) {
         if ((bits & (1u << num)) != 0) {
             nums.emplace_back(num);
@@ -49,7 +49,7 @@ static inline int countBits(std::uint16_t bits) {
     return nums;
  }
 
-static char countOccurrencesNaked(Play &board, std::uint16_t bits, char i_min, char i_max, char j_min, char j_max, std::uint16_t &seen_i, std::uint16_t &seen_j) {
+static char countOccurrencesNaked(Sudoku::SudokuObj &board, std::uint16_t bits, char i_min, char i_max, char j_min, char j_max, std::uint16_t &seen_i, std::uint16_t &seen_j) {
     char count = 0;
     for (auto i = i_min; i < i_max; i++) {
         for (auto j = j_min; j < j_max; j++) {
@@ -66,7 +66,7 @@ static char countOccurrencesNaked(Play &board, std::uint16_t bits, char i_min, c
     return count;
 }
 
-static char countOccurrencesHidden(Play &board, std::uint16_t bits, char i_min, char i_max, char j_min, char j_max, std::uint16_t &seen_i, std::uint16_t &seen_j) {
+static char countOccurrencesHidden(Sudoku::SudokuObj &board, std::uint16_t bits, char i_min, char i_max, char j_min, char j_max, std::uint16_t &seen_i, std::uint16_t &seen_j) {
    char count = 0;
    std::uint16_t seen_vals = 0;
    for (auto i = i_min; i < i_max; i++) {
@@ -85,7 +85,7 @@ static char countOccurrencesHidden(Play &board, std::uint16_t bits, char i_min, 
     return count;
 }
 
-static bool removedOccurrencesNaked(Play &board, std::uint16_t bits, char i_min, char i_max, char j_min, char j_max, std::vector<Move> &moves) {
+static bool removedOccurrencesNaked(Sudoku::SudokuObj &board, std::uint16_t bits, char i_min, char i_max, char j_min, char j_max, std::vector<Move> &moves) {
     bool ret = false;
     for (auto i = i_min; i < i_max; i++) {
         for (auto j = j_min; j < j_max; j++) {
@@ -113,7 +113,7 @@ static bool removedOccurrencesNaked(Play &board, std::uint16_t bits, char i_min,
             for (const auto &num : set_bits) {
                 //board.pencil(num + START_CHAR, i, j);
                 Move move = {
-                    (num + 1), i, j, difficulty, &Play::pencil
+                    (num + 1), i, j, difficulty, &Sudoku::SudokuObj::pencil
                 };
                 moves.push_back(move);
                 ret = true;
@@ -123,7 +123,7 @@ static bool removedOccurrencesNaked(Play &board, std::uint16_t bits, char i_min,
     return ret;
 }
 
-static bool removedOccurrencesHidden(Play &board, std::uint16_t bits, char i_min, char i_max, char j_min, char j_max, std::vector<Move> &moves) {
+static bool removedOccurrencesHidden(Sudoku::SudokuObj &board, std::uint16_t bits, char i_min, char i_max, char j_min, char j_max, std::vector<Move> &moves) {
     bool ret = false;
     for (auto i = i_min; i < i_max; i++) {
         for (auto j = j_min; j < j_max; j++) {
@@ -152,7 +152,7 @@ static bool removedOccurrencesHidden(Play &board, std::uint16_t bits, char i_min
             for (auto &num : set_bits) {
                 //board->pencil(num + START_CHAR, i, j);
                 Move move = {
-                    num + 1, i, j, difficulty, &Play::pencil
+                    num + 1, i, j, difficulty, &Sudoku::SudokuObj::pencil
                 };
                 moves.push_back(move);
                 ret = true;
@@ -163,7 +163,7 @@ static bool removedOccurrencesHidden(Play &board, std::uint16_t bits, char i_min
 }
 
 
-Hint solveHuman(Play &board) {
+Hint solveHuman(Sudoku::SudokuObj &board) {
     Hint hint = {
         "",
         "",
@@ -320,7 +320,7 @@ Hint solveHuman(Play &board) {
  * @return true when found a naked single
  * @return false otherwise
  */
-bool findNakedSingles(Play &board, std::vector<Move> &moves) {
+bool findNakedSingles(Sudoku::SudokuObj &board, std::vector<Move> &moves) {
     bool ret = false;
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
@@ -328,7 +328,7 @@ bool findNakedSingles(Play &board, std::vector<Move> &moves) {
             auto marks = board.getPencil(i, j);
             if (countBits(marks) != 1) continue;
             for (auto bits : getSetBits(marks)) {
-                Move m = {bits + 1, i, j, Sudoku::BEGINNER, &Play::insert};
+                Move m = {bits + 1, i, j, Sudoku::BEGINNER, &Sudoku::SudokuObj::insert};
                 moves.push_back(m);
                 ret = true;
             }
@@ -346,7 +346,7 @@ bool findNakedSingles(Play &board, std::vector<Move> &moves) {
  * @return true when a hidden single is found
  * @return false otherwise
  */
-bool findHiddenSingles(Play &board, std::vector<Move> &moves) {
+bool findHiddenSingles(Sudoku::SudokuObj &board, std::vector<Move> &moves) {
     bool ret = false;
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
@@ -360,7 +360,7 @@ bool findHiddenSingles(Play &board, std::vector<Move> &moves) {
                 if ((countOccurrencesHidden(board, single, i_box, i_box + 3, j_box, j_box + 3, trash, trash) == 1)
                     || (countOccurrencesHidden(board, single, i, i + 1, 0, 9, trash, trash) == 1)
                     || (countOccurrencesHidden(board, single, 0, 9, j, j + 1, trash, trash) == 1)) {
-                    Move m = {b + 1, i, j, Sudoku::EASY, &Play::insert};
+                    Move m = {b + 1, i, j, Sudoku::EASY, &Sudoku::SudokuObj::insert};
                     moves.push_back(m);
                     ret = true;
                 }
@@ -370,7 +370,7 @@ bool findHiddenSingles(Play &board, std::vector<Move> &moves) {
     return ret;
 }
 
-bool findNaked(Play &board, const std::uint16_t num, std::vector<Move> &moves) {
+bool findNaked(Sudoku::SudokuObj &board, const std::uint16_t num, std::vector<Move> &moves) {
     std::uint16_t trash;
     if (num == 0) return false;
     const char matcher = countBits(num);
@@ -404,7 +404,7 @@ bool findNaked(Play &board, const std::uint16_t num, std::vector<Move> &moves) {
 }
 
 
-bool findHidden(Play &board, const std::uint16_t num, std::vector<Move> &moves) {
+bool findHidden(Sudoku::SudokuObj &board, const std::uint16_t num, std::vector<Move> &moves) {
     if (num == 0) return false;
     const char matcher = countBits(num);
     std::uint16_t trash;
@@ -437,13 +437,13 @@ bool findHidden(Play &board, const std::uint16_t num, std::vector<Move> &moves) 
     return false;
 }
 
-static bool removeMarks_i_box(Play &board, char val, char i, char j_box, std::vector<Move> &moves) {
+static bool removeMarks_i_box(Sudoku::SudokuObj &board, Sudoku::value val, char i, char j_box, std::vector<Move> &moves) {
     for (int idx = 0; idx < 9; idx++) {
         if (((idx / 3) * 3) == j_box) continue; // same box as pointers
         if (!board.isEmpty(i, idx)) continue;
         if ((board.getPencil(i, idx) & (1 << val)) != 0) {
             //board->pencil(val + START_CHAR, i, idx);
-            Move move = {val + 1, i, idx, Sudoku::MEDIUM, &Play::pencil};
+            Move move = {val + 1, i, idx, Sudoku::MEDIUM, &Sudoku::SudokuObj::pencil};
             moves.push_back(move);
             return true;
         }
@@ -451,13 +451,13 @@ static bool removeMarks_i_box(Play &board, char val, char i, char j_box, std::ve
     return false;
 }
 
-static bool removeMarks_j_box(Play &board, char val, char j, char i_box, std::vector<Move> &moves) {
+static bool removeMarks_j_box(Sudoku::SudokuObj &board, Sudoku::value val, char j, char i_box, std::vector<Move> &moves) {
     for (int idx = 0; idx < 9; idx++) {
         if (((idx / 3) * 3) == i_box) continue;
         if (!board.isEmpty(idx, j)) continue;
         if ((board.getPencil(idx, j) & (1 << val)) != 0) {
             //board->pencil(val + START_CHAR, idx, j);
-            Move move = {val + 1, idx, j, Sudoku::MEDIUM, &Play::pencil};
+            Move move = {val + 1, idx, j, Sudoku::MEDIUM, &Sudoku::SudokuObj::pencil};
             moves.push_back(move);
             return true;
         }
@@ -465,7 +465,7 @@ static bool removeMarks_j_box(Play &board, char val, char j, char i_box, std::ve
     return false;
 }
 
-bool findPointingBox(Play &board, int i_start, int j_start, std::vector<Move> &moves) {
+bool findPointingBox(Sudoku::SudokuObj &board, int i_start, int j_start, std::vector<Move> &moves) {
     char counts[9] = {};
     bool indexes[9][3][3] = {false};
     for (auto i = i_start; i < i_start + 3; i++) {
@@ -517,7 +517,7 @@ bool findPointingBox(Play &board, int i_start, int j_start, std::vector<Move> &m
     return false;
 }
 
-static bool existsOnlyInBox(Play &board, char box_i, char box_j, char i_min, char i_max, char j_min, char j_max, char num) {
+static bool existsOnlyInBox(Sudoku::SudokuObj &board, char box_i, char box_j, char i_min, char i_max, char j_min, char j_max, char num) {
     for (auto i = i_min; i < i_max; i++) {
         for (auto j = j_min; j < j_max; j++) {
             if (!board.isEmpty(i, j)) continue;
@@ -530,7 +530,7 @@ static bool existsOnlyInBox(Play &board, char box_i, char box_j, char i_min, cha
     return true;
 }
 
-static bool removedLockedIFromBox(Play &board, char box_i, char box_j, char locked_i, char num, std::vector<Move> &moves) {
+static bool removedLockedIFromBox(Sudoku::SudokuObj &board, char box_i, char box_j, char locked_i, Sudoku::value num, std::vector<Move> &moves) {
     bool ret = false;
     for (auto i = box_i; i < box_i + 3; i++) {
         for (auto j = box_j; j < box_j + 3; j++) {
@@ -538,7 +538,7 @@ static bool removedLockedIFromBox(Play &board, char box_i, char box_j, char lock
             if (i == locked_i) continue;
             if ((board.getPencil(i, j) & (1 << num)) != 0) {
                 //board->pencil(num + START_CHAR, i, j);
-                Move move = {num + 1, i, j, Sudoku::MEDIUM, &Play::pencil};
+                Move move = {num + 1, i, j, Sudoku::MEDIUM, &Sudoku::SudokuObj::pencil};
                 moves.push_back(move);
                 ret = true;
             }
@@ -547,7 +547,7 @@ static bool removedLockedIFromBox(Play &board, char box_i, char box_j, char lock
     return ret;
 }
 
-static bool removedLockedJFromBox(Play &board, char box_i, char box_j, char locked_j, char num, std::vector<Move> &moves) {
+static bool removedLockedJFromBox(Sudoku::SudokuObj &board, char box_i, char box_j, char locked_j, Sudoku::value num, std::vector<Move> &moves) {
     bool ret = false;
     for (auto i = box_i; i < box_i + 3; i++) {
         for (auto j = box_j; j < box_j + 3; j++) {
@@ -555,7 +555,7 @@ static bool removedLockedJFromBox(Play &board, char box_i, char box_j, char lock
             if (j == locked_j) continue;
             if ((board.getPencil(i, j) & (1 << num)) != 0) {
                 //board->pencil(num + START_CHAR, i, j);
-                Move move = {num + 1, i, j, Sudoku::MEDIUM, &Play::pencil};
+                Move move = {num + 1, i, j, Sudoku::MEDIUM, &Sudoku::SudokuObj::pencil};
                 moves.push_back(move);
                 ret = true;
             }
@@ -564,7 +564,7 @@ static bool removedLockedJFromBox(Play &board, char box_i, char box_j, char lock
     return ret;
 }
 
-bool findLockedCandidates(Play &board, std::vector<Move> &moves) {
+bool findLockedCandidates(Sudoku::SudokuObj &board, std::vector<Move> &moves) {
     for (auto box_i = 0; box_i < 9; box_i += 3) {
         for (auto box_j = 0; box_j < 9; box_j += 3) {
             for (auto i = box_i; i < box_i + 3; i++) {
@@ -590,7 +590,7 @@ bool findLockedCandidates(Play &board, std::vector<Move> &moves) {
     return false;
 }
 
-bool findBug(Play &board, Move *move) {
+bool findBug(Sudoku::SudokuObj &board, Move *move) {
     int numb_of_threes = 0;
     int col = 0xFF;
     int row = 0xFF;
@@ -625,7 +625,7 @@ bool findBug(Play &board, Move *move) {
             (*move).row = col;
             (*move).val = num + 1;
             (*move).difficulty = Sudoku::HARD;
-            (*move).move = &Play::insert;
+            (*move).move = &Sudoku::SudokuObj::insert;
             return true;
         }
     }
@@ -666,7 +666,7 @@ static std::uint16_t getEqualWingIndexes(std::array<std::uint16_t, 9> positions,
  * @return true when correct moves have been found
  * @return false otherwise
  */
-static bool removeXwingByRows(Play &board, const std::uint16_t num, std::uint16_t i_indexes, std::uint16_t j_indexes, std::vector<Move> &moves) {
+static bool removeXwingByRows(Sudoku::SudokuObj &board, const std::uint16_t num, std::uint16_t i_indexes, std::uint16_t j_indexes, std::vector<Move> &moves) {
     bool ret = false;
     for (char i = 0; i < 9; i++) {
         if ((i_indexes & (1 << i)) != 0) continue;
@@ -689,7 +689,7 @@ static bool removeXwingByRows(Play &board, const std::uint16_t num, std::uint16_
                     break;
             }
             for (auto unset : getSetBits(marks)) {
-                Move move = {unset + 1, i, j, difficulty, &Play::pencil};
+                Move move = {unset + 1, i, j, difficulty, &Sudoku::SudokuObj::pencil};
                 moves.push_back(move);
                 ret = true;
             }
@@ -711,7 +711,7 @@ static bool removeXwingByRows(Play &board, const std::uint16_t num, std::uint16_
  * @return true if found any pencil marks to remove
  * @return false otherwise
  */
-static bool removeXwingByCols(Play &board, const std::uint16_t num, std::uint16_t i_indexes, std::uint16_t j_indexes, std::vector<Move> &moves) {
+static bool removeXwingByCols(Sudoku::SudokuObj &board, const std::uint16_t num, std::uint16_t i_indexes, std::uint16_t j_indexes, std::vector<Move> &moves) {
     bool ret = false;
     for (char i : getSetBits(i_indexes)) {
         for (char j = 0; j < 9; j++) {
@@ -734,7 +734,7 @@ static bool removeXwingByCols(Play &board, const std::uint16_t num, std::uint16_
                     break;
             }
             for (auto unset : getSetBits(marks)) {
-                Move move = {unset + 1, i, j, difficulty, &Play::pencil};
+                Move move = {unset + 1, i, j, difficulty, &Sudoku::SudokuObj::pencil};
                 moves.push_back(move);
                 ret = true;
             }
@@ -752,7 +752,7 @@ static bool removeXwingByCols(Play &board, const std::uint16_t num, std::uint16_
  * @return true  if found any x-wings
  * @return false otherwise
  */
-bool findXwing(Play &board, const std::uint16_t num, std::vector<Move> &moves) {
+bool findXwing(Sudoku::SudokuObj &board, const std::uint16_t num, std::vector<Move> &moves) {
     std::array<std::uint16_t, 9> positions[2];
     for (auto i = 0; i < 9; i++) {
         std::uint16_t seen_j, seen_i, trash;
@@ -790,7 +790,7 @@ bool findXwing(Play &board, const std::uint16_t num, std::vector<Move> &moves) {
  * @return true if pencil marks can be removed
  * @return false otherwise
  */
-bool findUniqueRectangle(Play &board, const std::uint16_t num, std::vector<Move> &moves) {
+bool findUniqueRectangle(Sudoku::SudokuObj &board, const std::uint16_t num, std::vector<Move> &moves) {
     if (num == 0) return false;
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
@@ -820,7 +820,7 @@ bool findUniqueRectangle(Play &board, const std::uint16_t num, std::vector<Move>
             auto mark = board.getPencil(intersect_i, intersect_j) & num;
             if (mark == 0) continue;
             for (auto &unset : getSetBits(mark)) {
-                Move move = {unset + 1, intersect_i, intersect_j, Sudoku::HARD, &Play::pencil };
+                Move move = {unset + 1, (int)intersect_i, (int)intersect_j, Sudoku::HARD, &Sudoku::SudokuObj::pencil };
                 moves.push_back(move);
             }
             return true;
@@ -861,7 +861,7 @@ static bool canSee(char i_1, char j_1, char i_2, char j_2) {
  * @return true if moves are found
  * @return false if moves are not found
  */
-static bool removedByChain(Play &board, const std::uint16_t num, std::vector<int> chain_a, std::vector<int> chain_b, std::vector<Move> &moves) {
+static bool removedByChain(Sudoku::SudokuObj &board, const std::uint16_t num, std::vector<int> chain_a, std::vector<int> chain_b, std::vector<Move> &moves) {
     for (char i = 0; i < 9; i++) {
         for (char j = 0; j < 9; j++) {
             if (!board.isEmpty(i, j)) continue;
@@ -885,7 +885,7 @@ static bool removedByChain(Play &board, const std::uint16_t num, std::vector<int
             if (seen_a && seen_b) {
                 bool should_ret = false;
                 for (auto unset : getSetBits(marks)) {
-                    Move move = {unset + 1, i, j, Sudoku::HARD, &Play::pencil};
+                    Move move = {unset + 1, i, j, Sudoku::HARD, &Sudoku::SudokuObj::pencil};
                     moves.push_back(move);
                     should_ret = true;
                 }
@@ -951,7 +951,7 @@ void build_chains(const std::vector<int> all, std::vector<int> &chain_a, std::ve
  * @return true if moves are found
  * @return false if moves are not found
  */
-bool findChainOfPairs(Play &board, const std::uint16_t num, std::vector<Move> &moves) {
+bool findChainOfPairs(Sudoku::SudokuObj &board, const std::uint16_t num, std::vector<Move> &moves) {
     std::vector<int> all_doubles;
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
@@ -988,7 +988,7 @@ struct findXYwingHelper {
     int j[3];
 };
 
-static bool foundMatchingPair_XYwing(Play &board, findXYwingHelper &data) {
+static bool foundMatchingPair_XYwing(Sudoku::SudokuObj &board, findXYwingHelper &data) {
     // Searching in the same box
     int box_i = (data.i[0] / 3) * 3;
     int box_j = (data.j[0] / 3) * 3;
@@ -1040,7 +1040,7 @@ static bool foundMatchingPair_XYwing(Play &board, findXYwingHelper &data) {
     return false;
 }
 
-static bool foundThirdPair_XYwing(Play &board, findXYwingHelper &data) {
+static bool foundThirdPair_XYwing(Sudoku::SudokuObj &board, findXYwingHelper &data) {
     data.marks[2] = data.marks[0] ^ data.marks[1];
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
@@ -1057,7 +1057,7 @@ static bool foundThirdPair_XYwing(Play &board, findXYwingHelper &data) {
 }
 
 
-static bool foundConstraints_XYwing(Play &board, findXYwingHelper &data, std::vector<Move> &moves) {
+static bool foundConstraints_XYwing(Sudoku::SudokuObj &board, findXYwingHelper &data, std::vector<Move> &moves) {
     // finding the two point to intersect
     int intersections[2];
     int inter_index = 0;
@@ -1073,7 +1073,7 @@ static bool foundConstraints_XYwing(Play &board, findXYwingHelper &data, std::ve
     if (board.isEmpty(data.i[intersections[0]], data.j[intersections[1]])) {
         auto marks = board.getPencil(data.i[intersections[0]], data.j[intersections[1]]);
         if ((marks & remove) != 0) {
-            Move m = {getSetBits(remove)[0] + 1, data.i[intersections[0]], data.i[intersections[1]], Sudoku::EXPERT, &Play::pencil};
+            Move m = {getSetBits(remove)[0] + 1, data.i[intersections[0]], data.i[intersections[1]], Sudoku::EXPERT, &Sudoku::SudokuObj::pencil};
             moves.push_back(m);
             return true;
         }
@@ -1082,7 +1082,7 @@ static bool foundConstraints_XYwing(Play &board, findXYwingHelper &data, std::ve
     if (board.isEmpty(data.i[intersections[1]], data.j[intersections[0]])) {
         auto marks = board.getPencil(data.i[intersections[1]], data.j[intersections[0]]);
         if ((marks & remove) != 0) {
-            Move m = {getSetBits(remove)[0] + 1, data.i[intersections[1]], data.j[intersections[0]], Sudoku::EXPERT, &Play::pencil};
+            Move m = {getSetBits(remove)[0] + 1, data.i[intersections[1]], data.j[intersections[0]], Sudoku::EXPERT, &Sudoku::SudokuObj::pencil};
             moves.push_back(m);
             return true;
         }
@@ -1090,7 +1090,7 @@ static bool foundConstraints_XYwing(Play &board, findXYwingHelper &data, std::ve
     return false;
 }
 
-bool findXYwing(Play &board, std::vector<Move> &moves) {
+bool findXYwing(Sudoku::SudokuObj &board, std::vector<Move> &moves) {
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 9; j++) {
             if (!board.isEmpty(i, j)) continue;

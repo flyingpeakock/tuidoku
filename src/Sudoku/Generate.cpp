@@ -67,15 +67,16 @@ static Sudoku::puzzle removeGivens(Sudoku::puzzle filled) {
     return grid;
 }
 
-static Sudoku::difficulty gradePuzzle(Play &board, Sudoku::difficulty maxDiff);
+static Sudoku::difficulty gradePuzzle(Sudoku::SudokuObj &board, Sudoku::difficulty maxDiff);
 
 static Sudoku::difficulty gradePuzzle(Sudoku::puzzle &grid, Sudoku::difficulty maxDiff) {
-    Play board({}, grid, NULL);
+    //Play board({}, grid, NULL);
+    Sudoku::SudokuObj board(grid);
     board.autoPencil();
     return gradePuzzle(board, maxDiff);
 }
 
-static Sudoku::difficulty gradePuzzle(Play &board, Sudoku::difficulty maxDiff) {
+static Sudoku::difficulty gradePuzzle(Sudoku::SudokuObj &board, Sudoku::difficulty maxDiff) {
     // Ranking the board using the human solver
     Hint hint = solveHuman(board);
     std::vector<Hint> allHints;
