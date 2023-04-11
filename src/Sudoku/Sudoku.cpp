@@ -2,10 +2,113 @@
 #include <cmath>
 #include <string>
 #include <iostream>
+#include <random>
+
+void Sudoku::linkPuzzle(bool randomize, DancingLink buffer[CONSTRAINTS * SIZE], DancingLink *root, DancingLink columns[CONSTRAINTS]) {
+    DancingLink *current = root;
+    DancingLink *next;
+    size_t buffer_idx = 0;
+
+    // Initial link
+    current->colHeader = current;
+    current->up = current;
+    current->down = current;
+
+    // Linking columns together
+    for (auto i = 0; i < CONSTRAINTS; i++) {
+        next = &columns[i];
+        current->right = next;
+        next->left = current;
+
+        current = next;
+        current->up = current;
+        current->down = current;
+        current->colHeader = current;
+        current->count = 0;
+    }
+    current->right = root;
+    root->left = current;
+
+    for (auto row = 0; row < SIZE; row++) {
+        for (auto col = 0; col < SIZE; col++) {
+            for (auto num = 0; num < SIZE; num++) {
+                int constraints[4];
+                Sudoku::calculateConstraintColumns(constraints, row, col, num);
+
+                current = &buffer[buffer_idx + 3];
+                for (auto &constraint : constraints) {
+                    DancingLink *rowToAddTo = &columns[constraint];
+                    if (randomize && &columns[constraint].count != 0) {
+                        std::random_device rd;
+                        std::mt19937 gen(rd());
+                        std::uniform_int_distribution<> distrib(0, columns[constraint].count);
+                        auto offset_max = distrib(gen);
+                        for (auto offset = 0; offset < offset_max; offset++) {
+                            rowToAddTo = rowToAddTo->up;
+                        }
+                    }
+
+                    next = &buffer[buffer_idx];
+                    current->right = next;
+                    next->left = current;
+
+                    current = next;
+                    current->down = rowToAddTo;
+                    current->up = current->down->up;
+                    current->down->up->down = current;
+                    current->down->up = current;
+
+                    current->count = (row * SIZE * SIZE) + (col * SIZE) + num;
+
+                    current->colHeader = &columns[constraint];
+                    columns[constraint].count++;
+                    buffer_idx++;
+                }
+            }
+        }
+    }
+}
+
+/**
+ * @brief Covers given spaces in a constraint table
+ * 
+ * @param grid .. The grid to be filled in
+ * @param columns Array to the columns in the constraint table
+ */
+void Sudoku::coverGivens(puzzle &grid, DancingLink *columns) {
+    for (auto row = 0; row < SIZE; row++) {
+        for (auto col = 0; col < SIZE; col++) {
+            if (grid[row][col] == 0) continue;
+            auto num = grid[row][col] - 1;
+            int constraints[4];
+            calculateConstraintColumns(constraints, row, col, num);
+            for (auto &con : constraints) {
+                (columns + con)->cover();
+            }
+        }
+    }
+}
+
+/**
+ * @brief calculate the constraint columns for a given row, columns and number
+ * 
+ * @param columns array that gets filled with the correct values
+ * @param row 0-(SIZE - 1)
+ * @param col 0-(SIZE - 1)
+ * @param num 0-(SIZE - 1)
+ */
+void Sudoku::calculateConstraintColumns(int columns[4], int row, int col, int num) {
+    const int box_idx = Sudoku::BOX_SIZE * (row / Sudoku::BOX_SIZE) + (col / Sudoku::BOX_SIZE);
+    const int constraintSection = Sudoku::SIZE * Sudoku::SIZE;
+    columns[0] = (row * Sudoku::SIZE) + col;
+    columns[1] = constraintSection + (row * Sudoku::SIZE) + num;
+    columns[2] = (constraintSection * 2) + (col * Sudoku::SIZE) + num;
+    columns[3] = (constraintSection * 3) + (box_idx * Sudoku::SIZE) + num;
+}
 
 bool Sudoku::isSafe(puzzle grid, int row, int col, int num) {
     // Checking in the box
-    const int box_size = sqrt(SIZE);
+    const int box_size = BOX_SIZE;
     const int box_row = (row / box_size) * box_size;
     const int box_col = (col / box_size) * box_size;
 
@@ -118,7 +221,7 @@ void Sudoku::SudokuObj::restoreMarks(int row, int col) {
         }
     }
 
-    int boxSize = sqrt(Sudoku::SIZE);
+    int boxSize = BOX_SIZE;
     int boxRow = (row / boxSize) * boxSize;
     int boxCol = (col / boxSize) * boxSize;
     for (auto i = boxRow; i < boxRow + boxSize; i++) {
@@ -148,7 +251,7 @@ void Sudoku::SudokuObj::removeMarks(Sudoku::value val, int row, int col) {
         }
     }
 
-    int boxSize = sqrt(Sudoku::SIZE);
+    int boxSize = BOX_SIZE;
     int boxRow = (row / boxSize) * boxSize;
     int boxCol = (col / boxSize) * boxSize;
     for (auto i = boxRow; i < boxRow + boxSize; i++) {
@@ -195,4 +298,28 @@ Sudoku::puzzle Sudoku::SudokuObj::getCurrentGrid() const {
 
 Sudoku::puzzle Sudoku::SudokuObj::getSolutionGrid() const {
     return solutionGrid;
+}
+
+Sudoku::puzzle Sudoku::DancingLinkTables::createPuzzle() {
+    puzzle ret;
+    for (auto depth = 0; depth < current_idx; depth++) {
+        DancingLink *row = current[depth];
+        int i = row->count / (SIZE * SIZE);
+        int j = (row->count % (SIZE * SIZE)) / SIZE;
+        int num = (row->count % SIZE) + 1;
+        ret[i][j] = num;
+    }
+    return ret;
+}
+
+Sudoku::puzzle Sudoku::DancingLinkTables::createSolutionPuzzle() {
+    puzzle ret;
+    for (auto depth = 0; depth < solution_idx; depth++) {
+        DancingLink *row = solution[depth];
+        int i = row->count / (SIZE * SIZE);
+        int j = (row->count % (SIZE * SIZE)) / SIZE;
+        int num = (row->count % SIZE) + 1;
+        ret[i][j] = num;
+    }
+    return ret;
 }
