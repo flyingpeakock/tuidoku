@@ -6,13 +6,12 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(PROJECT_NAME tuidoku)
 set(UNIT_TESTS tuidoku_unit_tests)
-set(STATS_EXE tuidoku_run_stats)
 
 project(${PROJECT_NAME} C CXX)
 
 set(SOURCES
     src/File.cpp
-    src/HumanSolve.cpp
+    # src/HumanSolve.cpp
     src/main.cpp
     src/Stopwatch.cpp
     src/Sudoku/Generate.cpp
@@ -26,7 +25,7 @@ set(SOURCES
 set(TEST_SOURCES
     # Add files to be tested here
     src/File.cpp
-    src/HumanSolve.cpp
+    # src/HumanSolve.cpp
     src/Sudoku/Solve.cpp
     src/Sudoku/Generate.cpp
     src/Sudoku/Sudoku.cpp
@@ -36,28 +35,11 @@ set(TEST_SOURCES
 
     # Add unit tests here
     tests/file_test.cpp
-    tests/humanSolve_test.cpp
+    # tests/humanSolve_test.cpp
     tests/dancing_links.cpp
 )
 
-set(STATS_SOURCES
-    # Add project source files here
-    src/HumanSolve.cpp
-    src/Play.cpp
-    src/Sudoku/Generate.cpp
-    src/Sudoku/Solve.cpp
-    src/Sudoku/Sudoku.cpp
-    src/Tui/Tui.cpp
-    src/Config.cpp
-
-    # Add statistics source files here
-    statistics/main.cpp
-    statistics/HumanSolverPercentage.cpp
-    statistics/GeneratorStatistics.cpp
-)
-
 add_executable(${PROJECT_NAME} ${SOURCES})
-add_executable(${STATS_EXE} EXCLUDE_FROM_ALL ${STATS_SOURCES})
 
 find_package(GTest)
 find_package(libconfig REQUIRED)
@@ -71,11 +53,6 @@ find_package(Threads REQUIRED)
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE Threads::Threads
-    ${CURSES_LIBRARIES}
-    config++
-)
-
-target_link_libraries(${STATS_EXE}
     ${CURSES_LIBRARIES}
     config++
 )

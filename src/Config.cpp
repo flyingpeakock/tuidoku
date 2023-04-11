@@ -45,7 +45,6 @@ static setting_t allBinds[] = {
     {"insert", "i"},
     {"erase", std::string(1, (char)127)},
     {"fillPencils", "a"},
-    {"hint", "?"},
 
     // Other
     {"exit", "q"},

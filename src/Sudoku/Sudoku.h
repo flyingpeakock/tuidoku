@@ -2,17 +2,25 @@
 #include <array>
 #include <string>
 #include <map>
+#include <vector>
 
 namespace Sudoku {
     const int SIZE = 9;
 
+    /**
+     * @brief Difficulty can be of a move or of an entire puzzle
+     *        A puzzle is the same difficulty as it's most difficult move
+     * 
+     */
     enum difficulty {
-        BEGINNER = 0,
-        EASY,
-        MEDIUM,
-        HARD,
-        EXPERT,
-        ANY,
+        MISTAKE = 0,
+        BEGINNER = 1,
+        EASY = 2,
+        MEDIUM = 3,
+        HARD = 4,
+        EXPERT = 5,
+        ANY = 6,
+        LOWEST = BEGINNER,
         HIGHEST = EXPERT,
     };
 
@@ -20,7 +28,7 @@ namespace Sudoku {
     typedef std::array<std::array<value, SIZE>, SIZE> puzzle;
     class SudokuObj;
 
-    bool solve(puzzle &grid, bool randomize);
+    bool solve(puzzle &grid, bool randomize, unsigned int &difficulty);
     bool solve(puzzle &grid);
     puzzle generate(difficulty diff);
     puzzle generate();

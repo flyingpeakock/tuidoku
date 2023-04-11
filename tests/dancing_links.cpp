@@ -15,7 +15,8 @@ void GenerateBoard(std::string puzzleString, std::string solutionString, Sudoku:
 TEST(dancingLinks, solve_empty) {
     for (auto i = 0; i < 1000; i++) {
         Sudoku::puzzle grid = {};
-        bool res = Sudoku::solve(grid, false);
+        unsigned int trash;
+        bool res = Sudoku::solve(grid, false, trash);
         EXPECT_EQ(res, false);
         EXPECT_NE(grid, Sudoku::puzzle());
     }
@@ -58,7 +59,8 @@ TEST(dancingLinks, can_solve) {
         Sudoku::puzzle grid;
         Sudoku::puzzle solution;
         GenerateBoard(test.puzzle, test.solution, grid, solution);
-        bool ret = Sudoku::solve(grid, false);
+        unsigned int trash;
+        bool ret = Sudoku::solve(grid, false, trash);
         EXPECT_TRUE(ret);
         EXPECT_EQ(grid, solution);
     }
@@ -67,7 +69,8 @@ TEST(dancingLinks, can_solve) {
 TEST(dancingLinks, generate_then_solve) {
     Sudoku::puzzle grid = Sudoku::generate();
     Sudoku::puzzle solved = grid;
-    Sudoku::solve(solved, false);
+    unsigned int trash;
+    Sudoku::solve(solved, false, trash);
     for (auto i = 0; i < 9; i++) {
         for (auto j = 0; j < 0; j++) {
             if (grid[i][j] == 0) continue;

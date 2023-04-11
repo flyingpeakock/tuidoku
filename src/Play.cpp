@@ -1,7 +1,7 @@
 #include "Play.h"
 #include "Sudoku/Sudoku.h"
 #include "Tui/Tui.h"
-#include "HumanSolve.h"
+//#include "HumanSolve.h"
 #include <stdexcept>
 #include <cmath>
 
@@ -9,7 +9,6 @@ Play::Play(std::vector<keymap> keymap, Sudoku::puzzle grid, WINDOW *window) : su
     selectedNum = -1;
     row_idx = 0;
     col_idx = 0;
-    hintCounter = 0;
     state = State::INSERT;
     message = "Insert";
 
@@ -23,7 +22,6 @@ Play::Play(std::vector<keymap> keymap, Sudoku::puzzle grid, WINDOW *window) : su
         {"erase", &erase_key},
         {"fillPencils", &fillpencil_key},
         {"exit", &exit_key},
-        {"hint", &hint_key},
     };
 
     for (const auto &key : keymap) {
@@ -62,12 +60,7 @@ void Play::play() {
         else if (c == fillpencil_key) {
             sudoku.autoPencil();
         }
-        else if (c == hint_key) {
-            hintCounter++;
-            showHint();
-        }
         else if (c >= '0' && c <= '9') {
-            hintCounter = 0;
             selectedNum = c - '0';
             if (state == State::PENCIL) {
                 sudoku.pencil(c - '0', row_idx, col_idx);
@@ -144,22 +137,4 @@ void Play::printBoard() {
         }
     }
     wrefresh(gridWindow);
-}
-
-void Play::showHint() {
-    if (hintCounter == 1) {
-        hint = solveHuman(sudoku);
-        message = hint.hint1;
-    }
-    else if (hintCounter == 2) {
-        message = hint.hint2;
-    }
-    else {
-        if (hint.moves.size() != 0) {
-            for (auto &move : hint.moves) {
-                move(&sudoku);
-            }
-            hintCounter = 0;
-        }
-    }
 }

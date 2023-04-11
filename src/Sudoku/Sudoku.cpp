@@ -76,11 +76,16 @@ void Sudoku::SudokuObj::pencil(Sudoku::value val, int row, int col) {
         throw std::invalid_argument("Can only place pencil marks in empty cells");
     }
 
-    if ((val < 1) || (val > SIZE)) {
+    if ((val < 0) || (val > SIZE)) {
         throw std::invalid_argument("Value is out of range for this puzzle");
     }
 
-    pencilMarks[row][col] ^= (1 << (val - 1));
+    if (val == 0) {
+        pencilMarks[row][col] = 0;
+    }
+    else {
+        pencilMarks[row][col] ^= (1 << (val - 1));
+    }
 }
 
 void Sudoku::SudokuObj::autoPencil() {

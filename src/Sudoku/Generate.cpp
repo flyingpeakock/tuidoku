@@ -1,13 +1,11 @@
 #include "Sudoku.h"
 #include "../Play.h"
-#include "../HumanSolve.h"
+//#include "../HumanSolve.h"
 #include <algorithm>
 #include <chrono>
 #include <random>
 
 static Sudoku::puzzle removeGivens(Sudoku::puzzle filled);
-
-static Sudoku::difficulty gradePuzzle(Sudoku::puzzle &grid, Sudoku::difficulty maxDiff);
 
 Sudoku::puzzle Sudoku::generate() {
     return generate(ANY);
@@ -15,18 +13,10 @@ Sudoku::puzzle Sudoku::generate() {
 
 Sudoku::puzzle Sudoku::generate(difficulty diff) {
     puzzle grid = {};
-    solve(grid, true);
+    unsigned int difficulty = 0;
+    solve(grid, true, difficulty);
 
     grid = removeGivens(grid);
-
-    if (diff == ANY)
-    {
-        return grid;
-    }
-
-    Sudoku::difficulty this_diff = gradePuzzle(grid, diff);
-    if (diff != this_diff)
-        return generate(diff);
 
     return grid;
 }
@@ -58,56 +48,12 @@ static Sudoku::puzzle removeGivens(Sudoku::puzzle filled) {
         int removed = grid[cell.row][cell.col];
         grid[cell.row][cell.col] = 0;
         copy = grid;
-        bool isUnique = Sudoku::solve(copy, false);
+        unsigned int trash;
+        bool isUnique = Sudoku::solve(copy, false, trash);
         if (!isUnique) {
             // Removal made it a bad move, put it back
             grid[cell.row][cell.col] = removed;
         }
     }
     return grid;
-}
-
-static Sudoku::difficulty gradePuzzle(Sudoku::SudokuObj &board, Sudoku::difficulty maxDiff);
-
-static Sudoku::difficulty gradePuzzle(Sudoku::puzzle &grid, Sudoku::difficulty maxDiff) {
-    //Play board({}, grid, NULL);
-    Sudoku::SudokuObj board(grid);
-    board.autoPencil();
-    return gradePuzzle(board, maxDiff);
-}
-
-static Sudoku::difficulty gradePuzzle(Sudoku::SudokuObj &board, Sudoku::difficulty maxDiff) {
-    // Ranking the board using the human solver
-    Hint hint = solveHuman(board);
-    std::vector<Hint> allHints;
-    allHints.push_back(hint);
-    while (hint.moves.size() > 0) {
-        for (auto &move : hint.moves) {
-            move(&board);
-        }
-        hint = solveHuman(board);
-        allHints.push_back(hint);
-    }
-
-    // Couldn't solve
-    if (!board.isWon()) {
-        //return Sudoku::HIGHEST;
-        return Sudoku::ANY;
-    }
-
-    Sudoku::difficulty highestDifficulty = Sudoku::BEGINNER;
-    for (const auto h : allHints) {
-        for (const auto m : h.moves) {
-            if (m.difficulty > highestDifficulty) {
-                highestDifficulty = m.difficulty;
-            }
-
-            // filling in more difficult moves
-            if (m.difficulty > maxDiff) {
-                board.insert(board.getAnswer(m.row, m.col), m.row, m.col);
-                return gradePuzzle(board, maxDiff);
-            }
-        }
-    }
-    return highestDifficulty;
 }

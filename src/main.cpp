@@ -1,5 +1,5 @@
 #include "Sudoku/Sudoku.h"
-#include "HumanSolve.h"
+//#include "HumanSolve.h"
 #include "Tui/Tui.h"
 #include "Play.h"
 #include <fstream>
@@ -111,7 +111,6 @@ void play(WINDOW *mainWindow) {
             {"erase", Conf::keyBind("erase")},
             {"fillPencils", Conf::keyBind("fillPencils")},
             {"exit", Conf::keyBind("exit")},
-            {"hint", Conf::keyBind("hint")},
         };
         Play game(keys, grid, mainWindow);
         game.play();
