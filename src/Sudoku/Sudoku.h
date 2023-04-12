@@ -1,8 +1,4 @@
 #pragma once
-#include <array>
-#include <string>
-#include <map>
-#include <vector>
 
 namespace Sudoku {
     enum {
@@ -63,7 +59,7 @@ namespace Sudoku {
         int solution_count;
         bool should_randomize;
         bool backTrack();
-        void removeGivens();
+        void removeGivens(DancingLink **solution);
 
         public:
         DancingLinkTables(bool randomize);
