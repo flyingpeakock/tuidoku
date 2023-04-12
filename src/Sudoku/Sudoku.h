@@ -3,19 +3,16 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <math.h>
 
 namespace Sudoku {
     enum {
         eSize = 9,
+        eBoxSize = 3,
         eBoardSize = eSize * eSize,
         eConstraints = eBoardSize * 4,
         eBufferSize = eConstraints * eSize,
     };
-    const int BOX_SIZE = sqrt((unsigned int)eSize);
 
-    typedef unsigned int value;
-    typedef std::array<std::array<value, eSize>, eSize> puzzle;
     class DancingLinkTables;
     struct DancingLink;
 
@@ -37,9 +34,6 @@ namespace Sudoku {
     };
 
     void calculateConstraintColumns(int columns[4], int row, int col, int num);
-
-    bool isSafe(puzzle grid, int row, int col, int val);
-    puzzle fromString(std::string string);
 
     /**
     * @brief Dancing link which is a quadruply linked list
@@ -76,10 +70,6 @@ namespace Sudoku {
 
         void generate(difficulty diff);
         void resetLinks();
-        void coverGivens(puzzle grid);
-
-        Sudoku::puzzle createPuzzle();
-        Sudoku::puzzle createSolutionPuzzle();
         bool isUnique() const;
 
         void solve();

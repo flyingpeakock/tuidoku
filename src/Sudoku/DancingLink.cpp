@@ -102,25 +102,6 @@ void DancingLinkTables::resetLinks() {
     }
 }
 
-/**
- * @brief Covers given spaces in a constraint table
- * 
- * @param grid .. The grid to be filled in
- */
-void DancingLinkTables::coverGivens(puzzle grid) {
-    for (auto row = 0; row < eSize; row++) {
-        for (auto col = 0; col < eSize; col++) {
-            if (grid[row][col] == 0) continue;
-            auto num = grid[row][col] - 1;
-            int constraints[4];
-            calculateConstraintColumns(constraints, row, col, num);
-            for (auto &con : constraints) {
-                colHeaders[con].cover();
-            }
-        }
-    }
-}
-
 bool DancingLinkTables::isUnique() const {
     return solution_count == 1;
 }
