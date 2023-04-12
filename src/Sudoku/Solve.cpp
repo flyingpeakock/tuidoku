@@ -10,49 +10,14 @@ using namespace Sudoku;
 static DancingLink *smallestColumn(DancingLink *root);
 
 /**
- * @brief 
- * 
- * @param depth recursion depth
- * @param solutions number of solutions found
- * @return true if solutions found are greater than one
- * @return false no solutions found
- */
-//bool backTrack(int depth, int &solutions, DancingLink *root, Sudoku::puzzle &grid, DancingLink **solutionSet, unsigned int *difficulty);
-bool backTrack(DancingLinkTables &data);
-
-/**
- * @brief Create a Puzzle from a solutionset
- * 
- * @return Sudoku::puzzle 
- */
-static void createPuzzle(int depth, Sudoku::puzzle &grid, DancingLink **solutionSet);
-
-
-/**
  * @brief Solves a sudoku puzzle
  * 
- * @param grid puzzle to be solved
- * @return true if there is one solution
- * @return false if there are multiple solutions or if no solutions were found
  */
-bool Sudoku::solve(puzzle &grid, bool randomize, unsigned int &difficulty) {
-    DancingLinkTables data;
-    data.current_idx = 0;
-    data.solution_idx = -1; // Since the function increments we start at -1
-    data.solution_count = 0;
-
-    linkPuzzle(randomize, data.buffer, &data.root, data.colHeaders);
-    coverGivens(grid, data.colHeaders);
-
+void Sudoku::DancingLinkTables::solve() {
+    solution_idx = -1; // setting to -1 since backtrack increments before assignment
+    solution_count = 0;
     // Solving the board
-    bool foundSolution = backTrack(data);
-    grid = data.createSolutionPuzzle();
-    return data.solution_count == 1;
-}
-
-bool Sudoku::solve(puzzle &grid) {
-    unsigned int trash;
-    return solve(grid, false, trash);
+   backTrack();
 }
 
 /**
@@ -65,49 +30,32 @@ bool Sudoku::solve(puzzle &grid) {
  * @return false if no solution is found
  */
 //bool backTrack(int depth, int &solutions, DancingLink *root, Sudoku::puzzle &grid, DancingLink **solutionSet, unsigned int *difficulty) {
-bool backTrack(DancingLinkTables &data) {
-    if (data.root.right == &data.root) {
-        data.solution_count++;
-        //createPuzzle(depth, grid, solutionSet);
+bool Sudoku::DancingLinkTables::backTrack() {
+    if (root.right == &root) {
+        solution_count++;
         return true;
     }
 
-    DancingLink *col = smallestColumn(&data.root);
+    DancingLink *col = smallestColumn(&root);
     DancingLink *cur_col;
 
     col->cover();
-    data.solution_idx++;
+    solution_idx++;
     for (DancingLink *row = col->down; row != col; row = row->down) {
-        data.solution[data.solution_idx] = row;
+        solution[solution_idx] = row;
         for (cur_col = row->right; cur_col != row; cur_col = cur_col->right) {
             cur_col->colHeader->cover();
         }
-        if (backTrack(data) && data.solution_count > 1) {
+        if (backTrack() && solution_count > 1) {
             return true;
         }
         for (cur_col = row->left; cur_col != row; cur_col = cur_col->left) {
             cur_col->colHeader->uncover();
         }
     }
-    data.solution_idx--;
+    solution_idx--;
     col->uncover();
     return false;
-}
-
-/**
- * @brief Create a Puzzle from rows in the constraint grid
- * 
- * @param depth that has been searched
- * @param grid to put the pieces into
- */
-void createPuzzle(int depth, Sudoku::puzzle &grid, DancingLink **solutionSet) {
-    for (auto d = 0; d < depth; d++) {
-        DancingLink *row = solutionSet[d];
-        int i = row->count / (Sudoku::SIZE * Sudoku::SIZE);
-        int j = (row->count % (Sudoku::SIZE * Sudoku::SIZE)) / Sudoku::SIZE;
-        int num = (row->count % Sudoku::SIZE) + 1;
-        grid[i][j] = num;
-    }
 }
 
 /**
