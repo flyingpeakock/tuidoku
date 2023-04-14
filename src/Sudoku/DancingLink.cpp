@@ -122,15 +122,3 @@ static void generateLinks(DancingLinkTable *table, bool should_randomize) {
         }
     }
 }
-
-void Sudoku::repairLinks(DancingLinkTable *table) {
-    generateLinks(table, false); // uncovers everything
-
-    Sudoku::DancingLink *col;
-    for (auto &current : table->current) {
-        current->colHeader->cover();
-        for (auto link = current->right; link != current; link = link->right) {
-            link->colHeader->cover();
-        }
-    }
-}

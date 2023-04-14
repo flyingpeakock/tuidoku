@@ -13,7 +13,6 @@ Sudoku::DancingLinkTable Sudoku::generate() {
     solution = ret.solution;
     ret.current = ret.solution;
 
-    //repairLinks(&ret);
     for (auto i = 0; i < eBoardSize; i++) {
         // Storing and removing last
         auto back = ret.current.back();

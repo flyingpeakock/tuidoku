@@ -113,27 +113,6 @@ TEST(dancing_links, all_columns_are_linked) {
     }
 }
 
-TEST(dancing_links, repair_links) {
-    Sudoku::DancingLinkTable table(false);
-    Sudoku::solve(&table, false);
-    Sudoku::repairLinks(&table);
-    Sudoku::DancingLink *current = &table.colHeaders[0];
-    for (auto &link : table.colHeaders) {
-        EXPECT_EQ(&link, current);
-        current = current->right;
-    }
-
-    Sudoku::DancingLink *col;
-    Sudoku::DancingLink *row;
-    for (col = table.root.right; col != &table.root; col = col->right) {
-        row = col->down;
-        for (auto i = 0; i < 4; i++) {
-            row = row->right;
-        }
-        EXPECT_EQ(row, col->down);
-    }
-}
-
 TEST(dancing_links, none_covered_after_solve) {
     Sudoku::DancingLinkTable tables[2] = {true, false};
     bool bools[2] = {true, false};

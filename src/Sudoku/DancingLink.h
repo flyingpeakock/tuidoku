@@ -34,5 +34,4 @@ namespace Sudoku {
         std::vector<DancingLink *>solution;
     };
 
-    void repairLinks(DancingLinkTable *table);
 }
