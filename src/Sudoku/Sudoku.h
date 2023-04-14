@@ -1,75 +1,22 @@
 #pragma once
+#include "Constants.h"
+#include "DancingLink.h"
 
 namespace Sudoku {
-    enum {
-        eSize = 9,
-        eBoxSize = 3,
-        eBoardSize = eSize * eSize,
-        eConstraints = eBoardSize * 4,
-        eBufferSize = eConstraints * eSize,
-    };
-
-    class DancingLinkTables;
-    struct DancingLink;
-
     /**
-     * @brief Difficulty can be of a move or of an entire puzzle
-     *        A puzzle is the same difficulty as it's most difficult move
+     * @brief solves a sudoku puzzle
      * 
+     * @param table .. puzzle represented as a constraint table
+     *                 the table should be fully created
+     * @param randomize .. randomize for creating puzzles 
+     * @return true .. if a unique solution
+     * @return false .. if none or multiple solutions
      */
-    enum difficulty {
-        MISTAKE = 0,
-        BEGINNER = 1,
-        EASY = 2,
-        MEDIUM = 3,
-        HARD = 4,
-        EXPERT = 5,
-        ANY = 6,
-        LOWEST = BEGINNER,
-        HIGHEST = EXPERT,
-    };
+    bool solve(DancingLinkTable *table, bool randomize);
 
-    void calculateConstraintColumns(int columns[4], int row, int col, int num);
+    DancingLinkTable generate();
 
-    /**
-    * @brief Dancing link which is a quadruply linked list
-    * 
-    */
-    struct DancingLink {
-        DancingLink *up;
-        DancingLink *down;
-        DancingLink *left;
-        DancingLink *right;
-        DancingLink *colHeader;
-        int count; // is the column in columns, otherwise is the position and value in the board
-
-        void cover();
-        void uncover();
-    };
-
-    class DancingLinkTables {
-        private:
-        DancingLink root;
-        DancingLink colHeaders[eConstraints];
-        DancingLink buffer[eBufferSize];
-        DancingLink *current[eBoardSize];
-        DancingLink *solution[eBoardSize];
-        int current_idx;
-        int solution_idx;
-        int solution_count;
-        bool should_randomize;
-        bool backTrack();
-        void removeGivens(DancingLink **solution);
-
-        public:
-        DancingLinkTables(bool randomize);
-
-        void generate(difficulty diff);
-        void resetLinks();
-        bool isUnique() const;
-
-        void solve();
-    };
-
-
-}
+    int getRowFromLink(DancingLink *link);
+    int getColFromLink(DancingLink *link);
+    int getNumFromLink(DancingLink *link);
+};
