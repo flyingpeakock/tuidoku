@@ -15,7 +15,7 @@ Sudoku::DancingLinkTable Sudoku::generate() {
 
     for (auto i = 0; i < eBoardSize; i++) {
         // Storing and removing last
-        auto back = ret.current.back();
+        auto back = ret.current.back(); // never gets covered
         ret.current.pop_back();
 
         // covering links left in current

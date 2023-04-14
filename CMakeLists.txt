@@ -60,8 +60,13 @@ find_package(libconfig REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+target_include_directories(${PROJECT_NAME} PRIVATE src)
+
 target_link_libraries(${PROJECT_NAME}
     PRIVATE Threads::Threads
+    PRIVATE ftxui::screen
+    PRIVATE ftxui::dom
+    PRIVATE ftxui::component
     config++
 )
 
