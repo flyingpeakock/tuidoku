@@ -1,15 +1,13 @@
 #include "Sudoku.h"
 
-using namespace Sudoku;
-
-int Sudoku::getRowFromLink(DancingLink *link) {
-    return link->count / eBoardSize;
+void Sudoku::cover_link(DancingLink *link) {
+    for (auto col = link->right; col != link; col = col->right) {
+        col->colHeader->cover();
+    }
 }
 
-int Sudoku::getColFromLink(DancingLink *link) {
-    return (link->count % eBoardSize) / eSize;
-}
-
-int Sudoku::getNumFromLink(DancingLink *link) {
-    return (link->count % eSize) + 1;
+void Sudoku::uncover_link(DancingLink *link) {
+    for (auto col = link->left; col != link; col = col->left) {
+        col->colHeader->uncover();
+    }
 }

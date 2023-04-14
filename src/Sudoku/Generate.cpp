@@ -21,18 +21,14 @@ Sudoku::DancingLinkTable Sudoku::generate() {
         // covering links left in current
         for (auto col = ret.current.begin(); col != ret.current.end(); col++) {
             (*col)->colHeader->cover();
-            for (auto link = (*col)->right; link != (*col); link = link->right) {
-                link->colHeader->cover();
-            }
+            cover_link(*col);
         }
 
         bool isUnique = solve(&ret, false);
 
         // uncovering links in opposite order
         for (auto col = ret.current.rbegin(); col != ret.current.rend(); col++) {
-            for (auto link = (*col)->left; link != (*col); link = link->left) {
-                link->colHeader->uncover();
-            }
+            uncover_link(*col);
             (*col)->colHeader->uncover();
         }
         

@@ -41,18 +41,13 @@ static bool backTrack(Sudoku::DancingLinkTable *table, Sudoku::DancingLink **cur
     }
 
     Sudoku::DancingLink *col = smallestColumn(&table->root, randomize);
-    Sudoku::DancingLink *cur_col;
 
     col->cover();
     for (Sudoku::DancingLink *row = col->down; row != col; row = row->down) {
         current_solution[depth] = row;
-        for (cur_col = row->right; cur_col != row; cur_col = cur_col->right) {
-            cur_col->colHeader->cover();
-        }
+        Sudoku::cover_link(row);
         should_ret = backTrack(table, current_solution, depth+1, solution_count, randomize) && *solution_count > 1;
-        for (cur_col = row->left; cur_col != row; cur_col = cur_col->left) {
-            cur_col->colHeader->uncover();
-        }
+        Sudoku::uncover_link(row);
         if (should_ret) {
             col->uncover();
             return should_ret;

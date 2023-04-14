@@ -1,13 +1,36 @@
 cmake_minimum_required(VERSION 3.20)
 
 # Compiler and standard
-set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 20)
 
 set(PROJECT_NAME tuidoku)
 set(UNIT_TESTS tuidoku_unit_tests)
 
-project(${PROJECT_NAME} C CXX)
+project(${PROJECT_NAME} CXX)
+
+include(FetchContent)
+set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
+
+# Fetch GoogleTest
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip
+    DOWNLOAD_EXTRACT_TIMESTAMP False
+)
+FetchContent_MakeAvailable(googletest)
+
+# Fetch FTXUI
+FetchContent_Declare(
+    ftxui
+    GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+    GIT_TAG v4.0.0
+)
+
+FetchContent_GetProperties(ftxui)
+if(NOT ftxui_POPULATED)
+    FetchContent_Populate(ftxui)
+    add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
 
 set(SOURCES
     src/main.cpp
@@ -32,7 +55,6 @@ set(TEST_SOURCES
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-find_package(GTest)
 find_package(libconfig REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
