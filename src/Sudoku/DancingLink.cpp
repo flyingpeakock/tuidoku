@@ -11,7 +11,6 @@ void DancingLink::cover() {
     DancingLink *j;
     right->left = left;
     left->right = right;
-
     for (i = down; i != (this); i = i->down) {
         for (j = i->right; j != i; j = j->right) {
             j->down->up = j->up;
@@ -125,42 +124,13 @@ static void generateLinks(DancingLinkTable *table, bool should_randomize) {
 }
 
 void Sudoku::repairLinks(DancingLinkTable *table) {
-    //generateLinks(table, false); // uncovers everything
-    Sudoku::DancingLink *solution = table->solution[0];
-    int index = 0;
-    while (solution) {
-        if (solution->right->left != solution) {
-            solution->colHeader->uncover();
+    generateLinks(table, false); // uncovers everything
+
+    Sudoku::DancingLink *col;
+    for (auto &current : table->current) {
+        current->colHeader->cover();
+        for (auto link = current->right; link != current; link = link->right) {
+            link->colHeader->cover();
         }
-        solution = table->solution[++index];
-    }
-
-
-    // Cover the links that are in current
-    Sudoku::DancingLink *current = table->current[0];
-    index = 0;
-    while (current) {
-        if (current->right->left == current) {
-            current->colHeader->cover();
-        }
-        current = table->current[++index];
-    }
-}
-
-void Sudoku::coverRow(DancingLink *row) {
-    if (row->colHeader->left->right == row->colHeader) {
-        row->colHeader->cover();
-    }
-    for (auto col = row->right; col != row; col = col->right) {
-        col->colHeader->cover();
-    }
-}
-
-void Sudoku::uncoverRow(DancingLink *row) {
-    for (auto col = row->left; col != row; col = col->left) {
-        col->colHeader->uncover();
-    }
-    if (row->colHeader->left->right != row->colHeader) {
-        row->colHeader->uncover();
     }
 }

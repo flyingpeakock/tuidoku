@@ -1,5 +1,6 @@
 #pragma once
 #include "Constants.h"
+#include <vector>
 
 namespace Sudoku {
     void calculateConstraintColumns(int columns[4], int row, int col, int num);
@@ -29,11 +30,9 @@ namespace Sudoku {
         DancingLink root;
         DancingLink colHeaders[eConstraints];
         DancingLink buffer[eBufferSize];
-        DancingLink *current[eBoardSize + 1] = {nullptr, };
-        DancingLink *solution[eBoardSize + 1] = {nullptr, };
+        std::vector<DancingLink *>current;
+        std::vector<DancingLink *>solution;
     };
 
     void repairLinks(DancingLinkTable *table);
-    void coverRow(DancingLink *row);
-    void uncoverRow(DancingLink *row);
 }

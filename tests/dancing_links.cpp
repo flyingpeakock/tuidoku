@@ -148,3 +148,17 @@ TEST(dancing_links, none_covered_after_solve) {
         }
     }
 }
+
+TEST(dancing_links, solve_does_not_uncover_covered) {
+    Sudoku::DancingLinkTable table(false);
+    int constraints[4];
+    Sudoku::calculateConstraintColumns(constraints, 4, 6, 7);
+
+    for (auto c : constraints) {
+        table.colHeaders[c].cover();
+    }
+    Sudoku::solve(&table, false);
+    for (auto c : constraints) {
+        EXPECT_NE(table.colHeaders[c].right->left, &table.colHeaders[c]);
+    }
+}

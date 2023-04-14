@@ -33,8 +33,9 @@ static bool backTrack(Sudoku::DancingLinkTable *table, Sudoku::DancingLink **cur
         (*solution_count)++;
         
         // This solution becomes the solution in the table
+        table->solution.clear();
         for (auto i = 0; i < depth; i++) {
-            table->solution[i] = current_solution[i];
+            table->solution.push_back(current_solution[i]);
         }
         return true;
     }
