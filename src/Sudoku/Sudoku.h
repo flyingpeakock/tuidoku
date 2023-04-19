@@ -38,7 +38,7 @@ namespace Sudoku {
      * @return int 0 - (eSize - 1)
      */
     inline int getColFromLink(DancingLink *link) {
-        return (link->count & eBoardSize) / eSize;
+        return (link->count % eBoardSize) / eSize;
     }
 
     /**

@@ -39,6 +39,7 @@ set(SOURCES
     src/Sudoku/Sudoku.cpp
     src/Sudoku/DancingLink.cpp
     src/Config.cpp
+    src/Tui/Tui.cpp
 )
 
 set(TEST_SOURCES
