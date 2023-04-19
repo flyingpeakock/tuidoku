@@ -1,6 +1,7 @@
 #pragma once
 #include "Constants.h"
 #include <vector>
+#include <array>
 
 namespace Sudoku {
     void calculateConstraintColumns(int columns[4], int row, int col, int num);
@@ -28,8 +29,8 @@ namespace Sudoku {
     struct DancingLinkTable {
         DancingLinkTable(bool should_randomize);
         DancingLink root;
-        DancingLink colHeaders[eConstraints];
-        DancingLink buffer[eBufferSize];
+        std::array<DancingLink, eConstraints> colHeaders;
+        std::array<DancingLink, eBufferSize> buffer;
         std::vector<DancingLink *>current;
         std::vector<DancingLink *>solution;
     };

@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
     */
     auto table = Sudoku::generate();
     Tui::Board board(&table);
+    board.playLoop();
     
     return 0;
 }

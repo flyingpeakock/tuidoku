@@ -11,17 +11,23 @@ using namespace ftxui;
  */
 static void drawPuzzleTable(Canvas &c);
 
-static void drawFilledCells(Canvas &c, const std::vector<Sudoku::DancingLink *> &cells, const Canvas::Stylizer &style);
+/**
+ * @brief Draw a DancingLink * on the board
+ * 
+ * @param c canvas to draw on
+ * @param link which link to draw
+ * @param style which style to use
+ */
+static void drawFilledCell(Canvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style);
 
 Tui::Board::Board(Sudoku::DancingLinkTable *table) :
     screen(ScreenInteractive::FitComponent()),
     row(0), col(0),
-    puzzle(table){
+    puzzle(table),
+    c(146, 148){
     cursor.shape = Screen::Cursor::Shape::Block;
 
     renderer = Renderer([&] {
-        auto c = Canvas(146, 148);
-
         const Canvas::Stylizer style_clues = [&](Pixel &pixel){
             pixel.underlined = true;
             pixel.bold = true;
@@ -32,59 +38,89 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
         };
 
         drawPuzzleTable(c);
-        drawFilledCells(c, puzzle.clues, style_clues);
+        //drawFilledCells(c, puzzle.constraintTable->current.begin(), puzzle.constraintTable->current.begin() + puzzle.current_start_index, style_clues);
+        //drawFilledCells(c, puzzle.constraintTable->current.begin() + puzzle.current_start_index, puzzle.constraintTable->current.end(), style_filled);
+        for (auto i = 0; i < puzzle.constraintTable->current.size(); i++) {
+            Canvas::Stylizer style;
+            if (i < puzzle.current_start_index) {
+                style = style_clues;
+            }
+            else {
+                style = style_filled;
+            }
+            drawFilledCell(c, puzzle.constraintTable->current[i], style);
+        }
 
-        cursor.x = (8 + (col * 16)) / 2;
-        cursor.y = (8 + (row * 16)) / 4;
+        cursor.x = 4 + (col * 8);
+        cursor.y = 2 + (row * 4);
         screen.SetCursor(cursor);
 
         return frame(canvas(std::move(c)));
     });
 
-    auto keypress = CatchEvent(renderer, [&](Event event) {
-        bool key_pressed = false;
-        if ((event == Event::Character("h")) || (event == Event::ArrowLeft)) {
-            col--;
-            key_pressed = true;
+    parseEvent = CatchEvent([&](Event event) {
+        if (event.is_character()) {
+            return parseKeys(event);
         }
-        else if ((event == Event::Character("j")) || (event == Event::ArrowDown)) {
-            row++;
-            key_pressed = true;
-        }
-        else if ((event == Event::Character("k")) || (event == Event::ArrowUp)) {
-            row--;
-            key_pressed = true;
-        }
-        else if ((event == Event::Character("l")) || (event == Event::ArrowRight)) {
-            col++;
-            key_pressed = true;
-        }
-        else if (event == Event::Character("q")) {
-            screen.ExitLoopClosure()();
-            key_pressed = true;
-        }
-
-        if (key_pressed) {
-            if (col == 9) {
-                col = 0;
-            }
-            else if (col < 0) {
-                col = 8;
-            }
-
-            if (row == 9) {
-                row = 0;
-            }
-            else if (row < 0) {
-                row = 8;
+        else if (event.is_mouse()) {
+            auto m = event.mouse();
+            if (m.button == Mouse::Button::Left) {
+                col = ((m.x - 1) / 8);
+                row = ((m.y - 1) / 4);
+                return true;
             }
         }
-        return key_pressed;
+        return false;
     });
-    screen.Loop(keypress);
 }
 
-Tui::SudokuPuzzle::SudokuPuzzle(Sudoku::DancingLinkTable *table) : constraintTable(table), clues(table->current) {
+void Tui::Board::playLoop() {
+    screen.Loop(renderer | parseEvent);
+}
+
+bool Tui::Board::parseKeys(Event event) {
+    bool key_pressed = false;
+    if ((event == Event::Character("h")) || (event == Event::ArrowLeft)) {
+        col--;
+        key_pressed = true;
+    }
+    else if ((event == Event::Character("j")) || (event == Event::ArrowDown)) {
+        row++;
+        key_pressed = true;
+    }
+    else if ((event == Event::Character("k")) || (event == Event::ArrowUp)) {
+        row--;
+        key_pressed = true;
+    }
+    else if ((event == Event::Character("l")) || (event == Event::ArrowRight)) {
+        col++;
+        key_pressed = true;
+    }
+    else if (event == Event::Character("q")) {
+        screen.ExitLoopClosure()();
+        key_pressed = true;
+    }
+
+    if (key_pressed) {
+        if (col == 9) {
+            col = 0;
+        }
+        else if (col < 0) {
+            col = 8;
+        }
+
+        if (row == 9) {
+            row = 0;
+        }
+        else if (row < 0) {
+            row = 8;
+        }
+    }
+    return key_pressed;
+}
+
+Tui::SudokuPuzzle::SudokuPuzzle(Sudoku::DancingLinkTable *table) : constraintTable(table) {
+    current_start_index = constraintTable->current.size();
 }
 
 static void drawPuzzleTable(Canvas &c) {
@@ -116,16 +152,14 @@ static void drawPuzzleTable(Canvas &c) {
         c.DrawText(0, (++height) * 4, botrow, style);
 }
 
-void drawFilledCells(Canvas &c, const std::vector<Sudoku::DancingLink *> &cells, const Canvas::Stylizer &style) {
-    for (const auto &cell : cells) {
-        int row = Sudoku::getRowFromLink(cell);
-        int col = Sudoku::getColFromLink(cell);
-        int num = Sudoku::getNumFromLink(cell);
-        char num_char[2] = {(char)(num + '0'), '\0'};
+static void drawFilledCell(Canvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style){
+    int row = Sudoku::getRowFromLink(link);
+    int col = Sudoku::getColFromLink(link);
+    int num = Sudoku::getNumFromLink(link);
+    char num_char[2] = {(char)(num + '0'), '\0'};
 
-        int x = 8 + (col * 16);
-        int y = 8 + (row * 16);
+    int x = 8 + (col * 16);
+    int y = 8 + (row * 16);
 
-        c.DrawText(x, y, num_char, style);
-    }
+    c.DrawText(x, y, num_char, style);
 }

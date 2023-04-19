@@ -11,23 +11,27 @@
 namespace Tui {
     struct SudokuPuzzle {
         Sudoku::DancingLinkTable *constraintTable;
-        std::vector<Sudoku::DancingLink *> clues;
-
+        //std::vector<Sudoku::DancingLink *> clues;
         SudokuPuzzle(Sudoku::DancingLinkTable *table);
+        size_t current_start_index;
     };
 
     class Board {
         private:
+        bool parseKeys(ftxui::Event event);
+
         SudokuPuzzle puzzle;
 
         ftxui::ScreenInteractive screen;
         ftxui::Screen::Cursor cursor;
+        ftxui::ComponentDecorator parseEvent;
+        ftxui::Canvas c;
         int row;
         int col;
 
         public:
         Board(Sudoku::DancingLinkTable *constraintTable);
+        void playLoop();
         ftxui::Component renderer;
-        ftxui::Component keypress;
     };
 }
