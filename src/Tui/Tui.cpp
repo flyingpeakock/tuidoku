@@ -24,7 +24,9 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
     screen(ScreenInteractive::FitComponent()),
     row(0), col(0),
     puzzle(table),
-    c(146, 148){
+    c(146, 148),
+    state(eInsert){
+
     cursor.shape = Screen::Cursor::Shape::Block;
 
     renderer = Renderer([&] {
@@ -38,8 +40,6 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
         };
 
         drawPuzzleTable(c);
-        //drawFilledCells(c, puzzle.constraintTable->current.begin(), puzzle.constraintTable->current.begin() + puzzle.current_start_index, style_clues);
-        //drawFilledCells(c, puzzle.constraintTable->current.begin() + puzzle.current_start_index, puzzle.constraintTable->current.end(), style_filled);
         for (auto i = 0; i < puzzle.constraintTable->current.size(); i++) {
             Canvas::Stylizer style;
             if (i < puzzle.current_start_index) {
@@ -51,6 +51,12 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
             drawFilledCell(c, puzzle.constraintTable->current[i], style);
         }
 
+        if (state == eInsert) {
+            cursor.shape = Screen::Cursor::Shape::Block;
+        }
+        else {
+            cursor.shape = Screen::Cursor::Shape::BlockBlinking;
+        }
         cursor.x = 4 + (col * 8);
         cursor.y = 2 + (row * 4);
         screen.SetCursor(cursor);
@@ -100,8 +106,22 @@ bool Tui::Board::parseKeys(Event event) {
         screen.ExitLoopClosure()();
         key_pressed = true;
     }
+    else if (event == Event::Character("p")) {
+        state = ePencil;
+        key_pressed = true;
+    }
+    else if (event == Event::Character("i")) {
+        state = eInsert;
+        key_pressed = true;
+    }
 
-    if (key_pressed) {
+    if (!key_pressed) {
+        char pressed = event.character()[0];
+        if ((pressed >= '0') && (pressed <= '9')) {
+            return true;
+        }
+    }
+    else {
         if (col == 9) {
             col = 0;
         }
