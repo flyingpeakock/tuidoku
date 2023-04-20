@@ -180,6 +180,24 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
     }
 
     // The cell at row col is now empty
+    // Check if it is missing from constraint table because of removed pencil
+    found = Sudoku::containsLinkEqual(row, col, num - '1', removed_marks.begin(), removed_marks.end());
+    if (found != removed_marks.end()) {
+        auto f = *found;
+        std::vector<DancingLink *> re_cover;
+        while (true) {
+            auto current = removed_marks.back();
+            removed_marks.pop_back();
+            uncover_row(current);
+            if (current = f) break;
+            re_cover.insert(re_cover.begin(), current);
+        }
+        for (auto &current : re_cover) {
+            cover_row(current);
+        }
+    }
+
+    // Add chosen link to current and cover
     int constraints[4];
     Sudoku::calculateConstraintColumns(constraints, row, col, num - '1');
     for (auto i : constraints) {

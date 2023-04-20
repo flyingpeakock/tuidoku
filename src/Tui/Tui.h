@@ -1,10 +1,8 @@
-#include <ftxui/dom/elements.hpp>
-#include <ftxui/dom/table.hpp>
+#pragma once
+
 #include <ftxui/screen/screen.hpp>
 #include <ftxui/dom/canvas.hpp>
 #include <ftxui/component/screen_interactive.hpp>
-#include <ftxui/component/component.hpp>
-#include <ftxui/component/event.hpp>
 #include <ftxui/component/component.hpp>
 #include "../Sudoku/Sudoku.h"
 

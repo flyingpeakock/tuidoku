@@ -141,9 +141,11 @@ void Sudoku::uncover_link(DancingLink *link) {
 void Sudoku::cover_row(DancingLink *link) {
     link->up->down = link->down;
     link->down->up = link->up;
+    link->colHeader->count--;
     for (auto r = link->right; r != link; r = r->right) {
         r->up->down = r->down;
         r->down->up = r->up;
+        r->colHeader->count--;
     }
 }
 
@@ -151,9 +153,11 @@ void Sudoku::uncover_row(DancingLink *link) {
     for (auto l = link->left; l != link; l = l->left) {
         l->down->up = l;
         l->up->down = l;
+        l->colHeader->count++;
     }
     link->down->up = link;
     link->up->down = link;
+    link->colHeader->count++;
 }
 
 void Sudoku::uncoverInVector(std::vector<DancingLink *> &vector, DancingLink *link) {

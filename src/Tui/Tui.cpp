@@ -1,6 +1,10 @@
 #include "Tui.h"
 #include <chrono>
 #include <thread>
+#include <ftxui/dom/elements.hpp>
+#include <ftxui/component/event.hpp>
+#include <ftxui/component/captured_mouse.hpp>
+#include <ftxui/component/mouse.hpp>
 
 using namespace ftxui;
 
@@ -85,21 +89,6 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
         };
 
         drawPuzzleTable(c);
-        for (auto i = 0; i < puzzle.constraintTable->current.size(); i++) {
-            Canvas::Stylizer style;
-            if (i < puzzle.current_start_index) {
-                style = style_clues;
-            }
-            else {
-                style = style_filled;
-            }
-            drawFilledCell(c, puzzle.constraintTable->current[i], style);
-        }
-
-        for (const auto &err : puzzle.wrong_inputs) {
-            drawFilledCell(c, err, style_logical_error);
-        }
-
         if (autoPencil) {
             for (auto header = puzzle.constraintTable->root.right; header != &puzzle.constraintTable->root; header = header->right) {
                 for (auto link = header->down; link != header; link = link->down) {
@@ -116,6 +105,21 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
             }
         }
 
+        for (auto i = 0; i < puzzle.constraintTable->current.size(); i++) {
+            Canvas::Stylizer style;
+            if (i < puzzle.current_start_index) {
+                style = style_clues;
+            }
+            else {
+                style = style_filled;
+            }
+            drawFilledCell(c, puzzle.constraintTable->current[i], style);
+        }
+
+        for (const auto &err : puzzle.wrong_inputs) {
+            drawFilledCell(c, err, style_logical_error);
+        }
+
         if (state == eInsert) {
             cursor.shape = Screen::Cursor::Shape::Block;
         }
@@ -126,7 +130,7 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
         cursor.y = 2 + (row * 4);
         screen.SetCursor(cursor);
 
-        return frame(canvas(std::move(c)));
+        return canvas(std::move(c));
     });
 
     parseEvent = CatchEvent([&](Event event) {
@@ -150,6 +154,10 @@ void Tui::Board::playLoop() {
 }
 
 bool Tui::Board::parseKeys(Event event) {
+    if (&puzzle.constraintTable->root == puzzle.constraintTable->root.right) {
+        screen.ExitLoopClosure();
+        return true;
+    }
     bool key_pressed = false;
     if ((event == Event::Character("h")) || (event == Event::ArrowLeft)) {
         col--;
@@ -183,6 +191,13 @@ bool Tui::Board::parseKeys(Event event) {
         autoPencil = !autoPencil;
         key_pressed = true;
     }
+    else if ((state == eInsert) &&
+        ((event == Event::Character(" "))
+        || (event == Event::Delete)
+        || (event == Event::Backspace))) {
+            Sudoku::removeFromPuzzle(&puzzle, row, col);
+            key_pressed = true;
+        }
 
     if (!key_pressed) {
         char pressed = event.character()[0];
@@ -198,14 +213,7 @@ bool Tui::Board::parseKeys(Event event) {
             }
 
             selected = pressed;
-            return true;
-        }
-        else if ((state == eInsert)
-            && ((event == Event::Character(" "))
-                || (event == Event::Delete)
-                || (event == Event::Backspace))) {
-            Sudoku::removeFromPuzzle(&puzzle, row, col);
-            return true;
+            return key_pressed = true;
         }
     }
     else {
