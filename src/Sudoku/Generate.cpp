@@ -5,7 +5,7 @@
 Sudoku::DancingLinkTable Sudoku::generate() {
     // TODO: Figure out which to remove first, maybe by looking at which column has the most rows in each step during solve and picking one of those
     bool solve_result = true;
-    size_t current_index = 0;
+    int current_index = 0;
     std::vector<DancingLink *> solution;
     DancingLinkTable ret(true);
 

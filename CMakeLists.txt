@@ -37,6 +37,7 @@ set(SOURCES
     src/Sudoku/Generate.cpp
     src/Sudoku/Solve.cpp
     src/Sudoku/DancingLink.cpp
+    src/Sudoku/Sudoku.cpp
     src/Config.cpp
     src/Tui/Tui.cpp
 )
@@ -46,6 +47,7 @@ set(TEST_SOURCES
     src/Sudoku/Solve.cpp
     src/Sudoku/Generate.cpp
     src/Sudoku/DancingLink.cpp
+    src/Sudoku/Sudoku.cpp
     src/Config.cpp
 
     # Add unit tests here

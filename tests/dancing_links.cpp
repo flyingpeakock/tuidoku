@@ -119,7 +119,7 @@ TEST(dancing_links, none_covered_after_solve) {
     for (auto &table : tables) {
         for (auto b : bools) {
             Sudoku::solve(&table, b);
-            size_t counter = 0;
+            int counter = 0;
             for (auto col = table.root.right; col != &table.root; col = col->right) {
                 counter++;
             }
