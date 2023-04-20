@@ -9,6 +9,7 @@ static void generateLinks(DancingLinkTable *table, bool should_randomize);
 void DancingLink::cover() {
     DancingLink *i;
     DancingLink *j;
+    isCoverd = true;
     right->left = left;
     left->right = right;
     for (i = down; i != (this); i = i->down) {
@@ -23,6 +24,7 @@ void DancingLink::cover() {
 void DancingLink::uncover() {
     DancingLink *i;
     DancingLink *j;
+    isCoverd = false;
     for (i = up; i != (this); i = i->up) {
         for (j = i->left; j != i; j = j->left) {
             j->colHeader->count++;
@@ -76,6 +78,7 @@ static void generateLinks(DancingLinkTable *table, bool should_randomize) {
         current->down = current;
         current->colHeader = current;
         current->count = 0;
+        current->isCoverd = false;
     }
     // closing the loop
     current->right = &table->root;
@@ -121,4 +124,46 @@ static void generateLinks(DancingLinkTable *table, bool should_randomize) {
             }
         }
     }
+}
+
+void Sudoku::cover_link(DancingLink *link) {
+    for (auto col = link->right; col != link; col = col->right) {
+        col->colHeader->cover();
+    }
+}
+
+void Sudoku::uncover_link(DancingLink *link) {
+    for (auto col = link->left; col != link; col = col->left) {
+        col->colHeader->uncover();
+    }
+}
+
+void Sudoku::uncoverInVector(std::vector<DancingLink *> &vector, DancingLink *link) {
+    /*
+     * We need to uncover everything behind link and store the links
+     * then we need to uncover link
+     * then cover all the links that we have stored
+     * when covering and uncovering remove and append to current
+     */
+
+    std::vector<DancingLink *> uncovered;
+
+    while(true) {
+        auto current = vector.back();
+        vector.pop_back();
+        Sudoku::uncover_link(current);
+        current->colHeader->uncover();
+        if (current == link) {
+            // Dont add to uncovered
+            break;
+        }
+        uncovered.insert(uncovered.begin(), current);
+    }
+
+    for (auto l : uncovered) {
+        l->colHeader->cover();
+        cover_link(l);
+        vector.push_back(l);
+    }
+
 }

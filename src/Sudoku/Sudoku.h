@@ -21,47 +21,4 @@ namespace Sudoku {
      */
     DancingLinkTable generate();
 
-    /**
-     * @brief Get the Row index of DancingLink
-     * 
-     * @param link 
-     * @return int 0 - (eSize - 1)
-     */
-    inline int getRowFromLink(DancingLink *link) {
-        return link->count / eBoardSize;
-    }
-
-    /**
-     * @brief Get the Col index of DancingLink
-     * 
-     * @param link 
-     * @return int 0 - (eSize - 1)
-     */
-    inline int getColFromLink(DancingLink *link) {
-        return (link->count % eBoardSize) / eSize;
-    }
-
-    /**
-     * @brief Get the num value of DancingLink
-     * 
-     * @param link 
-     * @return int 1 - eSize
-     */
-    inline int getNumFromLink(DancingLink *link) {
-        return (link->count % eSize) + 1;
-    }
-
-    /**
-     * @brief Covers all the columns in a row, except for the column of link
-     * 
-     * @param link 
-     */
-    void cover_link(DancingLink *link);
-
-    /**
-     * @brief Uncovers all the columns in a row, except for the column of link
-     * 
-     * @param link 
-     */
-    void uncover_link(DancingLink *link);
 };

@@ -37,5 +37,11 @@ Sudoku::DancingLinkTable Sudoku::generate() {
             ret.current.insert(ret.current.begin(), back);
         }
     }
+
+    // need to re-cover the links that are in current
+    for (auto &link : ret.current) {
+        link->colHeader->cover();
+        cover_link(link);
+    }
     return ret;
 }

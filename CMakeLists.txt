@@ -36,7 +36,6 @@ set(SOURCES
     src/main.cpp
     src/Sudoku/Generate.cpp
     src/Sudoku/Solve.cpp
-    src/Sudoku/Sudoku.cpp
     src/Sudoku/DancingLink.cpp
     src/Config.cpp
     src/Tui/Tui.cpp
@@ -46,7 +45,6 @@ set(TEST_SOURCES
     # Add files to be tested here
     src/Sudoku/Solve.cpp
     src/Sudoku/Generate.cpp
-    src/Sudoku/Sudoku.cpp
     src/Sudoku/DancingLink.cpp
     src/Config.cpp
 

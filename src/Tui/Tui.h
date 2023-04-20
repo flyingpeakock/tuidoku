@@ -10,10 +10,12 @@
 
 namespace Tui {
     struct SudokuPuzzle {
-        Sudoku::DancingLinkTable *constraintTable;
-        //std::vector<Sudoku::DancingLink *> clues;
         SudokuPuzzle(Sudoku::DancingLinkTable *table);
+        Sudoku::DancingLinkTable *constraintTable;
         size_t current_start_index;
+        std::vector<Sudoku::DancingLink *> wrong_inputs;
+
+        void insert(int row, int col, char num);
     };
 
     class Board {
