@@ -106,8 +106,25 @@ namespace Sudoku {
         return end;
     }
 
+    inline std::vector<DancingLink *>::iterator containsLinkEqual(int row, int col, int num, std::vector<DancingLink *>::iterator start, std::vector<DancingLink *>::iterator end) {
+        int cur_row, cur_col, cur_num;
+        for (auto i = start; i < end; i++) {
+            cur_row = getRowFromLink(*i);
+            cur_col = getColFromLink(*i);
+            cur_num = getNumFromLink(*i);
+            if ((row == cur_row) && (col == cur_col) && (num == cur_num)) {
+                return i;
+            }
+        }
+        return end;
+    }
+
     inline bool isUncovered(DancingLink * link) {
-        return !link->colHeader->isCoverd;
+        if (link->colHeader->isCoverd) {
+            return false;
+        }
+
+        return link->up->down == link;
     }
 
     void uncoverInVector(std::vector<DancingLink*> &vector, DancingLink *link);
@@ -125,4 +142,11 @@ namespace Sudoku {
      * @param link 
      */
     void uncover_link(DancingLink *link);
+
+    void uncover_link(DancingLink *link);
+
+    void cover_row(DancingLink *link);
+
+    void uncover_row(DancingLink *link);
+
 }

@@ -138,6 +138,24 @@ void Sudoku::uncover_link(DancingLink *link) {
     }
 }
 
+void Sudoku::cover_row(DancingLink *link) {
+    link->up->down = link->down;
+    link->down->up = link->up;
+    for (auto r = link->right; r != link; r = r->right) {
+        r->up->down = r->down;
+        r->down->up = r->up;
+    }
+}
+
+void Sudoku::uncover_row(DancingLink *link) {
+    for (auto l = link->left; l != link; l = l->left) {
+        l->down->up = l;
+        l->up->down = l;
+    }
+    link->down->up = link;
+    link->up->down = link;
+}
+
 void Sudoku::uncoverInVector(std::vector<DancingLink *> &vector, DancingLink *link) {
     /*
      * We need to uncover everything behind link and store the links

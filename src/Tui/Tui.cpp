@@ -29,6 +29,15 @@ static void drawFilledCell(Canvas &c, Sudoku::DancingLink *link, const Canvas::S
  */
 static void removeFromPuzzle(Tui::SudokuPuzzle *puzzle, int row, int col);
 
+/**
+ * @brief Draws a DancingLink * as a pencil mark on the board
+ * 
+ * @param c canvas to draw on
+ * @param link which link to draw
+ * @param style which style to use
+ */
+static void drawPencil(Canvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style);
+
 static void recheckMistakes(std::vector<Sudoku::DancingLink *> &mistakes, Sudoku::DancingLinkTable *table) {
     for (auto i = mistakes.begin(), end = mistakes.end(); i < end; ){
         if (Sudoku::isUncovered(*i)) {
@@ -51,7 +60,9 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
     row(0), col(0),
     puzzle(table),
     c(146, 148),
-    state(eInsert){
+    state(eInsert),
+    autoPencil(false),
+    selected(0){
 
     cursor.shape = Screen::Cursor::Shape::Block;
 
@@ -59,15 +70,42 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
         const Canvas::Stylizer style_clues = [&](Pixel &pixel){
             pixel.underlined = true;
             pixel.bold = true;
+
+            if (pixel.character[0] == selected) {
+                pixel.background_color = Color::Cyan;
+                pixel.foreground_color = Color::White;
+            }
         };
 
         const Canvas::Stylizer style_filled = [&](Pixel &pixel){
             pixel.bold = true;
+
+            if (pixel.character[0] == selected) {
+                pixel.background_color = Color::BlueLight;
+                pixel.foreground_color = Color::White;
+            }
         };
 
         const Canvas::Stylizer style_logical_error = [&](Pixel &pixel) {
             pixel.bold = true;
             pixel.blink = true;
+            pixel.background_color = Color::Red1;
+            pixel.foreground_color = Color::White;
+        };
+
+        const Canvas::Stylizer style_pencil = [&](Pixel &pixel) {
+            pixel.dim = true;
+            pixel.bold = false;
+
+            if (pixel.character[0] == selected) {
+                pixel.background_color = Color::BlueLight;
+                pixel.foreground_color = Color::Black;
+            }
+        };
+
+        const Canvas::Stylizer style_pencil_error = [&](Pixel &pixel) {
+            pixel.dim = true;
+            pixel.bold = false;
             pixel.background_color = Color::Red1;
             pixel.foreground_color = Color::White;
         };
@@ -86,6 +124,22 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
 
         for (const auto &err : puzzle.wrong_inputs) {
             drawFilledCell(c, err, style_logical_error);
+        }
+
+        if (autoPencil) {
+            for (auto header = puzzle.constraintTable->root.right; header != &puzzle.constraintTable->root; header = header->right) {
+                for (auto link = header->down; link != header; link = link->down) {
+                    drawPencil(c, link, style_pencil);
+                }
+            }
+        }
+        else {
+            for (auto &link : puzzle.pencilMarks) {
+                drawPencil(c, link, style_pencil);
+            }
+            for (auto &link : puzzle.wrong_marks) {
+                drawPencil(c, link, style_pencil_error);
+            }
         }
 
         if (state == eInsert) {
@@ -151,6 +205,10 @@ bool Tui::Board::parseKeys(Event event) {
         state = eInsert;
         key_pressed = true;
     }
+    else if (event == Event::Character("P")) {
+        autoPencil = !autoPencil;
+        key_pressed = true;
+    }
 
     if (!key_pressed) {
         char pressed = event.character()[0];
@@ -158,10 +216,19 @@ bool Tui::Board::parseKeys(Event event) {
             if (state == eInsert) {
                 puzzle.insert(row, col, pressed);
             }
+            else if (!autoPencil){
+                puzzle.pencil(row, col, pressed);
+            }
+            else {
+                puzzle.pencilAuto(row, col, pressed);
+            }
+
+            selected = pressed;
             return true;
         }
         else if ((state == eInsert) && (event == Event::Character(" "))) {
             removeFromPuzzle(&puzzle, row, col);
+            return true;
         }
     }
     else {
@@ -185,13 +252,143 @@ bool Tui::Board::parseKeys(Event event) {
 Tui::SudokuPuzzle::SudokuPuzzle(Sudoku::DancingLinkTable *table) :
     constraintTable(table),
     current_start_index(table->current.size()) {
-    
-    for (auto &link : table->current) {
-        
+}
+
+void Tui::SudokuPuzzle::pencil(int row, int col, char num) {
+    if ((num < '1') || num > '9') {
+        // invalid input
+        return;
+    }
+
+    auto found = Sudoku::containsLinkEquivalent(row, col, constraintTable->current.begin(), constraintTable->current.end());
+    if (found != constraintTable->current.end()) {
+        return; // filled in square
+    }
+    found = Sudoku::containsLinkEquivalent(row, col, wrong_inputs.begin(), wrong_inputs.end());
+    if (found != wrong_inputs.end()) {
+        return; // filled in square
+    }
+
+    /*
+     * if exists in removed_marks, uncover all rows until row backwards, then add row to removed_marks, then cover all rows from row forwards
+     * if exists in pencilMarks, cover the row and add to removed_marks, mark is being removed
+     * if exists in wrong_marks, simply remove from wrong_marks, mark is being removed
+     * 
+     * else search through constraint table
+     *      if exists, add to pencilMarks
+     *      if not exists, find in buffer and add to wrong_marks
+     * 
+     * if autopencil if exists in constraint table cover row and add to removed_marks
+     * if autopencil and not exists in constraint table return
+     * auto pencil should be handled in another function
+     */
+
+    found = Sudoku::containsLinkEqual(row, col, num - '1', removed_marks.begin(), removed_marks.end());
+    if (found != removed_marks.end()) {
+        // Putting back a mark that was removed
+        pencilMarks.push_back(*found);
+        std::vector<Sudoku::DancingLink *> needs_recover;
+        while(true) {
+            auto current = removed_marks.back();
+            removed_marks.pop_back();
+            Sudoku::uncover_row(current);
+            if (current == *found) {
+                break;
+            }
+            needs_recover.insert(needs_recover.begin(), current);
+        }
+        for (auto &p : needs_recover) {
+            Sudoku::cover_row(p);
+            removed_marks.push_back(p);
+        }
+        return;
+    }
+
+    found = Sudoku::containsLinkEqual(row, col, num - '1', pencilMarks.begin(), pencilMarks.end());
+    if (found != pencilMarks.end()) {
+        Sudoku::cover_row(*found);
+        removed_marks.push_back(*found);
+        pencilMarks.erase(found);
+        return;
+    }
+
+    found = Sudoku::containsLinkEqual(row, col, num - '1', wrong_marks.begin(), wrong_marks.end());
+    if (found != wrong_marks.end()) {
+        wrong_marks.erase(found);
+        return;
+    }
+
+    int constraints[4];
+    Sudoku::calculateConstraintColumns(constraints, row, col, num - '1');
+    for (auto loop = 0; loop < 2; loop++) {
+        for (const auto &i : constraints) {
+            auto colHeader = &constraintTable->colHeaders[i];
+            if ((Sudoku::isUncovered(colHeader)) || (loop > 0)) {
+                for (auto r = colHeader->down; r != colHeader; r = r->down) {
+                    if (Sudoku::isLinkValues(r, row, col, num - '1')) {
+                        if (loop == 0) {
+                            pencilMarks.push_back(r);
+                        }
+                        else {
+                            wrong_marks.push_back(r);
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Tui::SudokuPuzzle::pencilAuto(int row, int col, char num) {
+    /*
+     * if in removed_marks uncover it
+     * else cover it and add to removed_marks
+     */
+
+    auto found = Sudoku::containsLinkEqual(row, col, num - '1', removed_marks.begin(), removed_marks.end());
+    if (found != removed_marks.end()) {
+        std::vector<Sudoku::DancingLink *> needs_recover;
+        while (true) {
+            auto current = removed_marks.back();
+            removed_marks.pop_back();
+            Sudoku::uncover_row(current);
+
+            if (current == *found) {
+                break;
+            }
+            needs_recover.insert(needs_recover.begin(), current);
+        }
+
+        for (auto link : needs_recover) {
+            Sudoku::cover_row(link);
+        }
+        return;
+    }
+
+    int constraints[4];
+    Sudoku::calculateConstraintColumns(constraints, row, col, num - '1');
+
+    for (const auto &i : constraints) {
+        auto colHeader = &constraintTable->colHeaders[i];
+        if (!Sudoku::isUncovered(colHeader)) continue;
+        for (auto r = colHeader->down; r != colHeader; r = r->down) {
+            if (Sudoku::isLinkValues(r, row, col, num - '1')) {
+                Sudoku::cover_row(r);
+                removed_marks.push_back(r);
+                return;
+            }
+        }
     }
 }
 
 void Tui::SudokuPuzzle::insert(int row, int col, char num) {
+    // Checking if position is a clue
+    auto found = Sudoku::containsLinkEquivalent(row, col, constraintTable->current.begin(), constraintTable->current.begin() + current_start_index);
+    if (found != constraintTable->current.begin() + current_start_index) {
+        return;
+    }
+
     if (num == '0') {
         return removeFromPuzzle(this, row, col);
     }
@@ -202,7 +399,7 @@ void Tui::SudokuPuzzle::insert(int row, int col, char num) {
 
     // Checking if position already filled
     // in wrong input
-    auto found = Sudoku::containsLinkEquivalent(row, col, wrong_inputs.begin(), wrong_inputs.end());
+    found = Sudoku::containsLinkEquivalent(row, col, wrong_inputs.begin(), wrong_inputs.end());
     if (found != wrong_inputs.end()) {
         if ((num - '1') == Sudoku::getNumFromLink(*found)) {
             // Already exists
@@ -233,6 +430,17 @@ void Tui::SudokuPuzzle::insert(int row, int col, char num) {
                     link->colHeader->cover();
                     Sudoku::cover_link(link);
                     constraintTable->current.push_back(link);
+
+                    // we need to remove links in pencilMarks that are now covered
+                    for (auto j = pencilMarks.begin(), end = pencilMarks.end(); j < end;) {
+                        if (Sudoku::isUncovered(*j)) {
+                            j++;
+                        }
+                        else {
+                            j = pencilMarks.erase(j);
+                            end = pencilMarks.end();
+                        }
+                    }
                     return;
                 }
             }
@@ -286,6 +494,24 @@ static void drawFilledCell(Canvas &c, Sudoku::DancingLink *link, const Canvas::S
 
     int x = 8 + (col * 16);
     int y = 8 + (row * 16);
+
+    c.DrawText(x, y, num_char, style);
+}
+
+static void drawPencil(Canvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style) {
+    int row = Sudoku::getRowFromLink(link);
+    int col = Sudoku::getColFromLink(link);
+    int num = Sudoku::getNumFromLink(link);
+    char num_char[2] = {(char)(num + '1'), '\0'};
+
+    int x = 8 + (col * 16);
+    int y = 8 + (row * 16);
+
+    int x_offset = num % Sudoku::eBoxSize;
+    int y_offset = num / Sudoku::eBoxSize;
+
+    x = ((x - 4) + (4 * x_offset));
+    y = ((y - 4) + (4 * y_offset));
 
     c.DrawText(x, y, num_char, style);
 }
