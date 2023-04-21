@@ -168,22 +168,22 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
     // in wrong input
     found = Sudoku::containsLinkEquivalent(row, col, wrong_inputs.begin(), wrong_inputs.end());
     if (found != wrong_inputs.end()) {
+        wrong_inputs.erase(found);
         if ((num - '1') == Sudoku::getNumFromLink(*found)) {
-            // Already exists
+            // Removed if number already there
             return;
         }
-        wrong_inputs.erase(found);
     }
     else {
         // checking in current
         found = Sudoku::containsLinkEquivalent(row, col, constraintTable->current.begin() + current_start_index, constraintTable->current.end());
         if (found != constraintTable->current.end()) {
-            if ((num - '1') == Sudoku::getNumFromLink(*found)) {
-                // Already exists
-                return;
-            }
             Sudoku::uncoverInVector(constraintTable->current, *found);
             recheckMistakes(wrong_inputs, constraintTable);
+            if ((num - '1') == Sudoku::getNumFromLink(*found)) {
+                // Removed if number is already there
+                return;
+            }
         }
     }
 
