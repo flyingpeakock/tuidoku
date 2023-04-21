@@ -134,6 +134,11 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
     });
 
     parseEvent = CatchEvent([&](Event event) {
+        if (&puzzle.constraintTable->root == puzzle.constraintTable->root.right) {
+            screen.ExitLoopClosure()();
+            return true;
+        }
+
         if (event.is_character()) {
             return parseKeys(event);
         }
@@ -154,10 +159,6 @@ void Tui::Board::playLoop() {
 }
 
 bool Tui::Board::parseKeys(Event event) {
-    if (&puzzle.constraintTable->root == puzzle.constraintTable->root.right) {
-        screen.ExitLoopClosure();
-        return true;
-    }
     bool key_pressed = false;
     if ((event == Event::Character("h")) || (event == Event::ArrowLeft)) {
         col--;

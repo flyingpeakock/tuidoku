@@ -11,7 +11,7 @@ namespace Tui {
         private:
         enum stateEnum {
             eInsert,
-            ePencil
+            ePencil,
         };
 
         stateEnum state;

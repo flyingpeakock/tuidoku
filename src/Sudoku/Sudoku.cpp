@@ -100,12 +100,20 @@ void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
 }
 
 void Sudoku::SudokuPuzzle::pencilAuto(int row, int col, char num) {
+    auto found = Sudoku::containsLinkEquivalent(row, col, constraintTable->current.begin(), constraintTable->current.end());
+    if (found != constraintTable->current.end()) {
+        return; // can't pencil filled
+    }
+    found = Sudoku::containsLinkEquivalent(row, col, wrong_inputs.begin(), wrong_inputs.end());
+    if (found != wrong_inputs.end()) {
+        return; // can't pencil filled
+    }
     /*
      * if in removed_marks uncover it
      * else cover it and add to removed_marks
      */
 
-    auto found = Sudoku::containsLinkEqual(row, col, num - '1', removed_marks.begin(), removed_marks.end());
+    found = Sudoku::containsLinkEqual(row, col, num - '1', removed_marks.begin(), removed_marks.end());
     if (found != removed_marks.end()) {
         std::vector<Sudoku::DancingLink *> needs_recover;
         while (true) {
