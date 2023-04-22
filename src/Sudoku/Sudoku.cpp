@@ -29,9 +29,10 @@ void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
     }
 
     /*
+     * if exists in wrong_marks, simply remove from wrong_marks, mark is being removed
+     * if exists in pencilMarks and covered add to wrong_marks
      * if exists in removed_marks, uncover all rows until row backwards, then add row to removed_marks, then cover all rows from row forwards
      * if exists in pencilMarks, cover the row and add to removed_marks, mark is being removed
-     * if exists in wrong_marks, simply remove from wrong_marks, mark is being removed
      * 
      * else search through constraint table
      *      if exists, add to pencilMarks
@@ -41,6 +42,18 @@ void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
      * if autopencil and not exists in constraint table return
      * auto pencil should be handled in another function
      */
+
+    found = Sudoku::containsLinkEqual(row, col, num - '1', wrong_marks.begin(), wrong_marks.end());
+    if (found != wrong_marks.end()) {
+        wrong_marks.erase(found);
+        return;
+    }
+
+    found = Sudoku::containsLinkEqual(row, col, num - '1', pencilMarks.begin(), pencilMarks.end());
+    if ((found != pencilMarks.end()) && (!Sudoku::isUncovered(*found))) {
+        wrong_marks.push_back(*found);
+        return;
+    }
 
     found = Sudoku::containsLinkEqual(row, col, num - '1', removed_marks.begin(), removed_marks.end());
     if (found != removed_marks.end()) {
@@ -68,12 +81,6 @@ void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
         Sudoku::cover_row(*found);
         removed_marks.push_back(*found);
         pencilMarks.erase(found);
-        return;
-    }
-
-    found = Sudoku::containsLinkEqual(row, col, num - '1', wrong_marks.begin(), wrong_marks.end());
-    if (found != wrong_marks.end()) {
-        wrong_marks.erase(found);
         return;
     }
 
@@ -215,17 +222,6 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
                     link->colHeader->cover();
                     Sudoku::cover_link(link);
                     constraintTable->current.push_back(link);
-
-                    // we need to remove links in pencilMarks that are now covered
-                    for (auto j = pencilMarks.begin(), end = pencilMarks.end(); j < end;) {
-                        if (Sudoku::isUncovered(*j)) {
-                            j++;
-                        }
-                        else {
-                            j = pencilMarks.erase(j);
-                            end = pencilMarks.end();
-                        }
-                    }
                     return;
                 }
             }

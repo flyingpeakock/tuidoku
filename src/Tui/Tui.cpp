@@ -98,9 +98,25 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
         }
         else {
             for (auto &link : puzzle.pencilMarks) {
-                drawPencil(c, link, style_pencil);
+                // Don't draw covered
+                if (Sudoku::isUncovered(link)) {
+                    drawPencil(c, link, style_pencil);
+                }
             }
             for (auto &link : puzzle.wrong_marks) {
+                // Don't draw filled
+                {
+                    auto r = Sudoku::getRowFromLink(link);
+                    auto c = Sudoku::getColFromLink(link);
+                    auto found = Sudoku::containsLinkEquivalent(r, c, puzzle.constraintTable->current.begin(), puzzle.constraintTable->current.end());
+                    if (found != puzzle.constraintTable->current.end()) {
+                        continue;
+                    }
+                    found = Sudoku::containsLinkEquivalent(r, c, puzzle.wrong_inputs.begin(), puzzle.wrong_inputs.end());
+                    if (found != puzzle.wrong_inputs.end()) {
+                        continue;
+                    }
+                }
                 drawPencil(c, link, style_pencil_error);
             }
         }
