@@ -159,12 +159,7 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
             return parseKeys(event);
         }
         else if (event.is_mouse()) {
-            auto m = event.mouse();
-            if (m.button == Mouse::Button::Left) {
-                col = ((m.x - 1) / 8);
-                row = ((m.y - 1) / 4);
-                return true;
-            }
+            return parseMouse(event);
         }
         return false;
     });
@@ -172,6 +167,37 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
 
 void Tui::Board::playLoop() {
     screen.Loop(renderer | parseEvent);
+}
+
+bool Tui::Board::parseMouse(Event event) {
+    auto m = event.mouse();
+    if (m.button == Mouse::Button::Left) {
+        col = ((m.x - 1) / 8);
+        row = ((m.y - 1) / 4);
+
+        if (col > 8) {
+            col = 8;
+        }
+        if (row > 8) {
+            row = 8;
+        }
+
+        auto found = Sudoku::containsLinkEquivalent(row, col, puzzle.constraintTable->current.begin(), puzzle.constraintTable->current.end());
+        auto found_mistake = Sudoku::containsLinkEquivalent(row, col, puzzle.wrong_inputs.begin(), puzzle.wrong_inputs.end());
+        if (found == puzzle.constraintTable->current.end() && found_mistake == puzzle.wrong_inputs.end()) {
+            // If position not filled
+            selected = 0;
+        }
+        // Is filled
+        else if (found != puzzle.constraintTable->current.end()) {
+            selected = Sudoku::getNumFromLink(*found) + '1';
+        }
+        else if (found_mistake != puzzle.wrong_inputs.end()) {
+            selected = Sudoku::getNumFromLink(*found) + '1';
+        }
+        return true;
+    }
+    return false;
 }
 
 bool Tui::Board::parseKeys(Event event) {

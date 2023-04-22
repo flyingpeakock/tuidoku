@@ -16,6 +16,7 @@ namespace Tui {
 
         stateEnum state;
         bool parseKeys(ftxui::Event event);
+        bool parseMouse(ftxui::Event event);
 
         bool autoPencil;
 
