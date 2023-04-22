@@ -1,12 +1,6 @@
 #include "Sudoku.h"
 
-/**
- * @brief Check if mistakes are still mistakes after the board has been changed
- * 
- * @param mistakes vecetor containing mistakes
- * @param table constraint table
- */
-static void recheckMistakes(std::vector<Sudoku::DancingLink *> &mistakes, Sudoku::DancingLinkTable *table);
+static bool canSee(Sudoku::DancingLink *link_l, Sudoku::DancingLink *link_r);
 
 Sudoku::SudokuPuzzle::SudokuPuzzle(Sudoku::DancingLinkTable *table) :
     constraintTable(table),
@@ -176,6 +170,7 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
     found = Sudoku::containsLinkEquivalent(row, col, wrong_inputs.begin(), wrong_inputs.end());
     if (found != wrong_inputs.end()) {
         wrong_inputs.erase(found);
+        recheckMistakes(*found);
         if ((num - '1') == Sudoku::getNumFromLink(*found)) {
             // Removed if number already there
             return;
@@ -186,7 +181,7 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
         found = Sudoku::containsLinkEquivalent(row, col, constraintTable->current.begin() + current_start_index, constraintTable->current.end());
         if (found != constraintTable->current.end()) {
             Sudoku::uncoverInVector(constraintTable->current, *found);
-            recheckMistakes(wrong_inputs, constraintTable);
+            recheckMistakes(*found);
             if ((num - '1') == Sudoku::getNumFromLink(*found)) {
                 // Removed if number is already there
                 return;
@@ -222,6 +217,7 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
                     link->colHeader->cover();
                     Sudoku::cover_link(link);
                     constraintTable->current.push_back(link);
+                    recheckMistakes(link);
                     return;
                 }
             }
@@ -239,16 +235,45 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
 }
 
 
-static void recheckMistakes(std::vector<Sudoku::DancingLink *> &mistakes, Sudoku::DancingLinkTable *table) {
-    for (auto i = mistakes.begin(), end = mistakes.end(); i < end; ){
+void Sudoku::SudokuPuzzle::recheckMistakes(Sudoku::DancingLink *link) {
+    if (Sudoku::isUncovered(link)) {
+        // Has removed
+        /* if pencil mark is now uncovered it is valid, add to pencil marks*/
+        for (auto i = wrong_marks.begin(), end = wrong_marks.end(); i < end; ) {
+            if (Sudoku::isUncovered(*i)) {
+                pencilMarks.push_back(*i);
+                i = wrong_marks.erase(i);
+                end = wrong_marks.end();
+            }
+            else {
+                i++;
+            }
+        }
+    }
+    else {
+        // Has inserted
+        /* manually remove pencil marks that are wrong and visible to the mark */
+        for (auto i = wrong_marks.begin(), end = wrong_marks.end(); i < end; ) {
+            if (canSee(link, *i)) {
+                pencilMarks.push_back(*i);
+                i = wrong_marks.erase(i);
+                end = wrong_marks.end();
+            }
+            else {
+                i++;
+            }
+        }
+    }
+    for (auto i = wrong_inputs.begin(), end = wrong_inputs.end(); i < end; ){
         if (Sudoku::isUncovered(*i)) {
             // Cover instead of just putting in mistakes
             (*i)->colHeader->cover();
             Sudoku::cover_link(*i);
-            table->current.push_back(*i);
+            // No longer wrong so add to current
+            constraintTable->current.push_back(*i);
 
-            i = mistakes.erase(i);
-            end = mistakes.end();
+            i = wrong_inputs.erase(i);
+            end = wrong_inputs.end();
         }
         else {
             i++;
@@ -272,7 +297,24 @@ void Sudoku::removeFromPuzzle(Sudoku::SudokuPuzzle *puzzle, int row, int col) {
         // Does not exist
         return;
     }
-
     Sudoku::uncoverInVector(puzzle->constraintTable->current, *found);
-    recheckMistakes(puzzle->wrong_inputs, puzzle->constraintTable);
+    puzzle->recheckMistakes(*found);
+}
+
+static bool canSee(Sudoku::DancingLink *link_l, Sudoku::DancingLink *link_r) {
+    int row[2] = {Sudoku::getRowFromLink(link_l), Sudoku::getRowFromLink(link_r)};
+    int col[2] = {Sudoku::getColFromLink(link_l), Sudoku::getColFromLink(link_r)};
+    int num[2] = {Sudoku::getNumFromLink(link_l), Sudoku::getNumFromLink(link_r)};
+
+    int constraints[2][4];
+    for (auto i = 0; i < 2; i++) {
+        Sudoku::calculateConstraintColumns(constraints[i], row[i], col[i], num[i]);
+    }
+
+    for (auto i = 0; i < 4; i++) {
+        if (constraints[0][i] == constraints[1][i]) {
+            return true;
+        }
+    }
+    return false;
 }
