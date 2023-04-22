@@ -178,15 +178,28 @@ bool Tui::Board::parseMouse(Event event) {
         if (col > 8) {
             col = 8;
         }
+        else if (col < 0) {
+            col = 0;
+        }
         if (row > 8) {
             row = 8;
+        }
+        else if (row < 0) {
+            row = 0;
         }
 
         auto found = Sudoku::containsLinkEquivalent(row, col, puzzle.constraintTable->current.begin(), puzzle.constraintTable->current.end());
         auto found_mistake = Sudoku::containsLinkEquivalent(row, col, puzzle.wrong_inputs.begin(), puzzle.wrong_inputs.end());
         if (found == puzzle.constraintTable->current.end() && found_mistake == puzzle.wrong_inputs.end()) {
-            // If position not filled
-            selected = 0;
+            if (autoPencil) {
+                selected = 0;
+                return true;
+            }
+            auto found_mark = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.pencilMarks.begin(), puzzle.pencilMarks.end());
+            auto found_mark_mistake = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.wrong_marks.begin(), puzzle.wrong_marks.end());
+            if (found_mark == puzzle.pencilMarks.end() && found_mark_mistake == puzzle.wrong_marks.end()) {
+                selected = 0;
+            }
         }
         // Is filled
         else if (found != puzzle.constraintTable->current.end()) {
