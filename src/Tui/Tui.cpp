@@ -171,7 +171,7 @@ void Tui::Board::playLoop() {
 
 bool Tui::Board::parseMouse(Event event) {
     auto m = event.mouse();
-    if (m.button == Mouse::Button::Left) {
+    if (m.button == Mouse::Button::Left && m.motion == Mouse::Motion::Pressed) {
         col = ((m.x - 1) / 8);
         row = ((m.y - 1) / 4);
 
@@ -191,14 +191,20 @@ bool Tui::Board::parseMouse(Event event) {
         auto found = Sudoku::containsLinkEquivalent(row, col, puzzle.constraintTable->current.begin(), puzzle.constraintTable->current.end());
         auto found_mistake = Sudoku::containsLinkEquivalent(row, col, puzzle.wrong_inputs.begin(), puzzle.wrong_inputs.end());
         if (found == puzzle.constraintTable->current.end() && found_mistake == puzzle.wrong_inputs.end()) {
-            if (autoPencil) {
-                selected = 0;
-                return true;
+            if (selected < '1' || selected > '9') {
+                return true; // No number selected
             }
-            auto found_mark = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.pencilMarks.begin(), puzzle.pencilMarks.end());
-            auto found_mark_mistake = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.wrong_marks.begin(), puzzle.wrong_marks.end());
-            if (found_mark == puzzle.pencilMarks.end() && found_mark_mistake == puzzle.wrong_marks.end()) {
-                selected = 0;
+            // Pressed on empty cell, fill or pencil
+            if (state == ePencil) {
+                if (autoPencil) {
+                    puzzle.pencilAuto(row, col, selected);
+                }
+                else {
+                    puzzle.pencil(row, col, selected);
+                }
+            }
+            else {
+                puzzle.insert(row, col, selected);
             }
         }
         // Is filled
@@ -269,7 +275,7 @@ bool Tui::Board::parseKeys(Event event) {
             }
 
             selected = pressed;
-            return key_pressed = true;
+            key_pressed = true;
         }
     }
     else {
