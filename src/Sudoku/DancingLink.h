@@ -4,21 +4,24 @@
 #include <array>
 
 namespace Sudoku {
-    void calculateConstraintColumns(int columns[4], int row, int col, int num);
-
     /**
      * @brief Dancing link which is a quadruply linked list
      * 
      */
+    struct DancingLinkColumn;
     struct DancingLink {
         DancingLink *up;
         DancingLink *down;
         DancingLink *left;
         DancingLink *right;
-        DancingLink *colHeader;
+        DancingLinkColumn *colHeader;
         int count; // is the column in columns, otherwise is the position and value in the board
         bool isCoverd; // Only set in colHeaders
+    };
 
+    struct DancingLinkColumn : DancingLink {
+        constraintColTypes constraintType;
+        
         void cover();
         void uncover();
     };
@@ -30,7 +33,7 @@ namespace Sudoku {
     struct DancingLinkTable {
         DancingLinkTable(bool should_randomize);
         DancingLink root;
-        std::array<DancingLink, eConstraints> colHeaders;
+        std::array<DancingLinkColumn, eConstraints> colHeaders;
         std::array<DancingLink, eBufferSize> buffer;
         std::vector<DancingLink *>current;
         std::vector<DancingLink *>solution;
@@ -147,4 +150,5 @@ namespace Sudoku {
 
     void uncover_row(DancingLink *link);
 
+    void calculateConstraintColumns(int columns[eConstraintTypes], int row, int col, int num);
 }

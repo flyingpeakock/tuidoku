@@ -9,7 +9,7 @@ static bool backTrack(Sudoku::DancingLinkTable *table, Sudoku::DancingLink **cur
  * 
  * @return ColHeader 
  */
-static Sudoku::DancingLink *smallestColumn(Sudoku::DancingLink *root, bool randomize);
+static Sudoku::DancingLinkColumn *smallestColumn(Sudoku::DancingLink *root, bool randomize);
 
 bool Sudoku::solve(DancingLinkTable *table, bool randomize) {
     unsigned int solution_count = 0;
@@ -40,7 +40,7 @@ static bool backTrack(Sudoku::DancingLinkTable *table, Sudoku::DancingLink **cur
         return true;
     }
 
-    Sudoku::DancingLink *col = smallestColumn(&table->root, randomize);
+    Sudoku::DancingLinkColumn *col = smallestColumn(&table->root, randomize);
 
     col->cover();
     for (Sudoku::DancingLink *row = col->down; row != col; row = row->down) {
@@ -63,12 +63,12 @@ static bool backTrack(Sudoku::DancingLinkTable *table, Sudoku::DancingLink **cur
  * @param root 
  * @return DancingLink* to the smallest column
  */
-static Sudoku::DancingLink *smallestColumn(Sudoku::DancingLink *root, bool randomize) {
-    Sudoku::DancingLink *current;
-    Sudoku::DancingLink *ret;
+static Sudoku::DancingLinkColumn *smallestColumn(Sudoku::DancingLink *root, bool randomize) {
+    Sudoku::DancingLinkColumn *current;
+    Sudoku::DancingLinkColumn *ret;
     int min = 0xFFFF;
     if (!randomize) {
-        for (current = root->right; current != root; current = current->right) {
+        for (current = (Sudoku::DancingLinkColumn *)root->right; (Sudoku::DancingLink *)current != root; current = (Sudoku::DancingLinkColumn*)current->right) {
             if (current->count < min) {
                 min = current->count;
                 ret = current;
@@ -77,8 +77,8 @@ static Sudoku::DancingLink *smallestColumn(Sudoku::DancingLink *root, bool rando
         }
     }
     else {
-        std::vector<Sudoku::DancingLink *> potentialColumns;
-        for (current = root->right; current != root; current = current->right) {
+        std::vector<Sudoku::DancingLinkColumn *> potentialColumns;
+        for (current = (Sudoku::DancingLinkColumn *)root->right; (Sudoku::DancingLink *)current != root; current = (Sudoku::DancingLinkColumn *)current->right) {
             if (current->count < min) {
                 potentialColumns.clear();
                 potentialColumns.push_back(current);

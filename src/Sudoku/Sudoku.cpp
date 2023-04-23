@@ -67,7 +67,7 @@ void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
         return;
     }
 
-    int constraints[4];
+    int constraints[eConstraintTypes];
     Sudoku::calculateConstraintColumns(constraints, row, col, num - '1');
     for (auto loop = 0; loop < 2; loop++) {
         for (const auto &i : constraints) {
@@ -123,7 +123,7 @@ void Sudoku::SudokuPuzzle::pencilAuto(int row, int col, char num) {
         return;
     }
 
-    int constraints[4];
+    int constraints[eConstraintTypes];
     Sudoku::calculateConstraintColumns(constraints, row, col, num - '1');
 
     for (const auto &i : constraints) {
@@ -199,7 +199,7 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
     }
 
     // Add chosen link to current and cover
-    int constraints[4];
+    int constraints[eConstraintTypes];
     Sudoku::calculateConstraintColumns(constraints, row, col, num - '1');
     for (auto i : constraints) {
         if (Sudoku::isUncovered(&constraintTable->colHeaders[i])) {
@@ -217,7 +217,7 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
     }
 
     // Could not find uncovered, force one from buffer
-    for (auto i = 0; i < Sudoku::eBufferSize; i += 4) {
+    for (auto i = 0; i < Sudoku::eBufferSize; i += eConstraintTypes) {
         auto current = &constraintTable->buffer[i];
         if (Sudoku::isLinkValues(current, row, col, num - '1')) {
             wrong_inputs.push_back(current);
@@ -300,12 +300,12 @@ bool Sudoku::canSee(Sudoku::DancingLink *link_l, Sudoku::DancingLink *link_r) {
     int col[2] = {Sudoku::getColFromLink(link_l), Sudoku::getColFromLink(link_r)};
     int num[2] = {Sudoku::getNumFromLink(link_l), Sudoku::getNumFromLink(link_r)};
 
-    int constraints[2][4];
+    int constraints[2][Sudoku::eConstraintTypes];
     for (auto i = 0; i < 2; i++) {
         Sudoku::calculateConstraintColumns(constraints[i], row[i], col[i], num[i]);
     }
 
-    for (auto i = 0; i < 4; i++) {
+    for (auto i = 0; i < Sudoku::eConstraintTypes; i++) {
         if (constraints[0][i] == constraints[1][i]) {
             return true;
         }
