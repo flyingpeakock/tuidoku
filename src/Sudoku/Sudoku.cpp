@@ -1,7 +1,5 @@
 #include "Sudoku.h"
 
-static bool canSee(Sudoku::DancingLink *link_l, Sudoku::DancingLink *link_r);
-
 static void uncoverInVector(std::vector<Sudoku::Move> &vector, Sudoku::DancingLink *link);
 
 Sudoku::SudokuPuzzle::SudokuPuzzle(Sudoku::DancingLinkTable *table) :
@@ -297,7 +295,7 @@ void Sudoku::removeFromPuzzle(Sudoku::SudokuPuzzle *puzzle, int row, int col) {
     puzzle->recheckMistakes(*found);
 }
 
-static bool canSee(Sudoku::DancingLink *link_l, Sudoku::DancingLink *link_r) {
+bool Sudoku::canSee(Sudoku::DancingLink *link_l, Sudoku::DancingLink *link_r) {
     int row[2] = {Sudoku::getRowFromLink(link_l), Sudoku::getRowFromLink(link_r)};
     int col[2] = {Sudoku::getColFromLink(link_l), Sudoku::getColFromLink(link_r)};
     int num[2] = {Sudoku::getNumFromLink(link_l), Sudoku::getNumFromLink(link_r)};
