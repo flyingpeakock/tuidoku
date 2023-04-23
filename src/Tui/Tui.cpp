@@ -219,14 +219,30 @@ bool Tui::Board::parseMouse(Event event) {
             }
             else {
                 // only insert if visible pencilmark
-                found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.pencilMarks.begin(), puzzle.pencilMarks.end());
-                if (found == puzzle.pencilMarks.end()) { // not in pencil marks
-                    found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.wrong_marks.begin(), puzzle.wrong_marks.end());
-                    if (found == puzzle.wrong_marks.end()) {
-                        return true; // not a visible mark don't fill anything
+                if (autoPencil) {
+                    for (auto c = puzzle.constraintTable->root.right; c != &puzzle.constraintTable->root; c = c->right) {
+                        for (auto r = c->down; r != c; r = r->down) {
+                            int r_link = Sudoku::getRowFromLink(r);
+                            int c_link = Sudoku::getColFromLink(r);
+                            int n_link = Sudoku::getNumFromLink(r) + '1';
+                            if ((r_link == row) && (c_link == col) && (n_link == selected)) {
+                                puzzle.insert(row, col, selected);
+                                return true;
+                            }
+                        }
                     }
                 }
-                puzzle.insert(row, col, selected);
+                else {
+                    found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.pencilMarks.begin(), puzzle.pencilMarks.end());
+                    if (found == puzzle.pencilMarks.end()) { // not in pencil marks
+                        found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.wrong_marks.begin(), puzzle.wrong_marks.end());
+                        if (found == puzzle.wrong_marks.end()) {
+                            return true; // not a visible mark don't fill anything
+                        }
+                    }
+                    puzzle.insert(row, col, selected);
+                    return true;
+                }
             }
         }
         // Is filled
