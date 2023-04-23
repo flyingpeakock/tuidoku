@@ -159,33 +159,3 @@ void Sudoku::uncover_row(DancingLink *link) {
     link->up->down = link;
     link->colHeader->count++;
 }
-
-void Sudoku::uncoverInVector(std::vector<DancingLink *> &vector, DancingLink *link) {
-    /*
-     * We need to uncover everything behind link and store the links
-     * then we need to uncover link
-     * then cover all the links that we have stored
-     * when covering and uncovering remove and append to current
-     */
-
-    std::vector<DancingLink *> uncovered;
-
-    while(true) {
-        auto current = vector.back();
-        vector.pop_back();
-        Sudoku::uncover_link(current);
-        current->colHeader->uncover();
-        if (current == link) {
-            // Dont add to uncovered
-            break;
-        }
-        uncovered.insert(uncovered.begin(), current);
-    }
-
-    for (auto l : uncovered) {
-        l->colHeader->cover();
-        cover_link(l);
-        vector.push_back(l);
-    }
-
-}

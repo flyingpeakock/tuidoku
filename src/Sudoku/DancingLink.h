@@ -127,8 +127,6 @@ namespace Sudoku {
         return link->up->down == link;
     }
 
-    void uncoverInVector(std::vector<DancingLink*> &vector, DancingLink *link);
-
     /**
      * @brief Covers all the columns in a row, except for the column of link
      * 

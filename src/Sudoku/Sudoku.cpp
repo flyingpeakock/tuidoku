@@ -2,6 +2,8 @@
 
 static bool canSee(Sudoku::DancingLink *link_l, Sudoku::DancingLink *link_r);
 
+static void uncoverInVector(std::vector<Sudoku::Move> &vector, Sudoku::DancingLink *link);
+
 Sudoku::SudokuPuzzle::SudokuPuzzle(Sudoku::DancingLinkTable *table) :
     constraintTable(table),
     current_start_index(table->current.size()) {
@@ -52,21 +54,9 @@ void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
     found = Sudoku::containsLinkEqual(row, col, num - '1', removed_marks.begin(), removed_marks.end());
     if (found != removed_marks.end()) {
         // Putting back a mark that was removed
+        uncoverInVector(moves, *found);
         pencilMarks.push_back(*found);
-        std::vector<Sudoku::DancingLink *> needs_recover;
-        while(true) {
-            auto current = removed_marks.back();
-            removed_marks.pop_back();
-            Sudoku::uncover_row(current);
-            if (current == *found) {
-                break;
-            }
-            needs_recover.insert(needs_recover.begin(), current);
-        }
-        for (auto &p : needs_recover) {
-            Sudoku::cover_row(p);
-            removed_marks.push_back(p);
-        }
+        removed_marks.erase(found);
         return;
     }
 
@@ -74,6 +64,7 @@ void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
     if (found != pencilMarks.end()) {
         Sudoku::cover_row(*found);
         removed_marks.push_back(*found);
+        moves.emplace_back(eCoverRow, *found);
         pencilMarks.erase(found);
         return;
     }
@@ -144,6 +135,7 @@ void Sudoku::SudokuPuzzle::pencilAuto(int row, int col, char num) {
             if (Sudoku::isLinkValues(r, row, col, num - '1')) {
                 Sudoku::cover_row(r);
                 removed_marks.push_back(r);
+                moves.emplace_back(eCoverRow, r);
                 return;
             }
         }
@@ -180,7 +172,8 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
         // checking in current
         found = Sudoku::containsLinkEquivalent(row, col, constraintTable->current.begin() + current_start_index, constraintTable->current.end());
         if (found != constraintTable->current.end()) {
-            Sudoku::uncoverInVector(constraintTable->current, *found);
+            uncoverInVector(moves, *found);
+            constraintTable->current.erase(found);
             recheckMistakes(*found);
             if ((num - '1') == Sudoku::getNumFromLink(*found)) {
                 // Removed if number is already there
@@ -217,6 +210,7 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
                     link->colHeader->cover();
                     Sudoku::cover_link(link);
                     constraintTable->current.push_back(link);
+                    moves.emplace_back(eCoverFull, link);
                     recheckMistakes(link);
                     return;
                 }
@@ -271,6 +265,7 @@ void Sudoku::SudokuPuzzle::recheckMistakes(Sudoku::DancingLink *link) {
             Sudoku::cover_link(*i);
             // No longer wrong so add to current
             constraintTable->current.push_back(*i);
+            moves.emplace_back(eCoverFull, *i);
 
             i = wrong_inputs.erase(i);
             end = wrong_inputs.end();
@@ -297,7 +292,8 @@ void Sudoku::removeFromPuzzle(Sudoku::SudokuPuzzle *puzzle, int row, int col) {
         // Does not exist
         return;
     }
-    Sudoku::uncoverInVector(puzzle->constraintTable->current, *found);
+    uncoverInVector(puzzle->moves, *found);
+    puzzle->constraintTable->current.erase(found);
     puzzle->recheckMistakes(*found);
 }
 
@@ -317,4 +313,48 @@ static bool canSee(Sudoku::DancingLink *link_l, Sudoku::DancingLink *link_r) {
         }
     }
     return false;
+}
+
+static void uncoverInVector(std::vector<Sudoku::Move> &vector, Sudoku::DancingLink *link) {
+    /*
+     * We need to uncover everything behind link and store the links
+     * then we need to uncover link
+     * then cover all the links that we have stored
+     * when covering and uncovering remove and append to current
+     */
+
+    std::vector<Sudoku::Move> uncovered;
+
+    while(true) {
+        auto current = vector.back();
+        vector.pop_back();
+        if (current.type == Sudoku::moveType::eCoverFull) {
+            Sudoku::uncover_link(current.link);
+            current.link->colHeader->uncover();
+            if (current.link == link) {
+                // Dont add to uncovered
+                break;
+            }
+        }
+        else {
+            Sudoku::uncover_row(current.link);
+            if (current.link == link) {
+                // Don't add to covered
+                break;
+            }
+        }
+        uncovered.insert(uncovered.begin(), current);
+    }
+
+    for (auto l : uncovered) {
+        if (l.type == Sudoku::moveType::eCoverFull) {
+            l.link->colHeader->cover();
+            cover_link(l.link);
+        }
+        else {
+            Sudoku::cover_row(l.link);
+        }
+        vector.push_back(l);
+    }
+
 }

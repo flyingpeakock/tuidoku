@@ -21,6 +21,16 @@ namespace Sudoku {
      */
     DancingLinkTable generate();
 
+    enum moveType {
+        eCoverFull,
+        eCoverRow
+    };
+
+    struct Move {
+        moveType type;
+        DancingLink *link;
+    };
+
     struct SudokuPuzzle {
         SudokuPuzzle(Sudoku::DancingLinkTable *table);
         Sudoku::DancingLinkTable *constraintTable;
@@ -29,6 +39,7 @@ namespace Sudoku {
         std::vector<Sudoku::DancingLink *> pencilMarks;   // contains visible marks
         std::vector<Sudoku::DancingLink *> wrong_marks;   // contains visible marks that are wrong
         std::vector<Sudoku::DancingLink *> removed_marks; // contains marks that have been visible but no longer are
+        std::vector<Move> moves;
 
         void insert(int row, int col, char num);
         void pencil(int row, int col, char num);
