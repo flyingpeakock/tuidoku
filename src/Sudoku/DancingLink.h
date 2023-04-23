@@ -4,8 +4,6 @@
 #include <array>
 
 namespace Sudoku {
-    void calculateConstraintColumns(int columns[4], int row, int col, int num);
-
     /**
      * @brief Dancing link which is a quadruply linked list
      * 
@@ -147,4 +145,5 @@ namespace Sudoku {
 
     void uncover_row(DancingLink *link);
 
+    void calculateConstraintColumns(int columns[eConstraintTypes], int row, int col, int num);
 }

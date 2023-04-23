@@ -3,7 +3,7 @@
 
 TEST(dancing_links, calculate_constraint_columns) {
     using namespace Sudoku;
-    int constraints[4];
+    int constraints[eConstraintTypes];
     for (auto i = 0; i < eSize; i++) {
         for (auto j = 0; j < eSize; j++) {
             for (auto num = 0; num < eSize; num++) {
@@ -51,7 +51,7 @@ TEST(dancing_links, each_row_has_four_columns) {
     for (auto &t : tables) {
         for (col = t.root.right; col != &t.root; col = col->right) {
             row = col->down;
-            for (auto i = 0; i < 4; i++) {
+            for (auto i = 0; i < Sudoku::eConstraintTypes; i++) {
                 row = row->right;
             }
             EXPECT_EQ(row, col->down);
@@ -130,8 +130,8 @@ TEST(dancing_links, none_covered_after_solve) {
 
 TEST(dancing_links, solve_does_not_uncover_covered) {
     Sudoku::DancingLinkTable table(false);
-    int constraints[4];
-    Sudoku::calculateConstraintColumns(constraints, 4, 6, 7);
+    int constraints[Sudoku::eConstraintTypes];
+    Sudoku::calculateConstraintColumns(constraints, Sudoku::eConstraintTypes, 6, 7);
 
     for (auto c : constraints) {
         table.colHeaders[c].cover();

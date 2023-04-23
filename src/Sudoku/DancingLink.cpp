@@ -49,12 +49,12 @@ Sudoku::DancingLinkTable::DancingLinkTable(bool should_randomize) {
  * @param col 0-(eSize - 1)
  * @param num 0-(eSize - 1)
  */
-void Sudoku::calculateConstraintColumns(int columns[4], int row, int col, int num) {
+void Sudoku::calculateConstraintColumns(int columns[eConstraintTypes], int row, int col, int num) {
     const int box_idx = eBoxSize * (row / eBoxSize) + (col / eBoxSize);
-    columns[0] = (row * eSize) + col;
-    columns[1] = eBoardSize + (row * eSize) + num;
-    columns[2] = (eBoardSize * 2) + (col * eSize) + num;
-    columns[3] = (eBoardSize * 3) + (box_idx * eSize) + num;
+    columns[eConstraintCell] = (row * eSize) + col;
+    columns[eConstraintRow] = eBoardSize + (row * eSize) + num;
+    columns[eConstraintCol] = (eBoardSize * 2) + (col * eSize) + num;
+    columns[eConstraintBox] = (eBoardSize * 3) + (box_idx * eSize) + num;
 }
 
 static void generateLinks(DancingLinkTable *table, bool should_randomize) {
@@ -88,7 +88,7 @@ static void generateLinks(DancingLinkTable *table, bool should_randomize) {
     for (auto row = 0; row < eSize; row++) {
         for (auto col = 0; col < eSize; col++) {
             for (auto num = 0; num < eSize; num++) {
-                int constraints[4];
+                int constraints[eConstraintTypes];
                 calculateConstraintColumns(constraints, row, col, num);
                 current = &table->buffer[buffer_idx + 3];
                 for (auto &constraint : constraints) {
