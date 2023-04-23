@@ -6,13 +6,13 @@ using namespace Sudoku;
 
 static void generateLinks(DancingLinkTable *table, bool should_randomize);
 
-void DancingLink::cover() {
+void DancingLinkColumn::cover() {
     DancingLink *i;
     DancingLink *j;
     isCoverd = true;
     right->left = left;
     left->right = right;
-    for (i = down; i != (this); i = i->down) {
+    for (i = down; i != (DancingLink *)(this); i = i->down) {
         for (j = i->right; j != i; j = j->right) {
             j->down->up = j->up;
             j->up->down = j->down;
@@ -21,11 +21,11 @@ void DancingLink::cover() {
     }
 }
 
-void DancingLink::uncover() {
+void DancingLinkColumn::uncover() {
     DancingLink *i;
     DancingLink *j;
     isCoverd = false;
-    for (i = up; i != (this); i = i->up) {
+    for (i = up; i != (DancingLink *)(this); i = i->up) {
         for (j = i->left; j != i; j = j->left) {
             j->colHeader->count++;
             j->down->up = j;
@@ -58,32 +58,36 @@ void Sudoku::calculateConstraintColumns(int columns[eConstraintTypes], int row, 
 }
 
 static void generateLinks(DancingLinkTable *table, bool should_randomize) {
-    DancingLink *current = &table->root;
-    DancingLink *next;
-    int buffer_idx = 0;
+    {
+        DancingLinkColumn *current, *next;
 
-    // Creating initial link
-    current->colHeader = current;
-    current->up = current;
-    current->down = current;
-    current->count = 0;
+        // Creating initial link
+        // current->colHeader = current;
 
-    // linking colummn headers
-    for (auto &i : table->colHeaders) {
-        next = &i;
-        current->right = next;
-        next->left = current;
-        current = next;
-        current->up = current;
-        current->down = current;
-        current->colHeader = current;
-        current->count = 0;
-        current->isCoverd = false;
+        table->root.up = &table->root;
+        table->root.down = &table->root;
+        table->root.count = 0;
+
+        // linking colummn headers
+        current = (DancingLinkColumn *)&table->root;
+        for (auto &i : table->colHeaders) {
+            next = &i;
+            current->right = next;
+            next->left = current;
+            current = next;
+            current->up = current;
+            current->down = current;
+            current->colHeader = current;
+            current->count = 0;
+            current->isCoverd = false;
+        }
+        // closing the loop
+        current->right = &table->root;
+        table->root.left = current;
     }
-    // closing the loop
-    current->right = &table->root;
-    table->root.left = current;
 
+    int buffer_idx = 0;
+    DancingLink *current, *next;
     // creating rows in constraint table
     for (auto row = 0; row < eSize; row++) {
         for (auto col = 0; col < eSize; col++) {
@@ -91,8 +95,10 @@ static void generateLinks(DancingLinkTable *table, bool should_randomize) {
                 int constraints[eConstraintTypes];
                 calculateConstraintColumns(constraints, row, col, num);
                 current = &table->buffer[buffer_idx + 3];
+                int constraintType = 0;
                 for (auto &constraint : constraints) {
                     DancingLink *rowToAddTo = &table->colHeaders[constraint];
+                    table->colHeaders[constraint].constraintType = (constraintColTypes)constraintType++;
 
                     // Randomize for creating puzzles
                     if (should_randomize && table->colHeaders[constraint].count != 0) {
