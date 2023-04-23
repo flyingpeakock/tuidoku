@@ -100,11 +100,38 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
             for (auto &link : puzzle.pencilMarks) {
                 // Don't draw covered
                 if (Sudoku::isUncovered(link)) {
-                    drawPencil(c, link, style_pencil);
+                    // Don't draw if seen by any in wrong inputs
+                    bool is_hidden = false;
+                    for (auto &l : puzzle.wrong_inputs) {
+                        if (Sudoku::canSee(l, link)) {
+                            is_hidden = true;
+                            break;
+                        }
+                    }
+                    if (!is_hidden) {
+                        drawPencil(c, link, style_pencil);
+                    }
                 }
             }
             for (auto &link : puzzle.wrong_marks) {
-                drawPencil(c, link, style_pencil_error);
+                /*
+                // Don't draw if in same cell as wrong input
+                auto found = Sudoku::containsLinkEquivalent(Sudoku::getRowFromLink(link), Sudoku::getColFromLink(link), puzzle.wrong_inputs.begin(), puzzle.wrong_inputs.end());
+                if (found == puzzle.wrong_inputs.end()) {
+                    drawPencil(c, link, style_pencil_error);
+                }
+                */
+                // Don't draw if seen by any in wrong inputs
+                bool is_hidden = false;
+                for (auto &l : puzzle.wrong_inputs) {
+                    if (Sudoku::canSee(l, link)) {
+                        is_hidden = true;
+                        break;
+                    }
+                }
+                if (!is_hidden) {
+                    drawPencil(c, link, style_pencil_error);
+                }
             }
         }
 
@@ -191,6 +218,14 @@ bool Tui::Board::parseMouse(Event event) {
                 }
             }
             else {
+                // only insert if visible pencilmark
+                found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.pencilMarks.begin(), puzzle.pencilMarks.end());
+                if (found == puzzle.pencilMarks.end()) { // not in pencil marks
+                    found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.wrong_marks.begin(), puzzle.wrong_marks.end());
+                    if (found == puzzle.wrong_marks.end()) {
+                        return true; // not a visible mark don't fill anything
+                    }
+                }
                 puzzle.insert(row, col, selected);
             }
         }

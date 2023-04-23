@@ -57,4 +57,5 @@ namespace Sudoku {
     */
     void removeFromPuzzle(SudokuPuzzle *puzzle, int row, int col);
 
+    bool canSee(DancingLink *link_l, DancingLink *link_r);
 };
