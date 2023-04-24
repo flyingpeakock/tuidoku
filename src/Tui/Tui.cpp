@@ -215,9 +215,25 @@ bool Tui::Board::parseMouse(Event event) {
                     if (found == puzzle.wrong_marks.end()) {
                         return true; // not a visible mark don't fill anything
                     }
+                    else { // Found in wrong marks
+                        bool isHidden = false;
+                        for (auto &l : puzzle.wrong_inputs) {
+                            if (Sudoku::canSee(l, *found)) {
+                                isHidden = true;
+                                break;
+                            }
+                        }
+                        if (!isHidden) {
+                            puzzle.insert(row, col, selected);
+                        }
+                    }
                 }
-                puzzle.insert(row, col, selected);
-                return true;
+                else { // Found in pencilmarks
+                    // Contains regular mark, don't insert if covered
+                    if (Sudoku::isUncovered(*found)) {
+                        puzzle.insert(row, col, selected);
+                    }
+                }
             }
         }
         // Is filled
