@@ -45,6 +45,11 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
     cursor.shape = Screen::Cursor::Shape::Block;
 
     renderer = Renderer([&] {
+        if (puzzle.constraintTable->root->right == &puzzle.constraintTable->root) {
+            // Nothing to select if puzzle is done
+            selected = 0;
+        }
+
         const Canvas::Stylizer style_clues = [&](Pixel &pixel){
             pixel.underlined = true;
             pixel.bold = true;
