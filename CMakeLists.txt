@@ -38,6 +38,7 @@ set(SOURCES
     src/Sudoku/Solve.cpp
     src/Sudoku/DancingLink.cpp
     src/Sudoku/Sudoku.cpp
+    src/Sudoku/Logic.cpp
     src/Config.cpp
     src/Tui/Tui.cpp
 )
