@@ -5,6 +5,7 @@
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/component/component.hpp>
 #include "../Sudoku/Sudoku.h"
+#include "../Sudoku/Logic.h"
 
 namespace Tui {
     class Board {
@@ -48,6 +49,9 @@ namespace Tui {
         int row;
         int col;
         char selected;
+        Sudoku::logic::Move move;
+
+        bool showNextMove;
 
         public:
         /** constructor with constraintTable representing puzzle*/

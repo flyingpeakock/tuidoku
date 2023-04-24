@@ -64,6 +64,14 @@ static void drawAllFilled(Canvas &c,
                           const int current_start_index);
 
 /**
+ * @brief Print the next move on the board
+ * 
+ * @param c Canvas to draw on
+ * @param move Sudoku::logic::Move object to draw
+ */
+static void drawNextMove(Canvas &c, const Sudoku::logic::Move &move);
+
+/**
  * @brief Set the Cursor shape and position
  * 
  * @param s screen to draw cursor on
@@ -106,6 +114,7 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
     c(146, 148),
     state(eInsert),
     selected(0),
+    showNextMove(false),
 
     renderer(Renderer([&] {
         if (!isPlaying(&puzzle.constraintTable->root)) {
@@ -116,6 +125,9 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
         drawPuzzleTable(c);
         drawAllPencils(c, selected, puzzle.pencilMarks, puzzle.wrong_marks, puzzle.wrong_inputs);
         drawAllFilled(c, selected, puzzle.constraintTable->current, puzzle.wrong_inputs, puzzle.current_start_index);
+        if (showNextMove) {
+            drawNextMove(c, move);
+        }
         setCursor(screen, row, col, state == ePencil);
 
         return canvas(std::move(c));
@@ -226,6 +238,14 @@ bool Tui::Board::parseKeys(Event event) {
     else if (event == Event::Character("P")) {
         puzzle.autoPencil();
         key_pressed = true;
+    }
+    else if (event == Event::Character("H")) {
+        if (!showNextMove) {
+            move = Sudoku::logic::getNextMove(puzzle, showNextMove);
+        }
+        else {
+            showNextMove = false;
+        }
     }
     else if ((state == eInsert) &&
         ((event == Event::Character(" "))
@@ -458,5 +478,29 @@ static void setMouseRowCol(int &row, int &col, int m_row, int m_col) {
     }
     else if (row < 0) {
         row = 0;
+    }
+}
+
+static void drawNextMove(Canvas &c, const Sudoku::logic::Move &move) {
+    const Canvas::Stylizer style_truth = [&](Pixel &pixel) {
+        pixel.dim = true;
+        pixel.bold = false;
+        pixel.blink = true;
+        pixel.background_color = Color::Green;
+    };
+
+    const Canvas::Stylizer style_false = [&](Pixel &pixel) {
+        pixel.dim = true;
+        pixel.bold = false;
+        pixel.blink = true;
+        pixel.background_color = Color::Red3;
+    };
+
+    for (auto link : move.truths) {
+        drawPencil(c, link, style_truth);
+    }
+
+    for (auto link : move.falses) {
+        drawPencil(c, link, style_false);
     }
 }

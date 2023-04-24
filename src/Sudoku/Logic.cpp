@@ -34,13 +34,12 @@ bool Sudoku::logic::foundIllogicalPencil(const SudokuPuzzle &puzzle, Move &move)
 
 bool Sudoku::logic::foundWrongRemovedPencil(const SudokuPuzzle &puzzle, Move &move) {
     for (const auto &i : puzzle.removed_marks) {
-        for (const auto &solution : puzzle.constraintTable->solution) {
-            if (i->count == solution->count) {
-                move.type = eLogicErrorInsert;
-                move.diff = eBeginner;
-                move.falses.push_back(i);
-                return true;
-            }
+        auto found = containsLinkEqual(getRowFromLink(i), getColFromLink(i), getNumFromLink(i), puzzle.constraintTable->solution.begin(), puzzle.constraintTable->solution.end());
+        if (found != puzzle.constraintTable->solution.begin()) {
+            move.type = eLogicErrorInsert;
+            move.diff = eBeginner;
+            move.truths.push_back(i);
+            return true;
         }
     }
     return false;
@@ -59,7 +58,7 @@ bool Sudoku::logic::foundMissingPencilMark(const SudokuPuzzle &puzzle, Move &mov
             if (!foundInMarks) {
                 move.type = eLogicErrorPencilMissing;
                 move.diff = eBeginner;
-                move.falses.push_back(row);
+                move.truths.push_back(row);
                 return true;
             }
 
