@@ -43,7 +43,7 @@ namespace Sudoku {
 
         void insert(int row, int col, char num);
         void pencil(int row, int col, char num);
-        void pencilAuto(int row, int col, char num);
+        void autoPencil();
 
         void recheckMistakes(Sudoku::DancingLink *link);
     };

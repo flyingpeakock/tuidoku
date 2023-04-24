@@ -39,13 +39,12 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
     puzzle(table),
     c(146, 148),
     state(eInsert),
-    autoPencil(false),
     selected(0){
 
     cursor.shape = Screen::Cursor::Shape::Block;
 
     renderer = Renderer([&] {
-        if (puzzle.constraintTable->root->right == &puzzle.constraintTable->root) {
+        if (puzzle.constraintTable->root.right == &puzzle.constraintTable->root) {
             // Nothing to select if puzzle is done
             selected = 0;
         }
@@ -93,39 +92,10 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
             pixel.foreground_color = Color::White;
         };
 
-        drawPuzzleTable(c);
-        if (autoPencil) {
-            for (auto header = puzzle.constraintTable->root.right; header != &puzzle.constraintTable->root; header = header->right) {
-                for (auto link = header->down; link != header; link = link->down) {
-                    drawPencil(c, link, style_pencil);
-                }
-            }
-        }
-        else {
-            for (auto &link : puzzle.pencilMarks) {
-                // Don't draw covered
-                if (Sudoku::isUncovered(link)) {
-                    // Don't draw if seen by any in wrong inputs
-                    bool is_hidden = false;
-                    for (auto &l : puzzle.wrong_inputs) {
-                        if (Sudoku::canSee(l, link)) {
-                            is_hidden = true;
-                            break;
-                        }
-                    }
-                    if (!is_hidden) {
-                        drawPencil(c, link, style_pencil);
-                    }
-                }
-            }
-            for (auto &link : puzzle.wrong_marks) {
-                /*
-                // Don't draw if in same cell as wrong input
-                auto found = Sudoku::containsLinkEquivalent(Sudoku::getRowFromLink(link), Sudoku::getColFromLink(link), puzzle.wrong_inputs.begin(), puzzle.wrong_inputs.end());
-                if (found == puzzle.wrong_inputs.end()) {
-                    drawPencil(c, link, style_pencil_error);
-                }
-                */
+    drawPuzzleTable(c);
+        for (auto &link : puzzle.pencilMarks) {
+            // Don't draw covered
+            if (Sudoku::isUncovered(link)) {
                 // Don't draw if seen by any in wrong inputs
                 bool is_hidden = false;
                 for (auto &l : puzzle.wrong_inputs) {
@@ -135,8 +105,28 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
                     }
                 }
                 if (!is_hidden) {
-                    drawPencil(c, link, style_pencil_error);
+                    drawPencil(c, link, style_pencil);
                 }
+            }
+        }
+        for (auto &link : puzzle.wrong_marks) {
+            /*
+            // Don't draw if in same cell as wrong input
+            auto found = Sudoku::containsLinkEquivalent(Sudoku::getRowFromLink(link), Sudoku::getColFromLink(link), puzzle.wrong_inputs.begin(), puzzle.wrong_inputs.end());
+            if (found == puzzle.wrong_inputs.end()) {
+                drawPencil(c, link, style_pencil_error);
+            }
+            */
+            // Don't draw if seen by any in wrong inputs
+            bool is_hidden = false;
+            for (auto &l : puzzle.wrong_inputs) {
+                if (Sudoku::canSee(l, link)) {
+                    is_hidden = true;
+                    break;
+                }
+            }
+            if (!is_hidden) {
+                drawPencil(c, link, style_pencil_error);
             }
         }
 
@@ -215,39 +205,19 @@ bool Tui::Board::parseMouse(Event event) {
             }
             // Pressed on empty cell, fill or pencil
             if (state == ePencil) {
-                if (autoPencil) {
-                    puzzle.pencilAuto(row, col, selected);
-                }
-                else {
-                    puzzle.pencil(row, col, selected);
-                }
+                puzzle.pencil(row, col, selected);
             }
             else {
                 // only insert if visible pencilmark
-                if (autoPencil) {
-                    for (auto c = puzzle.constraintTable->root.right; c != &puzzle.constraintTable->root; c = c->right) {
-                        for (auto r = c->down; r != c; r = r->down) {
-                            int r_link = Sudoku::getRowFromLink(r);
-                            int c_link = Sudoku::getColFromLink(r);
-                            int n_link = Sudoku::getNumFromLink(r) + '1';
-                            if ((r_link == row) && (c_link == col) && (n_link == selected)) {
-                                puzzle.insert(row, col, selected);
-                                return true;
-                            }
-                        }
+                found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.pencilMarks.begin(), puzzle.pencilMarks.end());
+                if (found == puzzle.pencilMarks.end()) { // not in pencil marks
+                    found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.wrong_marks.begin(), puzzle.wrong_marks.end());
+                    if (found == puzzle.wrong_marks.end()) {
+                        return true; // not a visible mark don't fill anything
                     }
                 }
-                else {
-                    found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.pencilMarks.begin(), puzzle.pencilMarks.end());
-                    if (found == puzzle.pencilMarks.end()) { // not in pencil marks
-                        found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.wrong_marks.begin(), puzzle.wrong_marks.end());
-                        if (found == puzzle.wrong_marks.end()) {
-                            return true; // not a visible mark don't fill anything
-                        }
-                    }
-                    puzzle.insert(row, col, selected);
-                    return true;
-                }
+                puzzle.insert(row, col, selected);
+                return true;
             }
         }
         // Is filled
@@ -293,7 +263,7 @@ bool Tui::Board::parseKeys(Event event) {
         key_pressed = true;
     }
     else if (event == Event::Character("P")) {
-        autoPencil = !autoPencil;
+        puzzle.autoPencil();
         key_pressed = true;
     }
     else if ((state == eInsert) &&
@@ -310,11 +280,8 @@ bool Tui::Board::parseKeys(Event event) {
             if (state == eInsert) {
                 puzzle.insert(row, col, pressed);
             }
-            else if (!autoPencil){
-                puzzle.pencil(row, col, pressed);
-            }
             else {
-                puzzle.pencilAuto(row, col, pressed);
+                puzzle.pencil(row, col, pressed);
             }
 
             selected = pressed;

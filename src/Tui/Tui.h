@@ -9,16 +9,15 @@
 namespace Tui {
     class Board {
         private:
+
         enum stateEnum {
             eInsert,
             ePencil,
         };
-
         stateEnum state;
+
         bool parseKeys(ftxui::Event event);
         bool parseMouse(ftxui::Event event);
-
-        bool autoPencil;
 
         Sudoku::SudokuPuzzle puzzle;
 
