@@ -22,7 +22,6 @@ namespace Tui {
         Sudoku::SudokuPuzzle puzzle;
 
         ftxui::ScreenInteractive screen;
-        ftxui::Screen::Cursor cursor;
         ftxui::ComponentDecorator parseEvent;
         ftxui::Canvas c;
         int row;
