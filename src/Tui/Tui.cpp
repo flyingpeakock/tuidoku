@@ -85,6 +85,16 @@ static inline bool isPlaying(Sudoku::DancingLink *root) {
 }
 
 /**
+ * @brief Set the row and column on mouse clicks
+ * 
+ * @param row reference to the variable that gets set with the row
+ * @param col  reference to the variable that gets set with the column
+ * @param m_row y position clicked by mouse
+ * @param m_col x position clicked by mouse
+ */
+static void setMouseRowCol(int &row, int &col, int m_row, int m_col);
+
+/**
  * @brief Construct a new Tui:: Board:: Board object
  * 
  * @param table constraint table that represents the puzzle
@@ -132,72 +142,55 @@ void Tui::Board::playLoop() {
 
 bool Tui::Board::parseMouse(Event event) {
     auto m = event.mouse();
-    if (m.button == Mouse::Button::Left && m.motion == Mouse::Motion::Pressed) {
-        col = ((m.x - 1) / 8);
-        row = ((m.y - 1) / 4);
+    if (m.button == Mouse::Button::None) {
+        return false;
+    }
+    if (m.motion != Mouse::Motion::Pressed) {
+        return false;
+    }
+    setMouseRowCol(row, col, m.y, m.x);
+    if (m.button != Mouse::Button::Left) {
+        return true; // If not left button just move position
+    }
 
-        if (col > 8) {
-            col = 8;
-        }
-        else if (col < 0) {
-            col = 0;
-        }
-        if (row > 8) {
-            row = 8;
-        }
-        else if (row < 0) {
-            row = 0;
-        }
+    auto found = Sudoku::containsLinkEquivalent(row, col, puzzle.constraintTable->current.begin(), puzzle.constraintTable->current.end());
+    if (found != puzzle.constraintTable->current.end()) {
+        selected = Sudoku::getNumFromLink(*found) + '1';
+        return true; // This cell is filled
+    }
+    found = Sudoku::containsLinkEquivalent(row, col, puzzle.wrong_inputs.begin(), puzzle.wrong_inputs.end());
+    if (found != puzzle.wrong_inputs.end()) {
+        selected = Sudoku::getNumFromLink(*found) + '1';
+        return true; // This cell is filled
+    }
 
-        auto found = Sudoku::containsLinkEquivalent(row, col, puzzle.constraintTable->current.begin(), puzzle.constraintTable->current.end());
-        auto found_mistake = Sudoku::containsLinkEquivalent(row, col, puzzle.wrong_inputs.begin(), puzzle.wrong_inputs.end());
-        if (found == puzzle.constraintTable->current.end() && found_mistake == puzzle.wrong_inputs.end()) {
-            if (selected < '1' || selected > '9') {
-                return true; // No number selected
-            }
-            // Pressed on empty cell, fill or pencil
-            if (state == ePencil) {
-                puzzle.pencil(row, col, selected);
-            }
-            else {
-                // only insert if visible pencilmark
-                found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.pencilMarks.begin(), puzzle.pencilMarks.end());
-                if (found == puzzle.pencilMarks.end()) { // not in pencil marks
-                    found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.wrong_marks.begin(), puzzle.wrong_marks.end());
-                    if (found == puzzle.wrong_marks.end()) {
-                        return true; // not a visible mark don't fill anything
-                    }
-                    else { // Found in wrong marks
-                        bool isHidden = false;
-                        for (auto &l : puzzle.wrong_inputs) {
-                            if (Sudoku::canSee(l, *found)) {
-                                isHidden = true;
-                                break;
-                            }
-                        }
-                        if (!isHidden) {
-                            puzzle.insert(row, col, selected);
-                        }
-                    }
-                }
-                else { // Found in pencilmarks
-                    // Contains regular mark, don't insert if covered
-                    if (Sudoku::isUncovered(*found)) {
-                        puzzle.insert(row, col, selected);
-                    }
-                }
-            }
-        }
-        // Is filled
-        else if (found != puzzle.constraintTable->current.end()) {
-            selected = Sudoku::getNumFromLink(*found) + '1';
-        }
-        else if (found_mistake != puzzle.wrong_inputs.end()) {
-            selected = Sudoku::getNumFromLink(*found) + '1';
-        }
+    // If made it here pressed on an empty cell
+    if (selected < '1' || selected > '9') {
+        return true; // No number selected
+    }
+
+    if (state == ePencil) {
+        puzzle.pencil(row, col, selected);
         return true;
     }
-    return false;
+
+    // only insert if visible pencilmark
+    found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.pencilMarks.begin(), puzzle.pencilMarks.end());
+    if (found != puzzle.pencilMarks.end() && Sudoku::isUncovered(*found)) {
+        puzzle.insert(row, col, selected);
+        return true;
+    }
+    found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.wrong_marks.begin(), puzzle.wrong_marks.end());
+    if (found != puzzle.wrong_marks.end()) {
+        for (auto &l : puzzle.wrong_inputs) {
+            if (Sudoku::canSee(l, *found)) {
+                return true; // Not a visible mark
+            }
+        }
+        puzzle.insert(row, col, selected);
+        return true;
+    }
+    return true;
 }
 
 bool Tui::Board::parseKeys(Event event) {
@@ -448,4 +441,22 @@ static void setCursor(Screen &s, const int row, const int col, bool isPencil) {
     cursor.x = 4 + (col * 8);
     cursor.y = 2 + (row * 4);
     s.SetCursor(cursor);
+}
+
+static void setMouseRowCol(int &row, int &col, int m_row, int m_col) {
+    col = ((m_col - 1) / 8);
+    row = ((m_row - 1) / 4);
+
+    if (col > 8) {
+        col = 8;
+    }
+    else if (col < 0) {
+        col = 0;
+    }
+    if (row > 8) {
+        row = 8;
+    }
+    else if (row < 0) {
+        row = 0;
+    }
 }

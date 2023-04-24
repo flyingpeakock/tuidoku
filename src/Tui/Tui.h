@@ -17,10 +17,22 @@ namespace Tui {
         /** state of the board, pencil or insert */
         stateEnum state;
 
-        /** function to parse keys pressed */
+        /**
+         * @brief Parse the key pressed
+         *
+         * @param event ftxui::Event
+         * @return true if event was handled
+         * @return false if event was not handled
+         */
         bool parseKeys(ftxui::Event event);
 
-        /** function to parse mouse clicked */
+        /**
+         * @brief Parse the mouse key pressed
+         * 
+         * @param event ftxui::Event
+         * @return true if the event was handled
+         * @return false if the event was not handled
+         */
         bool parseMouse(ftxui::Event event);
 
         /** suboku puzzle object */
@@ -38,7 +50,7 @@ namespace Tui {
         char selected;
 
         public:
-        /** constructor with constraintTable represent puzzle*/
+        /** constructor with constraintTable representing puzzle*/
         Board(Sudoku::DancingLinkTable *constraintTable);
 
         /** main loop*/
