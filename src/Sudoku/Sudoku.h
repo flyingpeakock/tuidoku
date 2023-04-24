@@ -3,6 +3,21 @@
 #include "DancingLink.h"
 
 namespace Sudoku {
+
+    /**
+     * @brief enums of board difficulties
+     * 
+     */
+    enum difficulty {
+        eBeginner,
+        eEasy,
+        eMedium,
+        eHard,
+        eExpert,
+        ePro,
+        eDifficulties
+    };
+
     /**
      * @brief solves a sudoku puzzle
      * 
