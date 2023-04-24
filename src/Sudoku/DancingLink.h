@@ -122,6 +122,15 @@ namespace Sudoku {
         return end;
     }
 
+    inline std::vector<DancingLink *>::iterator containsLinkEqual(DancingLink *link, std::vector<DancingLink *>::iterator start, std::vector<DancingLink *>::iterator end) {
+        for (auto i = start; i < end; i++) {
+            if ((*i)->count == link->count) {
+                return i;
+            }
+        }
+        return end;
+    }
+
     inline bool isUncovered(DancingLink * link) {
         if (link->colHeader->isCoverd) {
             return false;

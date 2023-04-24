@@ -45,6 +45,9 @@ namespace Sudoku {
         bool foundMissingPencilMark(const SudokuPuzzle &puzzle, Move &move);
         bool foundWrongInput(const SudokuPuzzle &puzzle, Move &move);
 
+        // Beginner
+        bool foundSingle(DancingLink *root, Move &move);
+
         /**
          * @brief Searches for any mistakes in the board
          * 

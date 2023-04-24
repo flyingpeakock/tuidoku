@@ -69,14 +69,8 @@ bool Sudoku::logic::foundMissingPencilMark(const SudokuPuzzle &puzzle, Move &mov
 
 bool Sudoku::logic::foundWrongInput(const SudokuPuzzle &puzzle, Move &move) {
     for (auto i = puzzle.constraintTable->current.begin() + puzzle.current_start_index; i < puzzle.constraintTable->current.end(); i++) {
-        bool isInSolution = false;
-        for (auto j = puzzle.constraintTable->solution.begin(); j < puzzle.constraintTable->solution.end(); j++) {
-            if ((*j)->count == (*i)->count) {
-                isInSolution = true;
-                break;
-            }
-        }
-        if (!isInSolution) {
+        auto found = Sudoku::containsLinkEqual(*i, puzzle.constraintTable->solution.begin(), puzzle.constraintTable->solution.end());
+        if (found == puzzle.constraintTable->solution.end()) {
             move.type = eLogicErrorInsert;
             move.diff = eBeginner;
             move.falses.push_back(*i);
@@ -100,7 +94,22 @@ Sudoku::logic::Move Sudoku::logic::getNextMove(const Sudoku::SudokuPuzzle &puzzl
     foundMove = false;
     if (foundMistake(puzzle, move)) {
         foundMove = true;
-        return move;
+    }
+    else if (foundSingle(&puzzle.constraintTable->root, move)) {
+        foundMove = true;
     }
     return move;
+}
+
+bool Sudoku::logic::foundSingle(DancingLink *root, Move &move) {
+    for (auto col = root->right; col != root; col = col->right) {
+        // Should find naked singles before hidden singles
+        if (col->count != 1) continue;
+
+        move.diff = eBeginner;
+        move.type = eLogicInsert;
+        move.truths.push_back(col->down);
+        return true;
+    }
+    return false;
 }
