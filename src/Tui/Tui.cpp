@@ -499,11 +499,23 @@ static void drawNextMove(Canvas &c, const Sudoku::logic::Move &move) {
         pixel.background_color = Color::Red3;
     };
 
+    const Canvas::Stylizer style_false_filled = [&](Pixel &pixel) {
+        pixel.dim = false;
+        pixel.bold = true;
+        pixel.blink = true;
+        pixel.background_color = Color::Red3;
+    };
+
     for (auto link : move.truths) {
         drawPencil(c, link, style_truth);
     }
 
     for (auto link : move.falses) {
-        drawPencil(c, link, style_false);
+        if (move.type == Sudoku::logic::eLogicErrorInsert) {
+            drawFilledCell(c, link, style_false_filled);
+        }
+        else {
+            drawPencil(c, link, style_false);
+        }
     }
 }
