@@ -35,7 +35,7 @@ bool Sudoku::logic::foundIllogicalPencil(const SudokuPuzzle &puzzle, Move &move)
 bool Sudoku::logic::foundWrongRemovedPencil(const SudokuPuzzle &puzzle, Move &move) {
     for (const auto &i : puzzle.removed_marks) {
         auto found = containsLinkEqual(getRowFromLink(i), getColFromLink(i), getNumFromLink(i), puzzle.constraintTable->solution.begin(), puzzle.constraintTable->solution.end());
-        if (found != puzzle.constraintTable->solution.begin()) {
+        if (found != puzzle.constraintTable->solution.end()) {
             move.type = eLogicErrorInsert;
             move.diff = eBeginner;
             move.truths.push_back(i);

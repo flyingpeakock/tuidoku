@@ -190,6 +190,7 @@ bool Tui::Board::parseMouse(Event event) {
     found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.pencilMarks.begin(), puzzle.pencilMarks.end());
     if (found != puzzle.pencilMarks.end() && Sudoku::isUncovered(*found)) {
         puzzle.insert(row, col, selected);
+        showNextMove = false;
         return true;
     }
     found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.wrong_marks.begin(), puzzle.wrong_marks.end());
@@ -200,6 +201,7 @@ bool Tui::Board::parseMouse(Event event) {
             }
         }
         puzzle.insert(row, col, selected);
+        showNextMove = false;
         return true;
     }
     return true;
@@ -266,6 +268,7 @@ bool Tui::Board::parseKeys(Event event) {
             }
 
             selected = pressed;
+            showNextMove = false;
             key_pressed = true;
         }
     }
