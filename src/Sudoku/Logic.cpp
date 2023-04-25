@@ -164,10 +164,10 @@ bool Sudoku::logic::foundBasicMove(DancingLink *root, int num_of_candidates, Mov
 
         // should find naked first since moving right in constraint table
         if (links[0]->constraintType == eConstraintCell) { // is naked
-            move.diff = (Sudoku::difficulty)(num_of_candidates - 2);
+            move.diff = (Sudoku::difficulty)(num_of_candidates - 1);
         }
         else { // is hidden
-            move.diff = (Sudoku::difficulty)(num_of_candidates - 1);
+            move.diff = (Sudoku::difficulty)(num_of_candidates);
         }
         move.type = eLogicPencil;
         move.truths = candidates;

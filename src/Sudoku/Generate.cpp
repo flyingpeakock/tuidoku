@@ -2,6 +2,7 @@
 #include <vector>
 #include <cstring>
 #include <algorithm>
+#include <random>
 
 Sudoku::DancingLinkTable Sudoku::generate() {
     // TODO: Figure out which to remove first, maybe by looking at which column has the most rows in each step during solve and picking one of those
@@ -14,7 +15,9 @@ Sudoku::DancingLinkTable Sudoku::generate() {
     ret.current = ret.solution;
     solution = ret.solution;
 
-    std::reverse(ret.current.begin(), ret.current.end()); // seems to create more difficult puzzles
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(ret.current.begin(), ret.current.end(), g);
 
     for (auto i = 0; i < eBoardSize; i++) {
         // Storing and removing last

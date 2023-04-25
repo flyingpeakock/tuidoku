@@ -52,6 +52,8 @@ namespace Sudoku {
         /**
          * @brief Looks for doubles, triples, and quads depending on candidates
          * 
+         * difficulty of the move is equal to num_of_candidates. If the move is naked the difficulty is stepped down one
+         * 
          * @param root root of the constraint table
          * @param num_of_candidates number of canditates, eg. 2=double
          * @param move move found
