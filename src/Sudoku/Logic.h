@@ -48,6 +48,18 @@ namespace Sudoku {
         // Beginner
         bool foundSingle(DancingLink *root, Move &move);
 
+        // Basic moves
+        /**
+         * @brief Looks for doubles, triples, and quads depending on candidates
+         * 
+         * @param root root of the constraint table
+         * @param num_of_candidates number of canditates, eg. 2=double
+         * @param move move found
+         * @return true if a move is found
+         * @return false if no move is found
+         */
+        bool foundBasicMove(DancingLink *root, int num_of_candidates, Move &move);
+
         /**
          * @brief Searches for any mistakes in the board
          * 

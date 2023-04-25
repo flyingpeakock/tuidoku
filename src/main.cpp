@@ -5,7 +5,7 @@
 void printPuzzle(Sudoku::DancingLinkTable *table) {
     int array[Sudoku::eSize][Sudoku::eSize] = {0};
 
-    std::vector<Sudoku::DancingLink *>innertable = table->current;
+    std::vector<Sudoku::DancingLink *>innertable = table->solution;
     int index = 0;
     for (auto &current : innertable) {
         int count = current->count;
@@ -45,6 +45,5 @@ int main(int argc, char *argv[]) {
     auto table = Sudoku::generate();
     Tui::Board board(&table);
     board.playLoop();
-    
     return 0;
 }

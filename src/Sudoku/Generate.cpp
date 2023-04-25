@@ -6,12 +6,12 @@ Sudoku::DancingLinkTable Sudoku::generate() {
     // TODO: Figure out which to remove first, maybe by looking at which column has the most rows in each step during solve and picking one of those
     bool solve_result = true;
     int current_index = 0;
-    std::vector<DancingLink *> solution;
     DancingLinkTable ret(true);
+    std::vector<DancingLink *> solution;
 
     solve(&ret, true); // fills the solution array, all columns are uncovered
-    solution = ret.solution;
     ret.current = ret.solution;
+    solution = ret.solution;
 
     for (auto i = 0; i < eBoardSize; i++) {
         // Storing and removing last
@@ -36,6 +36,7 @@ Sudoku::DancingLinkTable Sudoku::generate() {
             // move to front so we don't try it again
             ret.current.insert(ret.current.begin(), back);
         }
+        // All links are uncovered again
     }
 
     // need to re-cover the links that are in current
@@ -43,5 +44,6 @@ Sudoku::DancingLinkTable Sudoku::generate() {
         link->colHeader->cover();
         cover_link(link);
     }
+    ret.solution = solution;
     return ret;
 }
