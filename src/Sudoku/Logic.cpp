@@ -122,32 +122,42 @@ bool Sudoku::logic::foundSingle(DancingLink *root, Move &move) {
     return false;
 }
 
+/**
+ * @brief Get the matching links that are uncovered and have the same candidates
+ *
+ * @param candidates vector of candidates all in the same constraint column
+ * @return std::vector<Sudoku::DancingLinkColumn *> vector of all columns
+ */
+static std::vector<Sudoku::DancingLinkColumn *> getMatchingLinks(std::vector<Sudoku::DancingLink *> candidates) {
+    std::vector<Sudoku::DancingLinkColumn *> ret;
+    ret.push_back(candidates[0]->colHeader);
+    int count = candidates.size();
+
+    for (auto curr_col = candidates[0]->right; curr_col != candidates[0]; curr_col = curr_col->right) {
+        int this_count = 1; // start at one since we are counting curr_col
+        for (auto curr_row = curr_col->down; curr_row != curr_col; curr_row = curr_row->down) {
+            auto found = Sudoku::containsLinkEqual(curr_row, candidates.begin() + 1, candidates.end());
+            if (found != candidates.end()) {
+                this_count++;
+            }
+        }
+        if (this_count == count) {
+            ret.push_back(curr_col->colHeader);
+        }
+    }
+    return ret;
+}
+
 bool Sudoku::logic::foundBasicMove(DancingLink *root, int num_of_candidates, Move &move) {
     for (auto truth = root->right; truth != root; truth = truth->right) {
         if (truth->count != num_of_candidates) continue;
         
         std::vector<DancingLink *> candidates;
-        std::vector<DancingLinkColumn *>links;
         for (auto cand = truth->down; cand != truth; cand = cand->down) {
             candidates.push_back(cand);
         }
-        links.push_back(truth->colHeader);
-        for (auto i = 0; i < eConstraintTypes; i++) {
-            for (auto &cand : candidates) {
-                cand = cand->right; // Move all one constraint right
-            }
-            DancingLinkColumn *firstCol = candidates[0]->colHeader;
-            bool isSameColumns = true;
-            for (auto cand_itr = candidates.begin() + 1; cand_itr < candidates.end(); cand_itr++) {
-                if ((*cand_itr)->colHeader != firstCol) {
-                    isSameColumns = false;
-                    break;
-                }
-            }
-            if (isSameColumns) {
-                links.push_back(firstCol);
-            }
-        }
+        std::vector<DancingLinkColumn *>links = getMatchingLinks(candidates);
+
         if (links.size() < num_of_candidates) {
             continue; // No moves found for this column
         }

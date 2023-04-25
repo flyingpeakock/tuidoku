@@ -46,7 +46,8 @@ static void drawAllPencils(Canvas &c,
                            const char selected,
                            const std::vector<Sudoku::DancingLink *> &pencils,
                            const std::vector<Sudoku::DancingLink *> &pencilError,
-                           const std::vector<Sudoku::DancingLink *> &wrong_inputs);
+                           const std::vector<Sudoku::DancingLink *> &wrong_inputs,
+                           bool showNextMove);
 
 /**
  * @brief Draws all the visiable inputs
@@ -61,7 +62,8 @@ static void drawAllFilled(Canvas &c,
                           const char selected,
                           const std::vector<Sudoku::DancingLink *> &inputs,
                           const std::vector<Sudoku::DancingLink *> &errors,
-                          const int current_start_index);
+                          const int current_start_index,
+                          bool showNextMove);
 
 /**
  * @brief Print the next move on the board
@@ -123,8 +125,8 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
         }
 
         drawPuzzleTable(c);
-        drawAllPencils(c, selected, puzzle.pencilMarks, puzzle.wrong_marks, puzzle.wrong_inputs);
-        drawAllFilled(c, selected, puzzle.constraintTable->current, puzzle.wrong_inputs, puzzle.current_start_index);
+        drawAllPencils(c, selected, puzzle.pencilMarks, puzzle.wrong_marks, puzzle.wrong_inputs, showNextMove);
+        drawAllFilled(c, selected, puzzle.constraintTable->current, puzzle.wrong_inputs, puzzle.current_start_index, showNextMove);
         if (showNextMove) {
             drawNextMove(c, move);
         }
@@ -354,14 +356,15 @@ static void drawAllPencils(Canvas &c,
                            const char selected,
                            const std::vector<Sudoku::DancingLink *> &pencils,
                            const std::vector<Sudoku::DancingLink *> &pencilError,
-                           const std::vector<Sudoku::DancingLink *> &wrong_inputs) {
+                           const std::vector<Sudoku::DancingLink *> &wrong_inputs,
+                           bool showNextMove) {
                         
     
     const Canvas::Stylizer style_pencil = [&](Pixel &pixel) {
         pixel.dim = true;
         pixel.bold = false;
 
-        if (pixel.character[0] == selected) {
+        if (pixel.character[0] == selected && !showNextMove) {
             pixel.background_color = Color::BlueLight;
             pixel.foreground_color = Color::Black;
         }
@@ -409,13 +412,14 @@ static void drawAllFilled(Canvas &c,
                           const char selected,
                           const std::vector<Sudoku::DancingLink *> &inputs,
                           const std::vector<Sudoku::DancingLink *> &errors,
-                          const int current_start_index){
+                          const int current_start_index,
+                          bool showNextMove){
 
     const Canvas::Stylizer style_clues = [&](Pixel &pixel){
         pixel.underlined = true;
         pixel.bold = true;
 
-        if (pixel.character[0] == selected) {
+        if (pixel.character[0] == selected && !showNextMove) {
             pixel.background_color = Color::Cyan;
             pixel.foreground_color = Color::White;
         }
@@ -424,7 +428,7 @@ static void drawAllFilled(Canvas &c,
     const Canvas::Stylizer style_filled = [&](Pixel &pixel){
         pixel.bold = true;
 
-        if (pixel.character[0] == selected) {
+        if (pixel.character[0] == selected && !showNextMove) {
             pixel.background_color = Color::BlueLight;
             pixel.foreground_color = Color::White;
         }

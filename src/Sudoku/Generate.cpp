@@ -1,6 +1,7 @@
 #include "Sudoku.h"
 #include <vector>
 #include <cstring>
+#include <algorithm>
 
 Sudoku::DancingLinkTable Sudoku::generate() {
     // TODO: Figure out which to remove first, maybe by looking at which column has the most rows in each step during solve and picking one of those
@@ -12,6 +13,8 @@ Sudoku::DancingLinkTable Sudoku::generate() {
     solve(&ret, true); // fills the solution array, all columns are uncovered
     ret.current = ret.solution;
     solution = ret.solution;
+
+    std::reverse(ret.current.begin(), ret.current.end()); // seems to create more difficult puzzles
 
     for (auto i = 0; i < eBoardSize; i++) {
         // Storing and removing last
