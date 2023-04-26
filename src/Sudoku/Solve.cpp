@@ -29,7 +29,7 @@ bool Sudoku::solve(DancingLinkTable *table, bool randomize) {
  */
 static bool backTrack(Sudoku::DancingLinkTable *table, Sudoku::DancingLink **current_solution, unsigned int depth, unsigned int *solution_count, bool randomize) {
     bool should_ret;
-    if (table->root.right == &(table->root)) {
+    if (table->root->right == table->root.get()) {
         (*solution_count)++;
         
         // This solution becomes the solution in the table
@@ -40,7 +40,7 @@ static bool backTrack(Sudoku::DancingLinkTable *table, Sudoku::DancingLink **cur
         return true;
     }
 
-    Sudoku::DancingLinkColumn *col = smallestColumn(&table->root, randomize);
+    Sudoku::DancingLinkColumn *col = smallestColumn(table->root.get(), randomize);
 
     col->cover();
     for (Sudoku::DancingLink *row = col->down; row != col; row = row->down) {

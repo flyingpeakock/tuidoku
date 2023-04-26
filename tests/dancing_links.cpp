@@ -24,7 +24,7 @@ TEST(dancing_links, each_col_has_eSize_rows) {
     Sudoku::DancingLink *current;
     Sudoku::DancingLink *col;
 
-    for (current = table_f.root.right; current != &table_f.root; current = current->right) {
+    for (current = table_f.root->right; current != table_f.root.get(); current = current->right) {
         EXPECT_EQ(current->count, Sudoku::eSize);
         col = current;
         for (auto i = 0; i <= Sudoku::eSize; i++) {
@@ -33,7 +33,7 @@ TEST(dancing_links, each_col_has_eSize_rows) {
         EXPECT_EQ(current, col);
     }
 
-    for (current = table_t.root.right; current != &table_t.root; current = current->right) {
+    for (current = table_t.root->right; current != table_t.root.get(); current = current->right) {
         EXPECT_EQ(current->count, Sudoku::eSize);
         col = current;
         for (auto i = 0; i <= Sudoku::eSize; i++) {
@@ -49,7 +49,7 @@ TEST(dancing_links, each_row_has_four_columns) {
     Sudoku::DancingLinkTable tables[] = { Sudoku::DancingLinkTable(false), Sudoku::DancingLinkTable(true) };
 
     for (auto &t : tables) {
-        for (col = t.root.right; col != &t.root; col = col->right) {
+        for (col = t.root->right; col != t.root.get(); col = col->right) {
             row = col->down;
             for (auto i = 0; i < Sudoku::eConstraintTypes; i++) {
                 row = row->right;
@@ -66,7 +66,7 @@ TEST(dancing_links, each_row_has_same_count) {
     Sudoku::DancingLinkTable tables[] = { Sudoku::DancingLinkTable(false), Sudoku::DancingLinkTable(true) };
 
     for (auto &t : tables) {
-        for (col = t.root.right; col != &t.root; col = col->right) {
+        for (col = t.root->right; col != t.root.get(); col = col->right) {
             count = col->down->count;
             for (row = col->down->right; row != col->down; row = row->right) {
                 EXPECT_EQ(row->count, count);
@@ -81,8 +81,10 @@ TEST(dancing_links, each_cell_has_36_links) {
     int results[2][Sudoku::eSize][Sudoku::eSize] = {0};
 
     for (auto i = 0; i < 2; i++) {
-        for (auto &link : tables[i].buffer) {
-            results[i][Sudoku::getRowFromLink(&link)][Sudoku::getColFromLink(&link)]++;
+        //for (auto &link : tables[i].buffer) {
+        for (auto j = 0; j < Sudoku::eBufferSize; j++) {
+            auto link = tables[i].buffer.get() + j;
+            results[i][Sudoku::getRowFromLink(link)][Sudoku::getColFromLink(link)]++;
         }
     }
 
@@ -101,14 +103,18 @@ TEST(dancing_links, all_columns_are_linked) {
     Sudoku::DancingLink *current;
 
     current = &table_f.colHeaders[0];
-    for (auto &link : table_f.colHeaders) {
-        EXPECT_EQ(&link, current);
+    //for (auto &link : table_f.colHeaders) {
+    for (auto i = 0; i < Sudoku::eConstraints; i++) {
+        auto link = table_f.colHeaders.get() + i;
+        EXPECT_EQ(link, current);
         current = current->right;
     }
 
     current = &table_t.colHeaders[0];
-    for (auto &link : table_t.colHeaders) {
-        EXPECT_EQ(&link, current);
+    //for (auto &link : table_t.colHeaders) {
+    for (auto i = 0; i < Sudoku::eConstraints; i++) {
+        auto link = table_t.colHeaders.get() + i;
+        EXPECT_EQ(link, current);
         current = current->right;
     }
 }
@@ -120,7 +126,7 @@ TEST(dancing_links, none_covered_after_solve) {
         for (auto b : bools) {
             Sudoku::solve(&table, b);
             int counter = 0;
-            for (auto col = table.root.right; col != &table.root; col = col->right) {
+            for (auto col = table.root->right; col != table.root.get(); col = col->right) {
                 counter++;
             }
             EXPECT_EQ(counter, Sudoku::eConstraints);

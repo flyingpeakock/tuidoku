@@ -226,7 +226,7 @@ void Sudoku::SudokuPuzzle::recheckMistakes(Sudoku::DancingLink *link) {
 void Sudoku::SudokuPuzzle::autoPencil() {
     pencilMarks.clear();
     wrong_marks.clear();
-    for (auto col = constraintTable->root.right; col != &constraintTable->root; col = col->right) {
+    for (auto col = constraintTable->root->right; col != constraintTable->root.get(); col = col->right) {
         for (auto row = col->down; row != col; row = row->down) {
             // Don't add to pencilMarks multiple times
             auto found = containsLinkEqual(getRowFromLink(row), getColFromLink(row), getNumFromLink(row), pencilMarks.begin(), pencilMarks.end());

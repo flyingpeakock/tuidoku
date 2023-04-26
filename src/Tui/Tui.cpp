@@ -119,7 +119,7 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
     showNextMove(false),
 
     renderer(Renderer([&] {
-        if (!isPlaying(&puzzle.constraintTable->root)) {
+        if (!isPlaying(puzzle.constraintTable->root.get())) {
             // Nothing to select if puzzle is done
             selected = 0;
         }
@@ -136,7 +136,7 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
     })),
 
     parseEvent(CatchEvent([&](Event event) {
-        if (!isPlaying(&puzzle.constraintTable->root)) {
+        if (!isPlaying(puzzle.constraintTable->root.get())) {
             screen.ExitLoopClosure()();
             return true;
         }

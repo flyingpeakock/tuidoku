@@ -2,6 +2,7 @@
 #include "Constants.h"
 #include <vector>
 #include <array>
+#include <memory>
 
 namespace Sudoku {
     /**
@@ -32,9 +33,9 @@ namespace Sudoku {
      */
     struct DancingLinkTable {
         DancingLinkTable(bool should_randomize);
-        DancingLink root;
-        std::array<DancingLinkColumn, eConstraints> colHeaders;
-        std::array<DancingLink, eBufferSize> buffer;
+        std::unique_ptr<DancingLink> root;
+        std::unique_ptr<DancingLinkColumn[]> colHeaders;
+        std::unique_ptr<DancingLink[]> buffer;
         std::vector<DancingLink *>current;
         std::vector<DancingLink *>solution;
     };

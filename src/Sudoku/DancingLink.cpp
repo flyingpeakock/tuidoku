@@ -37,7 +37,10 @@ void DancingLinkColumn::uncover() {
 }
 
 
-Sudoku::DancingLinkTable::DancingLinkTable(bool should_randomize) {
+Sudoku::DancingLinkTable::DancingLinkTable(bool should_randomize):
+root(std::make_unique<DancingLink>()),
+colHeaders(std::make_unique<DancingLinkColumn[]>(Sudoku::eConstraints)),
+buffer(std::make_unique<DancingLink[]>(Sudoku::eBufferSize)){
     generateLinks(this, should_randomize);
 }
 
@@ -64,14 +67,15 @@ static void generateLinks(DancingLinkTable *table, bool should_randomize) {
         // Creating initial link
         // current->colHeader = current;
 
-        table->root.up = &table->root;
-        table->root.down = &table->root;
-        table->root.count = 0;
+        table->root->up = table->root.get();
+        table->root->down = table->root.get();
+        table->root->count = 0;
 
         // linking colummn headers
-        current = (DancingLinkColumn *)&table->root;
-        for (auto &i : table->colHeaders) {
-            next = &i;
+        current = (DancingLinkColumn *)table->root.get();
+        //for (auto &i : table->colHeaders) {
+        for (auto i = 0; i < Sudoku::eConstraints; i++) {
+            next = &table->colHeaders.get()[i];
             current->right = next;
             next->left = current;
             current = next;
@@ -82,8 +86,8 @@ static void generateLinks(DancingLinkTable *table, bool should_randomize) {
             current->isCoverd = false;
         }
         // closing the loop
-        current->right = &table->root;
-        table->root.left = current;
+        current->right = table->root.get();
+        table->root->left = current;
     }
 
     int buffer_idx = 0;

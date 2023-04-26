@@ -46,7 +46,7 @@ bool Sudoku::logic::foundWrongRemovedPencil(const SudokuPuzzle &puzzle, Move &mo
 }
 
 bool Sudoku::logic::foundMissingPencilMark(const SudokuPuzzle &puzzle, Move &move) {
-    for (auto col = puzzle.constraintTable->root.right; col != &puzzle.constraintTable->root; col = col->right) {
+    for (auto col = puzzle.constraintTable->root->right; col != puzzle.constraintTable->root.get(); col = col->right) {
         for (auto row = col->down; row != col; row = row->down) {
             bool foundInMarks = false;
             for (auto i = puzzle.pencilMarks.begin(); i < puzzle.pencilMarks.end(); i++) {
@@ -95,13 +95,13 @@ Sudoku::logic::Move Sudoku::logic::getNextMove(const Sudoku::SudokuPuzzle &puzzl
     if (foundMistake(puzzle, move)) {
         foundMove = true;
     }
-    else if (foundSingle(&puzzle.constraintTable->root, move)) {
+    else if (foundSingle(puzzle.constraintTable->root.get(), move)) {
         foundMove = true;
     }
     if (foundMove) return move;
 
     for (auto i = 2; i <= 4; i++) {
-        if (foundBasicMove(&puzzle.constraintTable->root, i, move)) {
+        if (foundBasicMove(puzzle.constraintTable->root.get(), i, move)) {
             foundMove = true;
             break;
         }
