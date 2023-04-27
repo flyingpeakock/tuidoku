@@ -34,9 +34,9 @@ namespace Sudoku {
     struct DancingLinkTable {
         DancingLinkTable(bool should_randomize);
         void generateLinks(bool should_randomize);
-        std::unique_ptr<DancingLink> root;
-        std::unique_ptr<DancingLinkColumn[]> colHeaders;
-        std::unique_ptr<DancingLink[]> buffer;
+        std::shared_ptr<DancingLink> root;
+        std::shared_ptr<DancingLinkColumn[]> colHeaders;
+        std::shared_ptr<DancingLink[]> buffer;
         std::vector<DancingLink *>current;
         std::vector<DancingLink *>solution;
     };

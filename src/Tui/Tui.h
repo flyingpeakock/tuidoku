@@ -49,13 +49,13 @@ namespace Tui {
         int row;
         int col;
         char selected;
-        std::vector<Sudoku::logic::Move> moves;
+        std::vector<Sudoku::logic::LogicalMove> moves;
 
         bool showNextMove;
 
         public:
         /** constructor with constraintTable representing puzzle*/
-        Board(Sudoku::DancingLinkTable *constraintTable);
+        Board(Sudoku::DancingLinkTable &constraintTable);
 
         /** main loop*/
         void playLoop();

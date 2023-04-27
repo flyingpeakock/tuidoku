@@ -29,7 +29,7 @@ namespace Sudoku {
      * @return true .. if a unique solution
      * @return false .. if none or multiple solutions
      */
-    bool solve(DancingLinkTable *table, bool randomize);
+    bool solve(DancingLinkTable &table, bool randomize);
 
     /**
      * @brief Generate a sudoku puzzle with a unique solution
@@ -52,8 +52,8 @@ namespace Sudoku {
     };
 
     struct SudokuPuzzle {
-        SudokuPuzzle(Sudoku::DancingLinkTable *table);
-        Sudoku::DancingLinkTable *constraintTable;
+        SudokuPuzzle(Sudoku::DancingLinkTable &table);
+        Sudoku::DancingLinkTable constraintTable;
         int current_start_index;
         std::vector<Sudoku::DancingLink *> wrong_inputs;
         std::vector<Sudoku::DancingLink *> pencilMarks;   // contains visible marks

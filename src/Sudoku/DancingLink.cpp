@@ -36,9 +36,9 @@ void DancingLinkColumn::uncover() {
 
 
 Sudoku::DancingLinkTable::DancingLinkTable(bool should_randomize):
-root(std::make_unique<DancingLink>()),
-colHeaders(std::make_unique<DancingLinkColumn[]>(Sudoku::eConstraints)),
-buffer(std::make_unique<DancingLink[]>(Sudoku::eBufferSize)){
+root(std::make_shared<DancingLink>()),
+colHeaders(std::make_shared<DancingLinkColumn[]>(Sudoku::eConstraints)),
+buffer(std::make_shared<DancingLink[]>(Sudoku::eBufferSize)){
     generateLinks(should_randomize);
 }
 

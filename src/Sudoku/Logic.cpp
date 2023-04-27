@@ -5,7 +5,7 @@
  * @brief vector containing all the methods used to find wrong moves
  * 
  */
-static std::vector<bool (*)(const Sudoku::SudokuPuzzle &puzzle, std::vector<Sudoku::logic::Move> &move)> mistakes = {
+static std::vector<bool (*)(const Sudoku::SudokuPuzzle &puzzle, std::vector<Sudoku::logic::LogicalMove> &move)> mistakes = {
     &Sudoku::logic::foundIllogicalInput,
     &Sudoku::logic::foundIllogicalPencil,
     &Sudoku::logic::foundWrongRemovedPencil,
@@ -13,9 +13,9 @@ static std::vector<bool (*)(const Sudoku::SudokuPuzzle &puzzle, std::vector<Sudo
     &Sudoku::logic::foundWrongInput,
 };
 
-bool Sudoku::logic::foundIllogicalInput(const SudokuPuzzle &puzzle, std::vector<Move> &moves) {
+bool Sudoku::logic::foundIllogicalInput(const SudokuPuzzle &puzzle, std::vector<LogicalMove> &moves) {
     for (const auto &i : puzzle.wrong_inputs) {
-        Move move;
+        LogicalMove move;
         move.type = eLogicErrorInsert;
         move.diff = eBeginner;
         move.falses.push_back(i);
@@ -24,9 +24,9 @@ bool Sudoku::logic::foundIllogicalInput(const SudokuPuzzle &puzzle, std::vector<
     return puzzle.wrong_inputs.size() != 0;
 }
 
-bool Sudoku::logic::foundIllogicalPencil(const SudokuPuzzle &puzzle, std::vector<Move> &moves) {
+bool Sudoku::logic::foundIllogicalPencil(const SudokuPuzzle &puzzle, std::vector<LogicalMove> &moves) {
     for (const auto &i : puzzle.wrong_marks) {
-        Move move;
+        LogicalMove move;
         move.type = eLogicErrorPencil;
         move.diff = eBeginner;
         move.falses.push_back(i);
@@ -35,12 +35,18 @@ bool Sudoku::logic::foundIllogicalPencil(const SudokuPuzzle &puzzle, std::vector
     return puzzle.wrong_marks.size() != 0;
 }
 
-bool Sudoku::logic::foundWrongRemovedPencil(const SudokuPuzzle &puzzle, std::vector<Move> &moves) {
+bool Sudoku::logic::foundWrongRemovedPencil(const SudokuPuzzle &puzzle, std::vector<LogicalMove> &moves) {
     bool ret = false;
     for (const auto &i : puzzle.removed_marks) {
-        auto found = containsLinkEqual(getRowFromLink(i), getColFromLink(i), getNumFromLink(i), puzzle.constraintTable->solution.begin(), puzzle.constraintTable->solution.end());
-        if (found != puzzle.constraintTable->solution.end()) {
-            Move move;
+        auto found = false;
+        for (auto link : puzzle.constraintTable.solution) {
+            if (link->count == i->count) {
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            LogicalMove move;
             move.type = eLogicErrorInsert;
             move.diff = eBeginner;
             move.truths.push_back(i);
@@ -51,9 +57,9 @@ bool Sudoku::logic::foundWrongRemovedPencil(const SudokuPuzzle &puzzle, std::vec
     return ret;
 }
 
-bool Sudoku::logic::foundMissingPencilMark(const SudokuPuzzle &puzzle, std::vector<Move> &moves) {
+bool Sudoku::logic::foundMissingPencilMark(const SudokuPuzzle &puzzle, std::vector<LogicalMove> &moves) {
     bool ret = false;
-    for (auto col = puzzle.constraintTable->root->right; col != puzzle.constraintTable->root.get(); col = col->right) {
+    for (auto col = puzzle.constraintTable.root->right; col != puzzle.constraintTable.root.get(); col = col->right) {
         for (auto row = col->down; row != col; row = row->down) {
             bool foundInMarks = false;
             for (auto i = puzzle.pencilMarks.begin(); i < puzzle.pencilMarks.end(); i++) {
@@ -63,7 +69,7 @@ bool Sudoku::logic::foundMissingPencilMark(const SudokuPuzzle &puzzle, std::vect
                 }
             }
             if (!foundInMarks) {
-                Move move;
+                LogicalMove move;
                 move.type = eLogicErrorPencilMissing;
                 move.diff = eBeginner;
                 move.truths.push_back(row);
@@ -76,12 +82,18 @@ bool Sudoku::logic::foundMissingPencilMark(const SudokuPuzzle &puzzle, std::vect
     return ret;
 }
 
-bool Sudoku::logic::foundWrongInput(const SudokuPuzzle &puzzle, std::vector<Move> &moves) {
+bool Sudoku::logic::foundWrongInput(const SudokuPuzzle &puzzle, std::vector<LogicalMove> &moves) {
     bool ret = false;
-    for (auto i = puzzle.constraintTable->current.begin() + puzzle.current_start_index; i < puzzle.constraintTable->current.end(); i++) {
-        auto found = Sudoku::containsLinkEqual(*i, puzzle.constraintTable->solution.begin(), puzzle.constraintTable->solution.end());
-        if (found == puzzle.constraintTable->solution.end()) {
-            Move move;
+    for (auto i = puzzle.constraintTable.current.begin() + puzzle.current_start_index; i < puzzle.constraintTable.current.end(); i++) {
+        auto found = false;
+        for (const auto &link : puzzle.constraintTable.solution) {
+            if (link->count == (*i)->count) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) { // not found in solution
+            LogicalMove move;
             move.type = eLogicErrorInsert;
             move.diff = eBeginner;
             move.falses.push_back(*i);
@@ -92,15 +104,15 @@ bool Sudoku::logic::foundWrongInput(const SudokuPuzzle &puzzle, std::vector<Move
     return ret;
 }
 
-std::vector<Sudoku::logic::Move> Sudoku::logic::foundMistake(const SudokuPuzzle &puzzle) {
-    std::vector<Sudoku::logic::Move> moves;
+std::vector<Sudoku::logic::LogicalMove> Sudoku::logic::foundMistake(const SudokuPuzzle &puzzle) {
+    std::vector<Sudoku::logic::LogicalMove> moves;
     for (auto &method : mistakes) {
         method(puzzle, moves);
     }
     return moves;
 }
 
-std::vector<Sudoku::logic::Move> Sudoku::logic::getNextMove(const Sudoku::SudokuPuzzle &puzzle, bool ignore_mistakes) {
+std::vector<Sudoku::logic::LogicalMove> Sudoku::logic::getNextMove(const Sudoku::SudokuPuzzle &puzzle, bool ignore_mistakes) {
     enum {
         eSingle,
         eDouble,
@@ -115,24 +127,27 @@ std::vector<Sudoku::logic::Move> Sudoku::logic::getNextMove(const Sudoku::Sudoku
         }
     }
 
-    auto columnCounts = getSortedConstraintColumns(puzzle.constraintTable->root.get());
-    std::vector<Move> moves;
+    auto columnCounts = getSortedConstraintColumns(puzzle.constraintTable.root.get());
+    std::vector<LogicalMove> moves;
     foundSingle(columnCounts[eSingle], moves);
-    for (int candidates = eSingle; candidates <= eTriple; candidates++) {
+    for (int candidates = eDouble; candidates <= eTriple; candidates++) {
         foundLockedCandidates(columnCounts[candidates], moves);
     }
 
-    std::sort(moves.begin(), moves.end(), [](const Move &left, const Move &right) -> bool {
+    std::sort(moves.begin(), moves.end(), [](const LogicalMove &left, const LogicalMove &right) -> bool {
+        if (left.diff == right.diff) {
+            return left.truths[0]->colHeader->constraintType < right.truths[0]->colHeader->constraintType;
+        }
         return left.diff < right.diff;
     });
     return moves;
 }
 
-bool Sudoku::logic::foundSingle(const std::vector<DancingLink *> &columns, std::vector<Move> &moves) {
+bool Sudoku::logic::foundSingle(const std::vector<DancingLink *> &columns, std::vector<LogicalMove> &moves) {
     bool ret = false;
     for (auto *link : columns) {
         if (link->count != 1) continue;
-        Move move;
+        LogicalMove move;
         move.diff = eBeginner;
         move.type = eLogicInsert;
         move.truths.push_back(link->down);
@@ -168,7 +183,7 @@ static std::vector<Sudoku::DancingLinkColumn *> getMatchingLinks(std::vector<Sud
     return ret;
 }
 
-bool Sudoku::logic::foundLockedCandidates(const std::vector<DancingLink *> &columns, std::vector<Move> &moves) {
+bool Sudoku::logic::foundLockedCandidates(const std::vector<DancingLink *> &columns, std::vector<LogicalMove> &moves) {
     bool ret = false;
     for (auto *col : columns) {
         if (col->count < 2 || col->count > 3) continue;
@@ -184,7 +199,7 @@ bool Sudoku::logic::foundLockedCandidates(const std::vector<DancingLink *> &colu
             continue;
         }
 
-        Move move;
+        LogicalMove move;
         move.type = eLogicPencil; // Found pencil marks to remove
         move.diff = (difficulty)(col->count - 1);
         move.truths = candidates;

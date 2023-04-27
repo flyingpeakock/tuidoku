@@ -2,9 +2,9 @@
 #include <random>
 #include <vector>
 
-static bool backTrack(Sudoku::DancingLinkTable *table, Sudoku::DancingLink **current_solution, unsigned int depth, unsigned int *solution_count, bool randomize);
+static bool backTrack(Sudoku::DancingLinkTable &table, Sudoku::DancingLink **current_solution, unsigned int depth, unsigned int *solution_count, bool randomize);
 
-bool Sudoku::solve(DancingLinkTable *table, bool randomize) {
+bool Sudoku::solve(DancingLinkTable &table, bool randomize) {
     unsigned int solution_count = 0;
     DancingLink *solution[eBoardSize];
     backTrack(table, solution, 0, &solution_count, randomize);
@@ -20,20 +20,20 @@ bool Sudoku::solve(DancingLinkTable *table, bool randomize) {
  * @return true if a solution is found
  * @return false if no solution is found
  */
-static bool backTrack(Sudoku::DancingLinkTable *table, Sudoku::DancingLink **current_solution, unsigned int depth, unsigned int *solution_count, bool randomize) {
+static bool backTrack(Sudoku::DancingLinkTable &table, Sudoku::DancingLink **current_solution, unsigned int depth, unsigned int *solution_count, bool randomize) {
     bool should_ret;
-    if (table->root->right == table->root.get()) {
+    if (table.root->right == table.root.get()) {
         (*solution_count)++;
         
         // This solution becomes the solution in the table
-        table->solution.clear();
+        table.solution.clear();
         for (auto i = 0; i < depth; i++) {
-            table->solution.push_back(current_solution[i]);
+            table.solution.push_back(current_solution[i]);
         }
         return true;
     }
 
-    Sudoku::DancingLinkColumn *col = smallestColumn(table->root.get(), randomize);
+    Sudoku::DancingLinkColumn *col = smallestColumn(table.root.get(), randomize);
 
     col->cover();
     for (Sudoku::DancingLink *row = col->down; row != col; row = row->down) {

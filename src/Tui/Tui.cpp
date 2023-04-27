@@ -71,7 +71,7 @@ static void drawAllFilled(Canvas &c,
  * @param c Canvas to draw on
  * @param move Sudoku::logic::Move object to draw
  */
-static void drawNextMove(Canvas &c, const Sudoku::logic::Move &move);
+static void drawNextMove(Canvas &c, const Sudoku::logic::LogicalMove &move);
 
 /**
  * @brief Set the Cursor shape and position
@@ -109,7 +109,7 @@ static void setMouseRowCol(int &row, int &col, int m_row, int m_col);
  * 
  * @param table constraint table that represents the puzzle
  */
-Tui::Board::Board(Sudoku::DancingLinkTable *table) :
+Tui::Board::Board(Sudoku::DancingLinkTable &table) :
     screen(ScreenInteractive::FitComponent()),
     row(0), col(0),
     puzzle(table),
@@ -119,14 +119,14 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
     showNextMove(false),
 
     renderer(Renderer([&] {
-        if (!isPlaying(puzzle.constraintTable->root.get())) {
+        if (!isPlaying(puzzle.constraintTable.root.get())) {
             // Nothing to select if puzzle is done
             selected = 0;
         }
 
         drawPuzzleTable(c);
         drawAllPencils(c, selected, puzzle.pencilMarks, puzzle.wrong_marks, puzzle.wrong_inputs, showNextMove);
-        drawAllFilled(c, selected, puzzle.constraintTable->current, puzzle.wrong_inputs, puzzle.current_start_index, showNextMove);
+        drawAllFilled(c, selected, puzzle.constraintTable.current, puzzle.wrong_inputs, puzzle.current_start_index, showNextMove);
         if (showNextMove) {
             drawNextMove(c, moves[0]);
         }
@@ -136,7 +136,7 @@ Tui::Board::Board(Sudoku::DancingLinkTable *table) :
     })),
 
     parseEvent(CatchEvent([&](Event event) {
-        if (!isPlaying(puzzle.constraintTable->root.get())) {
+        if (!isPlaying(puzzle.constraintTable.root.get())) {
             screen.ExitLoopClosure()();
             return true;
         }
@@ -167,8 +167,8 @@ bool Tui::Board::parseMouse(Event event) {
         return true; // If not left button just move position
     }
 
-    auto found = Sudoku::containsLinkEquivalent(row, col, puzzle.constraintTable->current.begin(), puzzle.constraintTable->current.end());
-    if (found != puzzle.constraintTable->current.end()) {
+    auto found = Sudoku::containsLinkEquivalent(row, col, puzzle.constraintTable.current.begin(), puzzle.constraintTable.current.end());
+    if (found != puzzle.constraintTable.current.end()) {
         selected = Sudoku::getNumFromLink(*found) + '1';
         return true; // This cell is filled
     }
@@ -228,6 +228,7 @@ bool Tui::Board::parseKeys(Event event) {
         key_pressed = true;
     }
     else if (event == Event::Character("q")) {
+        selected = 0;
         screen.ExitLoopClosure()();
         key_pressed = true;
     }
@@ -491,7 +492,7 @@ static void setMouseRowCol(int &row, int &col, int m_row, int m_col) {
     }
 }
 
-static void drawNextMove(Canvas &c, const Sudoku::logic::Move &move) {
+static void drawNextMove(Canvas &c, const Sudoku::logic::LogicalMove &move) {
     const Canvas::Stylizer style_truth = [&](Pixel &pixel) {
         pixel.dim = true;
         pixel.bold = false;

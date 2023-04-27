@@ -124,7 +124,7 @@ TEST(dancing_links, none_covered_after_solve) {
     bool bools[2] = {true, false};
     for (auto &table : tables) {
         for (auto b : bools) {
-            Sudoku::solve(&table, b);
+            Sudoku::solve(table, b);
             int counter = 0;
             for (auto col = table.root->right; col != table.root.get(); col = col->right) {
                 counter++;
@@ -142,7 +142,7 @@ TEST(dancing_links, solve_does_not_uncover_covered) {
     for (auto c : constraints) {
         table.colHeaders[c].cover();
     }
-    Sudoku::solve(&table, false);
+    Sudoku::solve(table, false);
     for (auto c : constraints) {
         EXPECT_NE(table.colHeaders[c].right->left, &table.colHeaders[c]);
     }
@@ -184,5 +184,43 @@ TEST(dancing_links, each_generated_link_has_valid_pointers) {
             ASSERT_NO_THROW(row->count);
         }
         ASSERT_NO_THROW(col->right);
+    }
+}
+
+TEST(dancing_links, table_copy_refers_to_same_links) {
+    auto table = Sudoku::generate();
+    auto table_copy = table;
+    EXPECT_EQ(table.root, table_copy.root);
+    EXPECT_EQ(table.root.get(), table_copy.root.get());
+
+    EXPECT_EQ(table.buffer, table_copy.buffer);
+    for (auto i = 0; i < Sudoku::eBufferSize; i++) {
+        EXPECT_EQ(table.buffer.get() + i, table_copy.buffer.get() + i);
+    }
+
+    EXPECT_EQ(table.colHeaders, table_copy.colHeaders);
+    for (auto i = 0; i < Sudoku::eConstraints; i++) {
+        EXPECT_EQ(table.colHeaders.get() + i, table_copy.colHeaders.get() + i);
+    }
+
+    EXPECT_EQ(table.current, table_copy.current);
+    EXPECT_EQ(table.solution, table_copy.solution);
+
+    Sudoku::DancingLink *otherCol = table_copy.root->right;
+    for (auto *col = table.root->right; col != table.root.get(); col = col->right) {
+        EXPECT_EQ(col, otherCol);
+        col->colHeader->cover();
+        Sudoku::cover_link(col->down);
+        EXPECT_EQ(col->right->left, otherCol->left);
+        EXPECT_EQ(col->down->left->up, otherCol->down->left->up);
+        Sudoku::uncover_link(col->down);
+        col->colHeader->uncover();
+        auto otherRow = otherCol->down;
+        for (auto *row = col->down; row != col; row = row->down) {
+            EXPECT_EQ(row, otherRow);
+            EXPECT_EQ(row->colHeader, otherRow->colHeader);
+            otherRow = otherRow->down;
+        }
+        otherCol = otherCol->right;
     }
 }
