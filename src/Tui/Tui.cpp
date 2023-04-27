@@ -44,9 +44,9 @@ static void drawPencil(Canvas &c, Sudoku::DancingLink *link, const Canvas::Styli
  */
 static void drawAllPencils(Canvas &c,
                            const char selected,
-                           const std::vector<Sudoku::DancingLink *> &pencils,
-                           const std::vector<Sudoku::DancingLink *> &pencilError,
-                           const std::vector<Sudoku::DancingLink *> &wrong_inputs,
+                           const Sudoku::DancingLinkContainer &pencils,
+                           const Sudoku::DancingLinkContainer &pencilError,
+                           const Sudoku::DancingLinkContainer &wrong_inputs,
                            bool showNextMove);
 
 /**
@@ -60,8 +60,8 @@ static void drawAllPencils(Canvas &c,
  */
 static void drawAllFilled(Canvas &c, 
                           const char selected,
-                          const std::vector<Sudoku::DancingLink *> &inputs,
-                          const std::vector<Sudoku::DancingLink *> &errors,
+                          const Sudoku::DancingLinkContainer &inputs,
+                          const Sudoku::DancingLinkContainer &errors,
                           const int current_start_index,
                           bool showNextMove);
 
@@ -358,9 +358,9 @@ static void drawPencil(Canvas &c, Sudoku::DancingLink *link, const Canvas::Styli
 
 static void drawAllPencils(Canvas &c,
                            const char selected,
-                           const std::vector<Sudoku::DancingLink *> &pencils,
-                           const std::vector<Sudoku::DancingLink *> &pencilError,
-                           const std::vector<Sudoku::DancingLink *> &wrong_inputs,
+                           const Sudoku::DancingLinkContainer &pencils,
+                           const Sudoku::DancingLinkContainer &pencilError,
+                           const Sudoku::DancingLinkContainer &wrong_inputs,
                            bool showNextMove) {
                         
     
@@ -414,8 +414,8 @@ static void drawAllPencils(Canvas &c,
 
 static void drawAllFilled(Canvas &c, 
                           const char selected,
-                          const std::vector<Sudoku::DancingLink *> &inputs,
-                          const std::vector<Sudoku::DancingLink *> &errors,
+                          const Sudoku::DancingLinkContainer &inputs,
+                          const Sudoku::DancingLinkContainer &errors,
                           const int current_start_index,
                           bool showNextMove){
 

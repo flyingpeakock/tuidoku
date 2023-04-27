@@ -143,7 +143,7 @@ std::vector<Sudoku::logic::LogicalMove> Sudoku::logic::getNextMove(const Sudoku:
     return moves;
 }
 
-bool Sudoku::logic::foundSingle(const std::vector<DancingLink *> &columns, std::vector<LogicalMove> &moves) {
+bool Sudoku::logic::foundSingle(const DancingLinkContainer &columns, std::vector<LogicalMove> &moves) {
     bool ret = false;
     for (auto *link : columns) {
         if (link->count != 1) continue;
@@ -164,7 +164,7 @@ bool Sudoku::logic::foundSingle(const std::vector<DancingLink *> &columns, std::
  * @param candidates vector of candidates all in the same constraint column
  * @return std::vector<Sudoku::DancingLinkColumn *> vector of all columns
  */
-static std::vector<Sudoku::DancingLinkColumn *> getMatchingLinks(std::vector<Sudoku::DancingLink *> candidates) {
+static std::vector<Sudoku::DancingLinkColumn *> getMatchingLinks(Sudoku::DancingLinkContainer candidates) {
     std::vector<Sudoku::DancingLinkColumn *> ret;
     int count = candidates.size();
 
@@ -183,12 +183,12 @@ static std::vector<Sudoku::DancingLinkColumn *> getMatchingLinks(std::vector<Sud
     return ret;
 }
 
-bool Sudoku::logic::foundLockedCandidates(const std::vector<DancingLink *> &columns, std::vector<LogicalMove> &moves) {
+bool Sudoku::logic::foundLockedCandidates(const DancingLinkContainer &columns, std::vector<LogicalMove> &moves) {
     bool ret = false;
     for (auto *col : columns) {
         if (col->count < 2 || col->count > 3) continue;
 
-        std::vector<DancingLink *> candidates;
+        DancingLinkContainer candidates;
         candidates.reserve(col->count);
         for (auto row = col->down; row != col; row = row->down) {
             candidates.push_back(row);
@@ -228,8 +228,8 @@ bool Sudoku::logic::foundLockedCandidates(const std::vector<DancingLink *> &colu
     return ret;
 }
 
-auto Sudoku::logic::getSortedConstraintColumns(DancingLink *root) -> std::array<std::vector<DancingLink *>, eSize> {
-    std::array<std::vector<DancingLink *>, eSize> ret;
+auto Sudoku::logic::getSortedConstraintColumns(DancingLink *root) -> std::array<DancingLinkContainer, eSize> {
+    std::array<DancingLinkContainer, eSize> ret;
     for (auto *col = root->right; col != root; col = col->right) {
         ret[(col->count - 1)].push_back(col);
     }

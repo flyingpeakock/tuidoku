@@ -47,7 +47,7 @@ Sudoku::DancingLinkTable Sudoku::generate(){
     bool solve_result = true;
     int current_index = 0;
     DancingLinkTable ret(true);
-    std::vector<DancingLink *> solution;
+    DancingLinkContainer solution;
 
     solve(ret, true); // fills the solution array, all columns are uncovered
     ret.current = ret.solution;
@@ -137,7 +137,7 @@ static Sudoku::DancingLink * getTrueLink(Sudoku::DancingLinkTable &table, Sudoku
 static Sudoku::difficulty grade(Sudoku::DancingLinkTable &table, Sudoku::difficulty requested_difficulty) {
     Sudoku::difficulty highestDifficulty = (Sudoku::difficulty)0;
     std::vector<Sudoku::Move> moveHistory;
-    std::vector<Sudoku::DancingLink *> toBeAdded;
+    Sudoku::DancingLinkContainer toBeAdded;
     while (table.root.get() != table.root->right) {
         auto moves = Sudoku::logic::getNextMove(Sudoku::SudokuPuzzle(table), true);
         if (moves.size() == 0) {

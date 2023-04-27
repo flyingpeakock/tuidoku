@@ -5,7 +5,7 @@
 void printPuzzle(Sudoku::DancingLinkTable *table) {
     int array[Sudoku::eSize][Sudoku::eSize] = {0};
 
-    std::vector<Sudoku::DancingLink *>innertable = table->solution;
+    Sudoku::DancingLinkContainer innertable = table->solution;
     int index = 0;
     for (auto &current : innertable) {
         int count = current->count;
@@ -18,13 +18,10 @@ void printPuzzle(Sudoku::DancingLinkTable *table) {
     char text[Sudoku::eBoardSize + 1] = {'\0'};
     for (auto i = 0; i < Sudoku::eSize; i++) {
         for (auto j = 0; j < Sudoku::eSize; j++) {
-            //std::cout << array[i][j] << "   ";
             text[(i * Sudoku::eSize) + j] = array[i][j] + '0';
         }
-        //std::cout << '\n';
     }
     std::cout << (const char *)text << '\n';
-    //std::cout << '\n';
 }
 
 int main(int argc, char *argv[]) {

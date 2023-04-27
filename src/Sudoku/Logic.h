@@ -28,7 +28,7 @@ namespace Sudoku {
              * Also contains the links to insert if eLogicInsert
              * empty when eLogicError
              */
-            std::vector<DancingLink *> truths;
+            DancingLinkContainer truths;
 
             /**
              * @brief Vector containing falses found using logic
@@ -36,16 +36,16 @@ namespace Sudoku {
              * These are the links to removed from pencil marks if eLogicInsert
              * Or the links that are wrong if eLogicErorr
              */
-            std::vector<DancingLink *> falses;
+            DancingLinkContainer falses;
         };
 
         /**
          * @brief Generates an array of vectors with the same number of link per column
          *
          * @param root root of the constraint table
-         * @return std::array<std::vector<Sudoku::DancingLink *>, Sudoku::eSize> 
+         * @return std::array<Sudoku::DancingLinkContainer, Sudoku::eSize> 
          */
-        std::array<std::vector<Sudoku::DancingLink *>, Sudoku::eSize> getSortedConstraintColumns(DancingLink *root);
+        std::array<Sudoku::DancingLinkContainer, Sudoku::eSize> getSortedConstraintColumns(DancingLink *root);
 
         // Mistakes
         bool foundIllogicalInput(const SudokuPuzzle &puzzle, std::vector<LogicalMove> &moves);
@@ -63,7 +63,7 @@ namespace Sudoku {
          * @return true if found something
          * @return false false if no moves found
          */
-        bool foundSingle(const std::vector<DancingLink *> &columns, std::vector<LogicalMove> &moves);
+        bool foundSingle(const DancingLinkContainer &columns, std::vector<LogicalMove> &moves);
 
         /**
          * @brief Looks for locked candidates in the board
@@ -73,7 +73,7 @@ namespace Sudoku {
          * @return true if a move is found
          * @return false if a move is not found
          */
-        bool foundLockedCandidates(const std::vector<DancingLink *> &columns, std::vector<LogicalMove> &moves);
+        bool foundLockedCandidates(const DancingLinkContainer &columns, std::vector<LogicalMove> &moves);
 
 
         /**

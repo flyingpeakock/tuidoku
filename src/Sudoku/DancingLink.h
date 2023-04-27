@@ -27,6 +27,8 @@ namespace Sudoku {
         void uncover();
     };
 
+    using DancingLinkContainer = std::vector<DancingLink *>;
+
     /**
      * @brief contains all the links needed for a sudoku constraint table
      * 
@@ -37,8 +39,8 @@ namespace Sudoku {
         std::shared_ptr<DancingLink> root;
         std::shared_ptr<DancingLinkColumn[]> colHeaders;
         std::shared_ptr<DancingLink[]> buffer;
-        std::vector<DancingLink *>current;
-        std::vector<DancingLink *>solution;
+        DancingLinkContainer current;
+        DancingLinkContainer solution;
     };
 
     /**
@@ -97,9 +99,9 @@ namespace Sudoku {
      * @param col int
      * @param start iterator begin
      * @param end iterator end
-     * @return std::vector<DancingLink *>::iterator equivalent if found, else end
+     * @return DancingLinkContainer::iterator equivalent if found, else end
      */
-    inline std::vector<DancingLink *>::iterator containsLinkEquivalent(int row, int col, std::vector<DancingLink *>::iterator start, std::vector<DancingLink *>::iterator end) {
+    inline DancingLinkContainer::iterator containsLinkEquivalent(int row, int col, DancingLinkContainer::iterator start, DancingLinkContainer::iterator end) {
         int cur_row, cur_col;
         for (auto i = start; i < end; i++) {
             cur_row = getRowFromLink(*i);
@@ -111,7 +113,7 @@ namespace Sudoku {
         return end;
     }
 
-    inline std::vector<DancingLink *>::iterator containsLinkEqual(int row, int col, int num, std::vector<DancingLink *>::iterator start, std::vector<DancingLink *>::iterator end) {
+    inline DancingLinkContainer::iterator containsLinkEqual(int row, int col, int num, DancingLinkContainer::iterator start, DancingLinkContainer::iterator end) {
         int cur_row, cur_col, cur_num;
         for (auto i = start; i < end; i++) {
             cur_row = getRowFromLink(*i);
@@ -124,7 +126,7 @@ namespace Sudoku {
         return end;
     }
 
-    inline std::vector<DancingLink *>::iterator containsLinkEqual(DancingLink *link, std::vector<DancingLink *>::iterator start, std::vector<DancingLink *>::iterator end) {
+    inline DancingLinkContainer::iterator containsLinkEqual(DancingLink *link, DancingLinkContainer::iterator start, DancingLinkContainer::iterator end) {
         for (auto i = start; i < end; i++) {
             if ((*i)->count == link->count) {
                 return i;

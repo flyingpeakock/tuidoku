@@ -55,10 +55,10 @@ namespace Sudoku {
         SudokuPuzzle(Sudoku::DancingLinkTable &table);
         Sudoku::DancingLinkTable constraintTable;
         int current_start_index;
-        std::vector<Sudoku::DancingLink *> wrong_inputs;
-        std::vector<Sudoku::DancingLink *> pencilMarks;   // contains visible marks
-        std::vector<Sudoku::DancingLink *> wrong_marks;   // contains visible marks that are wrong
-        std::vector<Sudoku::DancingLink *> removed_marks; // contains marks that have been visible but no longer are
+        Sudoku::DancingLinkContainer wrong_inputs;
+        Sudoku::DancingLinkContainer pencilMarks;   // contains visible marks
+        Sudoku::DancingLinkContainer wrong_marks;   // contains visible marks that are wrong
+        Sudoku::DancingLinkContainer removed_marks; // contains marks that have been visible but no longer are
         std::vector<Move> moves;
 
         void insert(int row, int col, char num);
