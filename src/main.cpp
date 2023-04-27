@@ -42,7 +42,8 @@ int main(int argc, char *argv[]) {
     Tui::down_key = Conf::keyBind("down");
     Tui::select_key = '\n';
     */
-    auto table = Sudoku::generate();
+    auto table = Sudoku::generate(Sudoku::eAny);
+    //auto table = Sudoku::generate(Sudoku::eBeginner);
     Tui::Board board(&table);
     board.playLoop();
     return 0;

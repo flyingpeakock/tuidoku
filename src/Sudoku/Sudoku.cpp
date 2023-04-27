@@ -229,7 +229,7 @@ void Sudoku::SudokuPuzzle::autoPencil() {
     for (auto col = constraintTable->root->right; col != constraintTable->root.get(); col = col->right) {
         for (auto row = col->down; row != col; row = row->down) {
             // Don't add to pencilMarks multiple times
-            auto found = containsLinkEqual(getRowFromLink(row), getColFromLink(row), getNumFromLink(row), pencilMarks.begin(), pencilMarks.end());
+            auto found = containsLinkEqual(row, pencilMarks.begin(), pencilMarks.end());
             if (found == pencilMarks.end()) {
                 pencilMarks.push_back(row);
             }

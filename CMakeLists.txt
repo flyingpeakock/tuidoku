@@ -49,6 +49,7 @@ set(TEST_SOURCES
     src/Sudoku/Generate.cpp
     src/Sudoku/DancingLink.cpp
     src/Sudoku/Sudoku.cpp
+    src/Sudoku/Logic.cpp
     src/Config.cpp
 
     # Add unit tests here

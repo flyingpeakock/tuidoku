@@ -2,3 +2,5 @@ tuidoku
 /aur
 .vscode/*
 build/*
+Debug/*
+Release/*

@@ -33,6 +33,7 @@ namespace Sudoku {
      */
     struct DancingLinkTable {
         DancingLinkTable(bool should_randomize);
+        void generateLinks(bool should_randomize);
         std::unique_ptr<DancingLink> root;
         std::unique_ptr<DancingLinkColumn[]> colHeaders;
         std::unique_ptr<DancingLink[]> buffer;

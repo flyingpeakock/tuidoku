@@ -147,3 +147,42 @@ TEST(dancing_links, solve_does_not_uncover_covered) {
         EXPECT_NE(table.colHeaders[c].right->left, &table.colHeaders[c]);
     }
 }
+
+TEST(dancing_links, each_col_has_9_count) {
+    Sudoku::DancingLinkTable table(true);
+    for (auto i = table.root->right; i != table.root.get(); i = i->right) {
+        EXPECT_EQ(i->count, Sudoku::eSize);
+    }
+
+    Sudoku::DancingLinkTable generatedTable = Sudoku::generate();
+    for (auto i = table.root->right; i != table.root.get(); i = i->right) {
+        EXPECT_LE(i->count, Sudoku::eSize);
+    }
+}
+
+TEST(dancing_links, generate_doesnt_break_columns) {
+    Sudoku::DancingLinkTable table = Sudoku::generate(Sudoku::eAny);
+    int i = 0;
+    bool seen_root = false;
+    Sudoku::DancingLink *current = table.root->right;
+    for (i; i < Sudoku::eConstraints; i++) {
+        if (current == table.root.get()) {
+            seen_root = true;
+            break;
+        }
+        current = current->right;
+    }
+    EXPECT_TRUE(seen_root);
+}
+
+TEST(dancing_links, each_generated_link_has_valid_pointers) {
+    Sudoku::DancingLinkTable table = Sudoku::generate(Sudoku::eAny);
+    ASSERT_NO_THROW(table.root->right);
+    for (auto col = table.root->right; col != table.root.get(); col = col->right) {
+        ASSERT_NO_THROW(col->down);
+        for (auto row = col->down; row != col; row = row->down) {
+            ASSERT_NO_THROW(row->count);
+        }
+        ASSERT_NO_THROW(col->right);
+    }
+}

@@ -4,8 +4,6 @@
 
 using namespace Sudoku;
 
-static void generateLinks(DancingLinkTable *table, bool should_randomize);
-
 void DancingLinkColumn::cover() {
     DancingLink *i;
     DancingLink *j;
@@ -41,7 +39,7 @@ Sudoku::DancingLinkTable::DancingLinkTable(bool should_randomize):
 root(std::make_unique<DancingLink>()),
 colHeaders(std::make_unique<DancingLinkColumn[]>(Sudoku::eConstraints)),
 buffer(std::make_unique<DancingLink[]>(Sudoku::eBufferSize)){
-    generateLinks(this, should_randomize);
+    generateLinks(should_randomize);
 }
 
 /**
@@ -60,22 +58,22 @@ void Sudoku::calculateConstraintColumns(int columns[eConstraintTypes], int row, 
     columns[eConstraintBox] = (eBoardSize * 3) + (box_idx * eSize) + num;
 }
 
-static void generateLinks(DancingLinkTable *table, bool should_randomize) {
+void Sudoku::DancingLinkTable::generateLinks(bool should_randomize) {
     {
         DancingLinkColumn *current, *next;
 
         // Creating initial link
         // current->colHeader = current;
 
-        table->root->up = table->root.get();
-        table->root->down = table->root.get();
-        table->root->count = 0;
+        root->up = root.get();
+        root->down = root.get();
+        root->count = 0;
 
         // linking colummn headers
-        current = (DancingLinkColumn *)table->root.get();
+        current = (DancingLinkColumn *)root.get();
         //for (auto &i : table->colHeaders) {
         for (auto i = 0; i < Sudoku::eConstraints; i++) {
-            next = &table->colHeaders.get()[i];
+            next = &colHeaders.get()[i];
             current->right = next;
             next->left = current;
             current = next;
@@ -86,8 +84,8 @@ static void generateLinks(DancingLinkTable *table, bool should_randomize) {
             current->isCoverd = false;
         }
         // closing the loop
-        current->right = table->root.get();
-        table->root->left = current;
+        current->right = root.get();
+        root->left = current;
     }
 
     int buffer_idx = 0;
@@ -98,24 +96,24 @@ static void generateLinks(DancingLinkTable *table, bool should_randomize) {
             for (auto num = 0; num < eSize; num++) {
                 int constraints[eConstraintTypes];
                 calculateConstraintColumns(constraints, row, col, num);
-                current = &table->buffer[buffer_idx + 3];
+                current = &buffer[buffer_idx + 3];
                 int constraintType = 0;
                 for (auto &constraint : constraints) {
-                    DancingLink *rowToAddTo = &table->colHeaders[constraint];
-                    table->colHeaders[constraint].constraintType = (constraintColTypes)constraintType++;
+                    DancingLink *rowToAddTo = &colHeaders[constraint];
+                    colHeaders[constraint].constraintType = (constraintColTypes)constraintType++;
 
                     // Randomize for creating puzzles
-                    if (should_randomize && table->colHeaders[constraint].count != 0) {
+                    if (should_randomize && colHeaders[constraint].count != 0) {
                         std::random_device rd;
                         std::mt19937 gen(rd());
-                        std::uniform_int_distribution<> distrib(0, table->colHeaders[constraint].count);
+                        std::uniform_int_distribution<> distrib(0, colHeaders[constraint].count);
                         auto offset = distrib(gen);
                         for (auto i = 0; i < offset; i++) {
                             rowToAddTo = rowToAddTo->up;
                         }
                     }
 
-                    next = &table->buffer[buffer_idx];
+                    next = &buffer[buffer_idx];
                     current->right = next;
                     next->left = current;
 
@@ -127,8 +125,8 @@ static void generateLinks(DancingLinkTable *table, bool should_randomize) {
 
                     current->count = (row * eBoardSize) + (col * eSize) + num;
 
-                    current->colHeader = &table->colHeaders[constraint];
-                    table->colHeaders[constraint].count++;
+                    current->colHeader = &colHeaders[constraint];
+                    colHeaders[constraint].count++;
                     buffer_idx++;
                 }
             }

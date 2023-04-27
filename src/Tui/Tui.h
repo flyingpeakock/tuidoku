@@ -49,7 +49,7 @@ namespace Tui {
         int row;
         int col;
         char selected;
-        Sudoku::logic::Move move;
+        std::vector<Sudoku::logic::Move> moves;
 
         bool showNextMove;
 

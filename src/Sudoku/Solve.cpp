@@ -4,13 +4,6 @@
 
 static bool backTrack(Sudoku::DancingLinkTable *table, Sudoku::DancingLink **current_solution, unsigned int depth, unsigned int *solution_count, bool randomize);
 
-/**
- * @brief find the column with the fewest amount of rows
- * 
- * @return ColHeader 
- */
-static Sudoku::DancingLinkColumn *smallestColumn(Sudoku::DancingLink *root, bool randomize);
-
 bool Sudoku::solve(DancingLinkTable *table, bool randomize) {
     unsigned int solution_count = 0;
     DancingLink *solution[eBoardSize];
@@ -55,45 +48,4 @@ static bool backTrack(Sudoku::DancingLinkTable *table, Sudoku::DancingLink **cur
     }
     col->uncover();
     return should_ret;
-}
-
-/**
- * @brief finds the smallest column
- * 
- * @param root 
- * @return DancingLink* to the smallest column
- */
-static Sudoku::DancingLinkColumn *smallestColumn(Sudoku::DancingLink *root, bool randomize) {
-    Sudoku::DancingLinkColumn *current;
-    Sudoku::DancingLinkColumn *ret;
-    int min = 0xFFFF;
-    if (!randomize) {
-        for (current = (Sudoku::DancingLinkColumn *)root->right; (Sudoku::DancingLink *)current != root; current = (Sudoku::DancingLinkColumn*)current->right) {
-            if (current->count < min) {
-                min = current->count;
-                ret = current;
-                if (min == 0) return current;
-            }
-        }
-    }
-    else {
-        std::vector<Sudoku::DancingLinkColumn *> potentialColumns;
-        for (current = (Sudoku::DancingLinkColumn *)root->right; (Sudoku::DancingLink *)current != root; current = (Sudoku::DancingLinkColumn *)current->right) {
-            if (current->count < min) {
-                potentialColumns.clear();
-                potentialColumns.push_back(current);
-                min = current->count;
-                if (min == 0) return current;
-            }
-            else if (current->count == min) {
-                potentialColumns.push_back(current);
-            }
-        }
-        if (potentialColumns.size() == 1) return potentialColumns[0];
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> distrib(0, potentialColumns.size() - 1);
-        ret = potentialColumns[distrib(gen)];
-    }
-    return ret;
 }

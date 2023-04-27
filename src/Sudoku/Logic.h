@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Sudoku.h"
+#include <array>
 
 namespace Sudoku {
     namespace logic {
@@ -38,29 +39,34 @@ namespace Sudoku {
             std::vector<DancingLink *> falses;
         };
 
+        /**
+         * @brief Generates an array of vectors with the same number of link per column
+         *
+         * @param root root of the constraint table
+         * @return std::array<std::vector<Sudoku::DancingLink *>, Sudoku::eSize> 
+         */
+        std::array<std::vector<Sudoku::DancingLink *>, Sudoku::eSize> getSortedConstraintColumns(DancingLink *root);
+
         // Mistakes
-        bool foundIllogicalInput(const SudokuPuzzle &puzzle, Move &move);
-        bool foundIllogicalPencil(const SudokuPuzzle &puzzle, Move &move);
-        bool foundWrongRemovedPencil(const SudokuPuzzle &puzzle, Move &move);
-        bool foundMissingPencilMark(const SudokuPuzzle &puzzle, Move &move);
-        bool foundWrongInput(const SudokuPuzzle &puzzle, Move &move);
+        bool foundIllogicalInput(const SudokuPuzzle &puzzle, std::vector<Move> &moves);
+        bool foundIllogicalPencil(const SudokuPuzzle &puzzle, std::vector<Move> &moves);
+        bool foundWrongRemovedPencil(const SudokuPuzzle &puzzle, std::vector<Move> &moves);
+        bool foundMissingPencilMark(const SudokuPuzzle &puzzle, std::vector<Move> &moves);
+        bool foundWrongInput(const SudokuPuzzle &puzzle, std::vector<Move> &moves);
 
         // Beginner
-        bool foundSingle(DancingLink *root, Move &move);
+        bool foundSingle(const std::vector<DancingLink *> &columns, std::vector<Move> &moves);
 
         // Basic moves
         /**
-         * @brief Looks for doubles, triples, and quads depending on candidates
+         * @brief Looks for locked candidates in the board
          * 
-         * difficulty of the move is equal to num_of_candidates. If the move is naked the difficulty is stepped down one
-         * 
-         * @param root root of the constraint table
-         * @param num_of_candidates number of canditates, eg. 2=double
-         * @param move move found
+         * @param columns columns that are potential truths
+         * @param moves vector to add to if found
          * @return true if a move is found
-         * @return false if no move is found
+         * @return false if a move is not found
          */
-        bool foundBasicMove(DancingLink *root, int num_of_candidates, Move &move);
+        bool foundLockedCandidates(const std::vector<DancingLink *> &columns, std::vector<Move> &moves);
 
         /**
          * @brief Searches for any mistakes in the board
@@ -70,7 +76,7 @@ namespace Sudoku {
          * @return true if a mistake is found
          * @return false if no mistkes are found
          */
-        bool foundMistake(const SudokuPuzzle &puzzle, Move &move);
+        std::vector<Move> foundMistake(const SudokuPuzzle &puzzle);
 
         /**
          * @brief Get the Next Move found in puzzle
@@ -79,6 +85,6 @@ namespace Sudoku {
          * @param foundMove gets set true if a move if found, otherwise sets to false
          * @return Move move object
          */
-        Move getNextMove(const SudokuPuzzle &puzzle, bool &foundMove);
+        std::vector<Move> getNextMove(const SudokuPuzzle &puzzle, bool ignoreMistakes);
     }
 }
