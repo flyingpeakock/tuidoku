@@ -514,10 +514,6 @@ static void drawNextMove(Canvas &c, const Sudoku::logic::LogicalMove &move) {
         pixel.background_color = Color::Red3;
     };
 
-    for (auto link : move.truths) {
-        drawPencil(c, link, style_truth);
-    }
-
     for (auto link : move.falses) {
         if (move.type == Sudoku::logic::eLogicErrorInsert) {
             drawFilledCell(c, link, style_false_filled);
@@ -525,5 +521,9 @@ static void drawNextMove(Canvas &c, const Sudoku::logic::LogicalMove &move) {
         else {
             drawPencil(c, link, style_false);
         }
+    }
+
+    for (auto link : move.truths) {
+        drawPencil(c, link, style_truth);
     }
 }

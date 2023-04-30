@@ -75,6 +75,15 @@ namespace Sudoku {
          */
         bool foundLockedCandidates(const DancingLinkContainer &columns, std::vector<LogicalMove> &moves);
 
+        /**
+         * @brief find hidden piars, naked pairs and x-wings
+         * 
+         * @param columns columns containing two candidates
+         * @param moves moves vector to add to
+         * @return true if any moves were found
+         * @return false if no moves were found
+         */
+        bool foundPairs(const std::shared_ptr<Sudoku::DancingLinkColumn[]> &colHeaders, const DancingLinkContainer &columns, std::vector<LogicalMove> &moves);
 
         /**
          * @brief Searches for any mistakes in the board

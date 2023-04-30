@@ -101,7 +101,7 @@ namespace Sudoku {
      * @param end iterator end
      * @return DancingLinkContainer::iterator equivalent if found, else end
      */
-    inline DancingLinkContainer::iterator containsLinkEquivalent(int row, int col, DancingLinkContainer::iterator start, DancingLinkContainer::iterator end) {
+    inline DancingLinkContainer::const_iterator containsLinkEquivalent(int row, int col, DancingLinkContainer::const_iterator start, DancingLinkContainer::const_iterator end) {
         int cur_row, cur_col;
         for (auto i = start; i < end; i++) {
             cur_row = getRowFromLink(*i);
@@ -113,7 +113,11 @@ namespace Sudoku {
         return end;
     }
 
-    inline DancingLinkContainer::iterator containsLinkEqual(int row, int col, int num, DancingLinkContainer::iterator start, DancingLinkContainer::iterator end) {
+    inline DancingLinkContainer::const_iterator containsLinkEquivalent(DancingLink *link, DancingLinkContainer::const_iterator start, DancingLinkContainer::const_iterator end) {
+        return containsLinkEquivalent(getRowFromLink(link), getColFromLink(link), start, end);
+    }
+
+    inline DancingLinkContainer::const_iterator containsLinkEqual(int row, int col, int num, DancingLinkContainer::const_iterator start, DancingLinkContainer::const_iterator end) {
         int cur_row, cur_col, cur_num;
         for (auto i = start; i < end; i++) {
             cur_row = getRowFromLink(*i);
@@ -126,7 +130,7 @@ namespace Sudoku {
         return end;
     }
 
-    inline DancingLinkContainer::iterator containsLinkEqual(DancingLink *link, DancingLinkContainer::iterator start, DancingLinkContainer::iterator end) {
+    inline DancingLinkContainer::const_iterator containsLinkEqual(DancingLink *link, DancingLinkContainer::const_iterator start, DancingLinkContainer::const_iterator end) {
         for (auto i = start; i < end; i++) {
             if ((*i)->count == link->count) {
                 return i;

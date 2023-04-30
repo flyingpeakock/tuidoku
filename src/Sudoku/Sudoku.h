@@ -39,6 +39,8 @@ namespace Sudoku {
      */
     DancingLinkTable generate(difficulty diff);
 
+    DancingLinkTable generate(std::string string);
+
     DancingLinkTable generate();
 
     enum moveType {

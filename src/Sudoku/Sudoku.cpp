@@ -134,6 +134,7 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
     found = Sudoku::containsLinkEqual(row, col, num - '1', removed_marks.begin(), removed_marks.end());
     if (found != removed_marks.end()) {
         uncoverInVector(moves, *found);
+        removed_marks.erase(found);
     }
 
     // Add chosen link to current and cover

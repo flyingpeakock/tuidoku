@@ -42,6 +42,49 @@ Sudoku::DancingLinkTable Sudoku::generate(Sudoku::difficulty diff) {
     return table;
 }
 
+Sudoku::DancingLinkTable Sudoku::generate(std::string string) {
+    if (string.size() != eBoardSize) {
+        throw std::invalid_argument("Received wrong amount of characters for a sudoku puzzle");
+    }
+    int row = 0;
+    int col = 0;
+    DancingLinkTable ret(false);
+    for (auto c : string) {
+        if (c > '9' || c < '0') {
+            throw std::invalid_argument("Received wrong digit for a sudoku puzzle");
+        }
+        int num = c - '1';
+        if (num >= 0) {
+            int count = (row * Sudoku::eBoardSize) + (col * Sudoku::eSize) + num;
+            int constraints[Sudoku::eConstraintTypes];
+            calculateConstraintColumns(constraints, row, col, num);
+            auto colHeader = &ret.colHeaders[constraints[0]];
+            for (auto row = colHeader->down; row != colHeader; row = row->down) {
+                if (row->count == count) {
+                    ret.current.push_back(row);
+                    break;
+                }
+            }
+        }
+        col++;
+        if (col == 9) {
+            row++;
+            col = 0;
+        }
+    }
+
+    // need to re-cover the links that are in current
+    for (auto &link : ret.current) {
+        link->colHeader->cover();
+        cover_link(link);
+    }
+
+    if (!Sudoku::solve(ret, false)) {
+        throw std::invalid_argument("Not a valid sudoku puzzle");
+    }
+    return ret;
+}
+
 Sudoku::DancingLinkTable Sudoku::generate(){
     //return Sudoku::generate(eAny);
     bool solve_result = true;
@@ -54,9 +97,11 @@ Sudoku::DancingLinkTable Sudoku::generate(){
     solution = ret.solution;
 
     // Shuffle to get a more difficult puzzle
+    /*
     std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(ret.current.begin(), ret.current.end(), g);
+    */
 
     for (auto i = 0; i < eBoardSize; i++) {
         // Storing and removing last
