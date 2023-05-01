@@ -307,6 +307,29 @@ static bool foundLinks(Sudoku::DancingLinkContainer &candidates,
     return false;
 }
 
+Sudoku::DancingLinkContainer getAllSeen(Sudoku::DancingLinkColumn *column) {
+    Sudoku::DancingLinkContainer ret;
+    for (auto row = column->down; row != column; row = row->down) {
+        for (auto col = row->right; col != row; col = col->right) {
+            if (col->colHeader->count <= column->count)
+                ret.push_back(col->colHeader);
+            for (auto new_row = col->down; new_row != col; new_row = new_row->down) {
+                if (new_row == new_row->colHeader) continue;
+                for (auto new_col = new_row->right; new_col != new_row; new_col = new_col->right) {
+                    if (new_col->colHeader->count <= column->count)
+                        ret.push_back(new_col->colHeader);
+                }
+            }
+        }
+    }
+    if (ret.size() > 1) {
+        std::sort(ret.begin(), ret.end());
+        auto last = std::unique(ret.begin(), ret.end());
+        ret.erase(last, ret.end());
+    }
+    return ret;
+}
+
 bool Sudoku::logic::foundPairs(const std::shared_ptr<Sudoku::DancingLinkColumn[]> &colHeaders, const DancingLinkContainer &columns, std::vector<LogicalMove> &moves) {
     bool ret = false;
     if (columns.size() == 0) return ret;
@@ -330,7 +353,8 @@ bool Sudoku::logic::foundPairs(const std::shared_ptr<Sudoku::DancingLinkColumn[]
             std::sort(intersect.begin(), intersect.end());
         }
 
-        if (!foundLinks(candidates, intersections, col_itr + 1, end + 1, 1, count)) continue;
+        auto seen_columns = getAllSeen(column->colHeader);
+        if (!foundLinks(candidates, intersections, seen_columns.begin(), seen_columns.end() - (count - 2), 1, count)) continue;
 
         LogicalMove move;
         move.type = eLogicPencil;
