@@ -298,7 +298,7 @@ static bool foundLinks(Sudoku::DancingLinkContainer &candidates,
             intersections = new_intersections;
             return true;
         }
-        else if (foundLinks(candidates, new_intersections, col_itr + 1, end + 1, depth++, count)) {
+        else if (foundLinks(candidates, new_intersections, col_itr + 1, end + 1, depth + 1, count)) {
             intersections = new_intersections;
             return true;
         }
