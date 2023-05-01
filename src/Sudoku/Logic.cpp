@@ -273,20 +273,17 @@ static bool foundLinks(Sudoku::DancingLinkContainer &candidates,
         std::vector<Sudoku::DancingLinkContainer> new_intersections;
         for (auto i = seen.begin(); i < seen.end(); i++) {
             Sudoku::DancingLinkContainer new_intersections_inner = *i;
-            for (auto j = copy.begin(), j_end = copy.end(); j < j_end; ) {
+            for (auto j = copy.begin(); j < copy.end(); j++) {
                 Sudoku::DancingLinkContainer temp; // An intersection between a row in this column and in previous column
                 std::set_intersection(std::begin(new_intersections_inner),
                                       std::end(new_intersections_inner),
                                       std::begin(*j),
                                       std::end(*j),
                                       std::back_inserter(temp));
-                if (temp.size() == 0) {
-                    j++;
-                }
-                else {
-                    j = copy.erase(j);
-                    j_end = copy.end();
+                if (temp.size() != 0) {
+                    copy.erase(j);
                     new_intersections_inner = temp;
+                    break;
                 }
             }
             if (new_intersections_inner.size() == 0) {
