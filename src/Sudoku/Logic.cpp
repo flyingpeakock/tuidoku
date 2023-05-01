@@ -307,21 +307,22 @@ static bool foundLinks(Sudoku::DancingLinkContainer &candidates,
     return false;
 }
 
-Sudoku::DancingLinkContainer getAllSeen(Sudoku::DancingLinkColumn *column) {
-    Sudoku::DancingLinkContainer ret;
+void getAllSeenHelper(Sudoku::DancingLinkContainer &vec, Sudoku::DancingLinkColumn *column, int count, int depth) {
     for (auto row = column->down; row != column; row = row->down) {
         for (auto col = row->right; col != row; col = col->right) {
-            if (col->colHeader->count <= column->count)
-                ret.push_back(col->colHeader);
-            for (auto new_row = col->down; new_row != col; new_row = new_row->down) {
-                if (new_row == new_row->colHeader) continue;
-                for (auto new_col = new_row->right; new_col != new_row; new_col = new_col->right) {
-                    if (new_col->colHeader->count <= column->count)
-                        ret.push_back(new_col->colHeader);
-                }
+            if (col->colHeader->count <= count) {
+                vec.push_back(col->colHeader);
+            }
+            if (depth < count) {
+                getAllSeenHelper(vec, col->colHeader, count, depth + 1);
             }
         }
     }
+}
+
+Sudoku::DancingLinkContainer getAllSeen(Sudoku::DancingLinkColumn *column, int count) {
+    Sudoku::DancingLinkContainer ret;
+    getAllSeenHelper(ret, column, count, 1);
     if (ret.size() > 1) {
         std::sort(ret.begin(), ret.end());
         auto last = std::unique(ret.begin(), ret.end());
@@ -353,7 +354,7 @@ bool Sudoku::logic::foundPairs(const std::shared_ptr<Sudoku::DancingLinkColumn[]
             std::sort(intersect.begin(), intersect.end());
         }
 
-        auto seen_columns = getAllSeen(column->colHeader);
+        auto seen_columns = getAllSeen(column->colHeader, count);
         if (!foundLinks(candidates, intersections, seen_columns.begin(), seen_columns.end() - (count - 2), 1, count)) continue;
 
         LogicalMove move;
