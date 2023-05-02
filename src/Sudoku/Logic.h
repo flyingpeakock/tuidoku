@@ -39,14 +39,6 @@ namespace Sudoku {
             DancingLinkContainer falses;
         };
 
-        /**
-         * @brief Generates an array of vectors with the same number of link per column
-         *
-         * @param root root of the constraint table
-         * @return std::array<Sudoku::DancingLinkContainer, Sudoku::eSize> 
-         */
-        std::array<Sudoku::DancingLinkContainer, Sudoku::eSize> getSortedConstraintColumns(DancingLink *root);
-
         // Mistakes
         bool foundIllogicalInput(const SudokuPuzzle &puzzle, std::vector<LogicalMove> &moves);
         bool foundIllogicalPencil(const SudokuPuzzle &puzzle, std::vector<LogicalMove> &moves);
@@ -63,7 +55,7 @@ namespace Sudoku {
          * @return true if found something
          * @return false false if no moves found
          */
-        bool foundSingle(const DancingLinkContainer &columns, std::vector<LogicalMove> &moves);
+        bool foundSingle(const DancingLink* column, std::vector<LogicalMove> &moves);
 
         /**
          * @brief Looks for locked candidates in the board
@@ -73,7 +65,7 @@ namespace Sudoku {
          * @return true if a move is found
          * @return false if a move is not found
          */
-        bool foundLockedCandidates(const DancingLinkContainer &columns, std::vector<LogicalMove> &moves);
+        bool foundLockedCandidates(const DancingLink *column, const DancingLinkContainer &candidates, const DancingLinkContainer &links, std::vector<LogicalMove> &moves);
 
         /**
          * @brief find hidden piars, naked pairs and x-wings
@@ -83,7 +75,7 @@ namespace Sudoku {
          * @return true if any moves were found
          * @return false if no moves were found
          */
-        bool foundPairs(const std::shared_ptr<Sudoku::DancingLinkColumn[]> &colHeaders, const DancingLinkContainer &columns, std::vector<LogicalMove> &moves);
+        bool xlogic(const DancingLink *column, std::vector<LogicalMove> &moves);
 
         /**
          * @brief Searches for any mistakes in the board
