@@ -1,6 +1,5 @@
 #include "Sudoku.h"
 #include "Logic.h"
-#include <vector>
 #include <cstring>
 #include <algorithm>
 #include <random>
@@ -225,7 +224,7 @@ static bool makeMove(const Sudoku::logic::LogicalMove &move, std::vector<Sudoku:
             for (auto *f : move.falses) {
                 Sudoku::cover_row(f);
                 ret = true;
-                moveHistory.emplace_back(Sudoku::eCoverRow, f);
+                moveHistory.emplace_back(Sudoku::Move::eCoverRow, f);
             }
             break;
 
@@ -234,7 +233,7 @@ static bool makeMove(const Sudoku::logic::LogicalMove &move, std::vector<Sudoku:
                 t->colHeader->cover();
                 Sudoku::cover_link(t);
                 ret = true;
-                moveHistory.emplace_back(Sudoku::eCoverFull, t);
+                moveHistory.emplace_back(Sudoku::Move::eCoverFull, t);
             }
             break;
 
@@ -246,11 +245,11 @@ static bool makeMove(const Sudoku::logic::LogicalMove &move, std::vector<Sudoku:
 
 static void unmakeMove(const Sudoku::Move &move) {
     switch (move.type) {
-        case Sudoku::eCoverRow:
+        case Sudoku::Move::eCoverRow:
             Sudoku::uncover_row(move.link);
             break;
         
-        case Sudoku::eCoverFull:
+        case Sudoku::Move::eCoverFull:
             Sudoku::uncover_link(move.link);
             move.link->colHeader->uncover();
             break;

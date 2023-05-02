@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TUI_H
+#define TUI_H
 
 #include <ftxui/screen/screen.hpp>
 #include <ftxui/dom/canvas.hpp>
@@ -49,9 +50,6 @@ namespace Tui {
         int row;
         int col;
         char selected;
-        Sudoku::logic::LogicalMove move;
-
-        bool showNextMove;
 
         public:
         /** constructor with constraintTable representing puzzle*/
@@ -61,3 +59,5 @@ namespace Tui {
         void playLoop();
     };
 }
+
+#endif // TUI_H

@@ -1,25 +1,13 @@
-#pragma once
+#ifndef SUDOKU_H
+#define SUDOKU_H
+
 #include "Constants.h"
 #include "DancingLink.h"
+#include "SudokuPuzzle.h"
+#include "Logic.h"
 #include <random>
 
 namespace Sudoku {
-
-    /**
-     * @brief enums of board difficulties
-     * 
-     */
-    enum difficulty {
-        eBeginner,
-        eEasy,
-        eMedium,
-        eHard,
-        eExpert,
-        ePro,
-        eDifficulties,
-        eHighestDifficulty = ePro,
-        eAny
-    };
 
     /**
      * @brief solves a sudoku puzzle
@@ -44,32 +32,6 @@ namespace Sudoku {
 
     DancingLinkTable generate();
 
-    enum moveType {
-        eCoverFull,
-        eCoverRow
-    };
-
-    struct Move {
-        moveType type;
-        DancingLink *link;
-    };
-
-    struct SudokuPuzzle {
-        SudokuPuzzle(Sudoku::DancingLinkTable &table);
-        Sudoku::DancingLinkTable constraintTable;
-        int current_start_index;
-        Sudoku::DancingLinkContainer wrong_inputs;
-        Sudoku::DancingLinkContainer pencilMarks;   // contains visible marks
-        Sudoku::DancingLinkContainer wrong_marks;   // contains visible marks that are wrong
-        Sudoku::DancingLinkContainer removed_marks; // contains marks that have been visible but no longer are
-        std::vector<Move> moves;
-
-        void insert(int row, int col, char num);
-        void pencil(int row, int col, char num);
-        void autoPencil();
-
-        void recheckMistakes(Sudoku::DancingLink *link);
-    };
 
     /**
     * @brief Removed a link from the SudokuPuzzle type
@@ -81,7 +43,6 @@ namespace Sudoku {
     void removeFromPuzzle(SudokuPuzzle *puzzle, int row, int col);
 
     bool canSee(DancingLink *link_l, DancingLink *link_r);
-
 
     /**
     * @brief find the column with the fewest amount of rows
@@ -122,3 +83,5 @@ namespace Sudoku {
         return ret;
     }
 };
+
+#endif // SUDOKU_H

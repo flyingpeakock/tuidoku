@@ -1,6 +1,5 @@
 #include "Sudoku.h"
 #include <random>
-#include <vector>
 
 static bool backTrack(Sudoku::DancingLinkTable &table, Sudoku::DancingLink **current_solution, unsigned int depth, unsigned int *solution_count, bool randomize);
 

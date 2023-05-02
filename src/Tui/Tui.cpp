@@ -46,8 +46,7 @@ static void drawAllPencils(Canvas &c,
                            const char selected,
                            const Sudoku::DancingLinkContainer &pencils,
                            const Sudoku::DancingLinkContainer &pencilError,
-                           const Sudoku::DancingLinkContainer &wrong_inputs,
-                           bool showNextMove);
+                           const Sudoku::DancingLinkContainer &wrong_inputs);
 
 /**
  * @brief Draws all the visiable inputs
@@ -62,8 +61,7 @@ static void drawAllFilled(Canvas &c,
                           const char selected,
                           const Sudoku::DancingLinkContainer &inputs,
                           const Sudoku::DancingLinkContainer &errors,
-                          const int current_start_index,
-                          bool showNextMove);
+                          const int current_start_index);
 
 /**
  * @brief Print the next move on the board
@@ -116,7 +114,6 @@ Tui::Board::Board(Sudoku::DancingLinkTable &table) :
     c(146, 148),
     state(eInsert),
     selected(0),
-    showNextMove(false),
 
     renderer(Renderer([&] {
         if (!isPlaying(puzzle.constraintTable.root.get())) {
@@ -125,10 +122,10 @@ Tui::Board::Board(Sudoku::DancingLinkTable &table) :
         }
 
         drawPuzzleTable(c);
-        drawAllPencils(c, selected, puzzle.pencilMarks, puzzle.wrong_marks, puzzle.wrong_inputs, showNextMove);
-        drawAllFilled(c, selected, puzzle.constraintTable.current, puzzle.wrong_inputs, puzzle.current_start_index, showNextMove);
-        if (showNextMove) {
-            drawNextMove(c, move);
+        drawAllPencils(c, selected, puzzle.pencilMarks, puzzle.wrong_marks, puzzle.wrong_inputs);
+        drawAllFilled(c, selected, puzzle.constraintTable.current, puzzle.wrong_inputs, puzzle.current_start_index);
+        if (puzzle.nextMove.type != Sudoku::logic::eMoveNotFound) {
+            drawNextMove(c, puzzle.nextMove);
         }
         setCursor(screen, row, col, state == ePencil);
 
@@ -192,7 +189,6 @@ bool Tui::Board::parseMouse(Event event) {
     found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.pencilMarks.begin(), puzzle.pencilMarks.end());
     if (found != puzzle.pencilMarks.end() && Sudoku::isUncovered(*found)) {
         puzzle.insert(row, col, selected);
-        showNextMove = false;
         return true;
     }
     found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.wrong_marks.begin(), puzzle.wrong_marks.end());
@@ -203,7 +199,6 @@ bool Tui::Board::parseMouse(Event event) {
             }
         }
         puzzle.insert(row, col, selected);
-        showNextMove = false;
         return true;
     }
     return true;
@@ -245,15 +240,7 @@ bool Tui::Board::parseKeys(Event event) {
         key_pressed = true;
     }
     else if (event == Event::Character("H")) {
-        if (!showNextMove) {
-            move = Sudoku::logic::getNextMove(puzzle, false);
-            if (move.type != Sudoku::logic::eMoveNotFound) {
-                showNextMove = true;
-            }
-        }
-        else {
-            showNextMove = false;
-        }
+        puzzle.getNextMove();
     }
     else if ((state == eInsert) &&
         ((event == Event::Character(" "))
@@ -274,7 +261,6 @@ bool Tui::Board::parseKeys(Event event) {
             }
 
             selected = pressed;
-            showNextMove = false;
             key_pressed = true;
         }
     }
@@ -360,15 +346,14 @@ static void drawAllPencils(Canvas &c,
                            const char selected,
                            const Sudoku::DancingLinkContainer &pencils,
                            const Sudoku::DancingLinkContainer &pencilError,
-                           const Sudoku::DancingLinkContainer &wrong_inputs,
-                           bool showNextMove) {
+                           const Sudoku::DancingLinkContainer &wrong_inputs) {
                         
     
     const Canvas::Stylizer style_pencil = [&](Pixel &pixel) {
         pixel.dim = true;
         pixel.bold = false;
 
-        if (pixel.character[0] == selected && !showNextMove) {
+        if (pixel.character[0] == selected) {
             pixel.background_color = Color::BlueLight;
             pixel.foreground_color = Color::Black;
         }
@@ -416,14 +401,13 @@ static void drawAllFilled(Canvas &c,
                           const char selected,
                           const Sudoku::DancingLinkContainer &inputs,
                           const Sudoku::DancingLinkContainer &errors,
-                          const int current_start_index,
-                          bool showNextMove){
+                          const int current_start_index){
 
     const Canvas::Stylizer style_clues = [&](Pixel &pixel){
         pixel.underlined = true;
         pixel.bold = true;
 
-        if (pixel.character[0] == selected && !showNextMove) {
+        if (pixel.character[0] == selected) {
             pixel.background_color = Color::Cyan;
             pixel.foreground_color = Color::White;
         }
@@ -432,7 +416,7 @@ static void drawAllFilled(Canvas &c,
     const Canvas::Stylizer style_filled = [&](Pixel &pixel){
         pixel.bold = true;
 
-        if (pixel.character[0] == selected && !showNextMove) {
+        if (pixel.character[0] == selected) {
             pixel.background_color = Color::BlueLight;
             pixel.foreground_color = Color::White;
         }
@@ -515,6 +499,7 @@ static void drawNextMove(Canvas &c, const Sudoku::logic::LogicalMove &move) {
     };
 
     for (auto link : move.falses) {
+        if (!Sudoku::isUncovered(link)) continue;
         if (move.type == Sudoku::logic::eLogicErrorInsert) {
             drawFilledCell(c, link, style_false_filled);
         }
