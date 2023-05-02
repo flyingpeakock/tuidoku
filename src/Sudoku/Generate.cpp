@@ -184,25 +184,20 @@ static Sudoku::difficulty grade(Sudoku::DancingLinkTable &table, Sudoku::difficu
     std::vector<Sudoku::Move> moveHistory;
     Sudoku::DancingLinkContainer toBeAdded;
     while (table.root.get() != table.root->right) {
-        auto moves = Sudoku::logic::getNextMove(Sudoku::SudokuPuzzle(table), true);
-        if (moves.size() == 0) {
-            moves.push_back(forceMove(table));
+        auto move = Sudoku::logic::getNextMove(Sudoku::SudokuPuzzle(table), true);
+        if (move.type == Sudoku::logic::eMoveNotFound) {
+            move = forceMove(table);
         }
 
-        auto diff = moves[0].diff;
+        auto diff = move.diff;
         if (diff > highestDifficulty) {
             highestDifficulty = diff;
         }
         if (diff > requested_difficulty) {
-            toBeAdded.emplace_back(getTrueLink(table, moves[0])); // Changing the table, start again
+            toBeAdded.emplace_back(getTrueLink(table, move)); // Changing the table, start again
             break;
         }
-        for (auto &move : moves) {
-            if (move.diff > diff) { // Only make moves of the same difficulty
-                break;
-            }
-            makeMove(move, moveHistory);
-        }
+        makeMove(move, moveHistory);
     }
 
     // cleaning up table
@@ -228,22 +223,18 @@ static bool makeMove(const Sudoku::logic::LogicalMove &move, std::vector<Sudoku:
     switch (move.type) {
         case Sudoku::logic::eLogicPencil: // Remove all pencilmarks that are false
             for (auto *f : move.falses) {
-                if (Sudoku::isUncovered(f)) { // Don't cover if already covered by another move
-                    Sudoku::cover_row(f);
-                    ret = true;
-                    moveHistory.emplace_back(Sudoku::eCoverRow, f);
-                }
+                Sudoku::cover_row(f);
+                ret = true;
+                moveHistory.emplace_back(Sudoku::eCoverRow, f);
             }
             break;
 
         case Sudoku::logic::eLogicInsert: // Insert all cells found in true
             for (auto *t : move.truths) {
-                if (Sudoku::isUncovered(t)) {
-                    t->colHeader->cover();
-                    Sudoku::cover_link(t);
-                    ret = true;
-                    moveHistory.emplace_back(Sudoku::eCoverFull, t);
-                }
+                t->colHeader->cover();
+                Sudoku::cover_link(t);
+                ret = true;
+                moveHistory.emplace_back(Sudoku::eCoverFull, t);
             }
             break;
 

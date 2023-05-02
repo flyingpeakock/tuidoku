@@ -46,6 +46,7 @@ int main(int argc, char *argv[]) {
     //auto table = Sudoku::generate("240030001590010320000020004352146897400389512189572643020093100600051009900060030"); // triple
     //auto table = Sudoku::generate(Sudoku::eAny);
     //auto table = Sudoku::generate(Sudoku::eHard);
+    /*
     std::vector<std::string> tables = {
         "458000793693500214700493685005900006040035070300002450060100007004009060100050840",
         "240030001590010320000020004352146897400389512189572643020093100600051009900060030",
@@ -57,7 +58,8 @@ int main(int argc, char *argv[]) {
         Tui::Board board(table);
         board.playLoop();
     }
-    auto table = Sudoku::generate(Sudoku::eHard);
+    */
+    auto table = Sudoku::generate(Sudoku::eExpert);
     Tui::Board board(table);
     board.playLoop();
     return 0;

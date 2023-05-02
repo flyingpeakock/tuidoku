@@ -11,7 +11,8 @@ namespace Sudoku {
             eLogicInsert, // Found a cell that can be inserted into
             eLogicErrorPencil, // Found a pencilMark that was wrongly removed
             eLogicErrorInsert, // Found an inserted number that is wrong
-            eLogicErrorPencilMissing // Found a pencil mark that isn't visible
+            eLogicErrorPencilMissing, // Found a pencil mark that isn't visible
+            eMoveNotFound
         };
         
         /**
@@ -40,11 +41,11 @@ namespace Sudoku {
         };
 
         // Mistakes
-        bool foundIllogicalInput(const SudokuPuzzle &puzzle, std::vector<LogicalMove> &moves);
-        bool foundIllogicalPencil(const SudokuPuzzle &puzzle, std::vector<LogicalMove> &moves);
-        bool foundWrongRemovedPencil(const SudokuPuzzle &puzzle, std::vector<LogicalMove> &moves);
-        bool foundMissingPencilMark(const SudokuPuzzle &puzzle, std::vector<LogicalMove> &moves);
-        bool foundWrongInput(const SudokuPuzzle &puzzle, std::vector<LogicalMove> &moves);
+        bool foundIllogicalInput(const SudokuPuzzle &puzzle, LogicalMove &move);
+        bool foundIllogicalPencil(const SudokuPuzzle &puzzle, LogicalMove &move);
+        bool foundWrongRemovedPencil(const SudokuPuzzle &puzzle, LogicalMove &move);
+        bool foundMissingPencilMark(const SudokuPuzzle &puzzle, LogicalMove &move);
+        bool foundWrongInput(const SudokuPuzzle &puzzle, LogicalMove &move);
 
         /**
          * @brief Looks for singles in the puzzle
@@ -55,7 +56,7 @@ namespace Sudoku {
          * @return true if found something
          * @return false false if no moves found
          */
-        bool foundSingle(const DancingLink* column, std::vector<LogicalMove> &moves);
+        bool foundSingle(const DancingLink* column, LogicalMove &move);
 
         /**
          * @brief Looks for locked candidates in the board
@@ -65,7 +66,7 @@ namespace Sudoku {
          * @return true if a move is found
          * @return false if a move is not found
          */
-        bool foundLockedCandidates(const DancingLink *column, const DancingLinkContainer &candidates, const DancingLinkContainer &links, std::vector<LogicalMove> &moves);
+        bool foundLockedCandidates(const DancingLink *column, const DancingLinkContainer &candidates, const DancingLinkContainer &links, LogicalMove &move);
 
         /**
          * @brief find hidden piars, naked pairs and x-wings
@@ -75,7 +76,7 @@ namespace Sudoku {
          * @return true if any moves were found
          * @return false if no moves were found
          */
-        bool xlogic(const DancingLink *column, std::vector<LogicalMove> &moves);
+        bool xlogic(const DancingLink *column, LogicalMove &move);
 
         /**
          * @brief Searches for any mistakes in the board
@@ -85,7 +86,7 @@ namespace Sudoku {
          * @return true if a mistake is found
          * @return false if no mistkes are found
          */
-        std::vector<LogicalMove> foundMistake(const SudokuPuzzle &puzzle);
+        LogicalMove foundMistake(const SudokuPuzzle &puzzle);
 
         /**
          * @brief Get the Next Move found in puzzle
@@ -94,6 +95,6 @@ namespace Sudoku {
          * @param foundMove gets set true if a move if found, otherwise sets to false
          * @return Move move object
          */
-        std::vector<LogicalMove> getNextMove(const SudokuPuzzle &puzzle, bool ignoreMistakes);
+        LogicalMove getNextMove(const SudokuPuzzle &puzzle, bool ignoreMistakes);
     }
 }

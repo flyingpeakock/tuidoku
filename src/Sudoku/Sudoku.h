@@ -17,6 +17,7 @@ namespace Sudoku {
         eExpert,
         ePro,
         eDifficulties,
+        eHighestDifficulty = ePro,
         eAny
     };
 

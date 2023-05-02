@@ -128,7 +128,7 @@ Tui::Board::Board(Sudoku::DancingLinkTable &table) :
         drawAllPencils(c, selected, puzzle.pencilMarks, puzzle.wrong_marks, puzzle.wrong_inputs, showNextMove);
         drawAllFilled(c, selected, puzzle.constraintTable.current, puzzle.wrong_inputs, puzzle.current_start_index, showNextMove);
         if (showNextMove) {
-            drawNextMove(c, moves[0]);
+            drawNextMove(c, move);
         }
         setCursor(screen, row, col, state == ePencil);
 
@@ -246,8 +246,8 @@ bool Tui::Board::parseKeys(Event event) {
     }
     else if (event == Event::Character("H")) {
         if (!showNextMove) {
-            moves = Sudoku::logic::getNextMove(puzzle, false);
-            if (moves.size() != 0) {
+            move = Sudoku::logic::getNextMove(puzzle, false);
+            if (move.type != Sudoku::logic::eMoveNotFound) {
                 showNextMove = true;
             }
         }
