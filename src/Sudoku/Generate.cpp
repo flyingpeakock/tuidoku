@@ -57,7 +57,7 @@ Sudoku::DancingLinkTable Sudoku::generate(std::string string) {
             int count = (row * Sudoku::eBoardSize) + (col * Sudoku::eSize) + num;
             int constraints[Sudoku::eConstraintTypes];
             calculateConstraintColumns(constraints, row, col, num);
-            auto colHeader = &ret.colHeaders[constraints[0]];
+            DancingLinkColumn *colHeader = ret.colHeaders.get() + constraints[0];
             for (auto row = colHeader->down; row != colHeader; row = row->down) {
                 if (row->count == count) {
                     ret.current.push_back(row);
