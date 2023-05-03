@@ -162,10 +162,9 @@ TEST(dancing_links, each_col_has_9_count) {
 
 TEST(dancing_links, generate_doesnt_break_columns) {
     Sudoku::DancingLinkTable table = Sudoku::generate(Sudoku::eAny);
-    int i = 0;
     bool seen_root = false;
     Sudoku::DancingLink *current = table.root->right;
-    for (i; i < Sudoku::eConstraints; i++) {
+    for (auto i = 0; i < Sudoku::eConstraints; i++) {
         if (current == table.root.get()) {
             seen_root = true;
             break;

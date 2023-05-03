@@ -73,7 +73,7 @@ void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
     if (found != pencilMarks.end()) {
         Sudoku::cover_row(*found);
         removed_marks.push_back(*found);
-        moves.emplace_back(Move::eCoverRow, *found);
+        moves.push_back({Move::eCoverRow, *found});
         pencilMarks.erase(found);
         return;
     }
@@ -168,7 +168,7 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
                     link->colHeader->cover();
                     Sudoku::cover_link(link);
                     constraintTable.current.push_back(link);
-                    moves.emplace_back(Move::eCoverFull, link);
+                    moves.push_back({Move::eCoverFull, link});
                     recheckMistakes(link);
                     return;
                 }
@@ -223,7 +223,7 @@ void Sudoku::SudokuPuzzle::recheckMistakes(Sudoku::DancingLink *link) {
             Sudoku::cover_link(*i);
             // No longer wrong so add to current
             constraintTable.current.push_back(*i);
-            moves.emplace_back(Move::eCoverFull, *i);
+            moves.push_back({Move::eCoverFull, *i});
 
             i = wrong_inputs.erase(i);
             end = wrong_inputs.end();

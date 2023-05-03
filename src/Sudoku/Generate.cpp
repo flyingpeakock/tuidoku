@@ -1,4 +1,5 @@
 #include "Sudoku.h"
+#include "DancingLinkObjects.h"
 #include "Logic.h"
 #include <cstring>
 #include <algorithm>
@@ -224,7 +225,7 @@ static bool makeMove(const Sudoku::logic::LogicalMove &move, std::vector<Sudoku:
             for (auto *f : move.falses) {
                 Sudoku::cover_row(f);
                 ret = true;
-                moveHistory.emplace_back(Sudoku::Move::eCoverRow, f);
+                moveHistory.push_back({Sudoku::Move::eCoverRow, f});
             }
             break;
 
@@ -233,7 +234,7 @@ static bool makeMove(const Sudoku::logic::LogicalMove &move, std::vector<Sudoku:
                 t->colHeader->cover();
                 Sudoku::cover_link(t);
                 ret = true;
-                moveHistory.emplace_back(Sudoku::Move::eCoverFull, t);
+                moveHistory.push_back({Sudoku::Move::eCoverFull, t});
             }
             break;
 
