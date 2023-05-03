@@ -14,8 +14,9 @@ set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 # Fetch GoogleTest
 FetchContent_Declare(
     googletest
-    URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip
-    DOWNLOAD_EXTRACT_TIMESTAMP False
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG v1.13.0
+    OVERRIDE_FIND_PACKAGE
 )
 FetchContent_MakeAvailable(googletest)
 
@@ -58,15 +59,9 @@ set(TEST_SOURCES
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-find_package(libconfig REQUIRED)
-
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE Threads::Threads
     PRIVATE ftxui::screen
     PRIVATE ftxui::dom
     PRIVATE ftxui::component
@@ -77,17 +72,16 @@ enable_testing()
 add_executable(${UNIT_TESTS} ${TEST_SOURCES})
 add_compile_definitions(TEST_PUZZLES_ROOT_DIR=\"${PROJECT_SOURCE_DIR}/tests/puzzles/\")
 target_link_libraries(${UNIT_TESTS}
-    # PRIVATE Threads::Threads
     config++
     GTest::gtest_main
 )
 include(GoogleTest)
 gtest_discover_tests(${UNIT_TESTS})
 
-#add_custom_target(
-    #run_gtest ALL
-    #COMMENT "Running unit tests\n"
-    #DEPENDS ${UNIT_TESTS}
-    #COMMAND ${UNIT_TESTS}
-    #WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build/
-#)
+add_custom_target(
+    run_gtest ALL
+    COMMENT "Running unit tests\n"
+    DEPENDS ${UNIT_TESTS}
+    COMMAND ${UNIT_TESTS}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/build/
+)
