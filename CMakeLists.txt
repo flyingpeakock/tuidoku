@@ -18,6 +18,10 @@ FetchContent_Declare(
     GIT_TAG v1.13.0
     OVERRIDE_FIND_PACKAGE
 )
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+IF (WIN32)
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+ENDIF()
 FetchContent_MakeAvailable(googletest)
 
 # Fetch FTXUI
@@ -66,6 +70,12 @@ target_link_libraries(${PROJECT_NAME}
     config++
 )
 
+IF (NOT TARGET GTest::gtest)
+    add_library(GTest::gtest ALIAS gtest)
+    add_library(GTest::gtest_main ALIAS gtest_main)
+    add_library(GTest::gmock ALIAS gmock)
+    add_library(GTest::gmock_main ALIAS gmock_main)
+ENDIF()
 enable_testing()
 add_executable(${UNIT_TESTS} ${TEST_SOURCES})
 add_compile_definitions(TEST_PUZZLES_ROOT_DIR=\"${PROJECT_SOURCE_DIR}/tests/puzzles/\")

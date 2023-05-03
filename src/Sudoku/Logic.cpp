@@ -1,7 +1,6 @@
 #include "Logic.h"
 #include <algorithm>
-#include <unordered_set>
-#include <unordered_map>
+#include <iterator>
 
 /**
  * @brief vector containing all the methods used to find wrong moves
