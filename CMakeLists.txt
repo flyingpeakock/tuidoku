@@ -58,14 +58,7 @@ set(TEST_SOURCES
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-
 target_include_directories(${PROJECT_NAME} PRIVATE src)
-target_compile_options(
-    ${PROJECT_NAME} 
-    INTERFACE
-    -stdlib=libc++
-)
-
 target_link_libraries(${PROJECT_NAME}
     PRIVATE ftxui::screen
     PRIVATE ftxui::dom
