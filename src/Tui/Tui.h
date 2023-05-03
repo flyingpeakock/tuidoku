@@ -9,54 +9,45 @@
 #include "../Sudoku/Logic.h"
 
 namespace Tui {
-    class Board {
-        private:
+    enum stateEnum {
+        eInsert,
+        ePencil,
+        eMenu,
+        eExit,
+    };
 
-        enum stateEnum {
-            eInsert,
-            ePencil,
-        };
-        /** state of the board, pencil or insert */
-        stateEnum state;
+    struct PuzzleCanvas : public ftxui::Canvas {
+        PuzzleCanvas();
+        void DrawPuzzle(const Sudoku::SudokuPuzzle &puzzle);
 
-        /**
-         * @brief Parse the key pressed
-         *
-         * @param event ftxui::Event
-         * @return true if event was handled
-         * @return false if event was not handled
-         */
+        ftxui::Element getCanvas();
+        bool parseMouse(ftxui::Event event);
         bool parseKeys(ftxui::Event event);
 
-        /**
-         * @brief Parse the mouse key pressed
-         * 
-         * @param event ftxui::Event
-         * @return true if the event was handled
-         * @return false if the event was not handled
-         */
-        bool parseMouse(ftxui::Event event);
-
-        /** suboku puzzle object */
-        Sudoku::SudokuPuzzle puzzle;
-
-        /** ftxui objects*/
-        ftxui::ScreenInteractive screen;
-        ftxui::Canvas c;
-        ftxui::ComponentDecorator parseEvent;
-        ftxui::Component renderer;
-
-        /** puzzle state */
         int row;
         int col;
         char selected;
+        bool showNextMove;
+    };
 
+    class Tui {
         public:
-        /** constructor with constraintTable representing puzzle*/
-        Board(Sudoku::DancingLinkTable &constraintTable);
+        Tui();
+        void runLoop();
 
-        /** main loop*/
-        void playLoop();
+        private:
+        Sudoku::difficulty difficulty;
+        stateEnum state;
+        ftxui::ScreenInteractive screen;
+        PuzzleCanvas puzzleCanvas;
+
+        Sudoku::DancingLinkTable table;
+        Sudoku::SudokuPuzzle puzzle;
+
+        ftxui::ComponentDecorator parseInput;
+        void parseMenuChoice(int choice);
+
+        bool parseEvent(ftxui::Event event, Sudoku::SudokuPuzzle &puzzle);
     };
 }
 
