@@ -209,7 +209,7 @@ void Tui::Tui::runLoop() {
             e = vbox(separator(), e);
         }
         else if (state.active) {
-            e = e | bold | bgcolor(Color::Green);
+            e = e | bold | bgcolor(Color::DarkOrange);
         }
         return e;
     };
@@ -231,6 +231,43 @@ void Tui::Tui::runLoop() {
         return canvas(std::move(puzzleCanvas));
     });
 
+    /* Help text renderer */
+    auto help_renderer = Renderer([&]{
+        FlexboxConfig outer, inner;
+        return window(text("Tuidoku") | bold, vbox(
+            text("Tuidoku, Sudoku for the terminal") | bold,
+            separatorEmpty(),
+            text("Key binds") | bold,
+            separatorLight(),
+            hbox(text("0-9"), filler(), text("Insert or remove")),
+            hbox(text("h"), filler(), text("Move left")),
+            hbox(text("H"), filler(), text("Show hint")),
+            hbox(text("i"), filler(), text("Insert mode")),
+            hbox(text("j"), filler(), text("Move down")),
+            hbox(text("k"), filler(), text("Move up")),
+            hbox(text("l"), filler(), text("Move right")),
+            hbox(text("p"), filler(), text("Pencil mode")),
+            hbox(text("P"), filler(), text("Fill pencil marks")),
+            hbox(text("q"), filler(), text("Quit")),
+            hbox(text("?"), filler(), text("Show this page")),
+            separatorEmpty(),
+            text("Mouse") | bold,
+            separatorLight(),
+            hbox(text("Click"), filler(), text("Move to cell")),
+            hbox(text("Right-click"), filler(), text("Insert or pencil")),
+            separatorEmpty(),
+            text("Behaviour") | bold,
+            separatorLight(),
+            flexbox({
+                flexbox({text("Insert") | bold, filler(), paragraph(R"(Insert mode can be identified by the cursor being a block. If a number is selected and you have right-clicked on a cell with that number visible as a pencil-mark the number will be inserted.)"),}, inner),
+                flexbox({text("Pencil") | bold, filler(), paragraph(R"(Pencil mode can be identified by the cursor being a bar. If a number is selected and you have right-clicked on a cell with that number visible as a pencil-mark the pencil-mark will be removed, if it is not visible the pencil-mark will be added.)"),}, inner),
+                flexbox({text("Select") | bold, filler(), paragraph(R"(To select a number simply press the number key. To avoid changing the board unintentionally it is useful to insert on an underlined number or pencil on any filled cell.)"),}, inner),
+                flexbox({text("Mistakes") | bold, filler(), paragraph(R"(Pencil-marks or inputs that are illogical are shown, i.e. they already appear in that unit. Simply incorrect moves are not shown unless hints are visible)"),}, inner),
+                flexbox({text("Hints") | bold, filler(), paragraph(R"(The green cells in a hint make up a truth, one of them must be true. None of the red cells in a hint can be true because of the green cells)")}, inner),
+            }, outer)
+        ) | borderEmpty) | size(WIDTH, EQUAL, 74) | size(HEIGHT, EQUAL, 47);
+    });
+
     /* Parse input for everything */
     parseInput = CatchEvent([&](Event event){
         if (state == eMenu) {
@@ -239,7 +276,9 @@ void Tui::Tui::runLoop() {
                 puzzle.nextMove.type = Sudoku::logic::eMoveNotFound;
                 state = eExit;
             }
-            return false; // Use defualt menu keys
+            if (event != Event::Character('?')) {
+                return false; // Use defualt menu keys
+            }
         }
         if (table.root->right == table.root.get()) {
             state = eExit;
@@ -253,13 +292,16 @@ void Tui::Tui::runLoop() {
 
     /* Tab to choose which renderer to render */
     auto container = Container::Tab({
-        board_renderer, menu_renderer
+        board_renderer, menu_renderer, help_renderer
     }, &tab_drawn) | parseInput;
 
     /* Main renderer */
     auto renderer = Renderer(container, [&] {
         if (state == eMenu) {
             tab_drawn = 1;
+        }
+        else if (state == eHelp) {
+            tab_drawn = 2;
         }
         else {
             tab_drawn = 0;
@@ -317,6 +359,7 @@ void Tui::Tui::parseMenuChoice(int choice) {
 
 bool Tui::Tui::parseEvent(Event event, Sudoku::SudokuPuzzle &puzzle) {
     bool key_pressed = false;
+    static stateEnum previousState = eInsert;
     if (event.is_character()) {
         if (puzzleCanvas.parseKeys(event)) {
             key_pressed = true;
@@ -351,6 +394,16 @@ bool Tui::Tui::parseEvent(Event event, Sudoku::SudokuPuzzle &puzzle) {
             else {
                 puzzle.nextMove.type = Sudoku::logic::eMoveNotFound;
             }
+        }
+        else if (event == Event::Character("?")) {
+            if (state == eHelp) {
+                state = previousState;
+            }
+            else {
+                previousState = state;
+                state = eHelp;
+            }
+            key_pressed = true;
         }
         else if ((state == eInsert) &&
             ((event == Event::Character(" "))

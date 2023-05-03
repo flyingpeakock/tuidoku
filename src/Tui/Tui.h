@@ -14,6 +14,7 @@ namespace Tui {
         ePencil,
         eMenu,
         eExit,
+        eHelp,
     };
 
     struct PuzzleCanvas : public ftxui::Canvas {
