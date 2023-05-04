@@ -60,6 +60,13 @@ TEST(logic, xlogic) {
             {{4, 4, 7}, {2, 6, 7}},
             Sudoku::logic::eLogicPencil,
             Sudoku::eConstraintRow
+        },
+        {
+            "390001700005400001000027000907205160150070009246819537000160000400703610000000073", // Naked Conjugate
+            {{0, 3, 5}, {0, 3, 4}, {0, 4, 4}, {0, 4, 7}, {1, 5, 5}, {1, 5, 7}},
+            {{2, 3, 4}, {2, 3, 5}, {1, 4, 7}, {0, 7, 4}, {0, 8, 4}},
+            Sudoku::logic::eLogicPencil,
+            Sudoku::eConstraintCell
         }
     };
 
