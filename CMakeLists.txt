@@ -21,7 +21,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 IF (NOT googletest_POPULATED)
     FetchContent_Populate(googletest)
-    add_subdirectory(${GOOGLETEST_SOURCE_DIR} ${GOOGLETEST_BUILD_DIR})
+    add_subdirectory(${GOOGLETEST_SOURCE_DIR} ${GOOGLETEST_BUILD_DIR} EXCLUDE_FROM_ALL)
 ENDIF()
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 IF (WIN32)
@@ -37,10 +37,10 @@ FetchContent_Declare(
 )
 
 FetchContent_GetProperties(ftxui)
-if(NOT ftxui_POPULATED)
+IF(NOT ftxui_POPULATED)
     FetchContent_Populate(ftxui)
     add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+ENDIF()
 
 set(SOURCES
     src/main.cpp
@@ -54,8 +54,6 @@ set(SOURCES
 )
 
 set(TEST_SOURCES
-
-
     # Add files to be tested here
     src/Sudoku/Solve.cpp
     src/Sudoku/Generate.cpp
@@ -74,15 +72,14 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE ftxui::screen
     PRIVATE ftxui::dom
     PRIVATE ftxui::component
-    config++
 )
 
 enable_testing()
 add_executable(${UNIT_TESTS} ${TEST_SOURCES})
+set_target_properties(${UNIT_TESTS} PROPERTIES EXCLUDE_FROM_ALL True)
 add_compile_definitions(TEST_PUZZLES_ROOT_DIR=\"${PROJECT_SOURCE_DIR}/tests/puzzles/\")
 target_link_libraries(${UNIT_TESTS}
-    config++
-    gtest_main
+    GTest::gtest_main
 )
 include(GoogleTest)
 gtest_discover_tests(${UNIT_TESTS})
