@@ -44,7 +44,7 @@ set(SOURCES
     src/Sudoku/DancingLink.cpp
     src/Sudoku/Sudoku.cpp
     src/Sudoku/Logic.cpp
-    src/Config.cpp
+    #src/Config.cpp
     src/Tui/Tui.cpp
 )
 
@@ -55,7 +55,7 @@ set(TEST_SOURCES
     src/Sudoku/DancingLink.cpp
     src/Sudoku/Sudoku.cpp
     src/Sudoku/Logic.cpp
-    src/Config.cpp
+    #src/Config.cpp
 
     # Add unit tests here
     tests/dancing_links.cpp
