@@ -5,8 +5,8 @@
 #include <ftxui/dom/canvas.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/component/component.hpp>
-#include "../Sudoku/Sudoku.h"
-#include "../Sudoku/Logic.h"
+#include <Sudoku/Sudoku.h>
+#include <Sudoku/Logic.h>
 
 namespace Tui {
     enum stateEnum {
