@@ -12,23 +12,7 @@ include(FetchContent)
 set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 
 # Fetch GoogleTest
-FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest
-    GIT_TAG v1.13.0
-    OVERRIDE_FIND_PACKAGE
-)
-FetchContent_MakeAvailable(googletest)
-IF (NOT googletest_POPULATED)
-    Find_Package(GTest REQUIRED)
-    FetchContent_Populate(googletest)
-    add_subdirectory(${GOOGLETEST_SOURCE_DIR} ${GOOGLETEST_BUILD_DIR} EXCLUDE_FROM_ALL)
-ENDIF()
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-IF (WIN32)
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-ENDIF()
-FetchContent_GetProperties(googletest)
+Find_Package(GTest REQUIRED)
 
 # Fetch FTXUI
 FetchContent_Declare(
