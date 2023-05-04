@@ -37,8 +37,8 @@ void DancingLinkColumn::uncover() {
 
 Sudoku::DancingLinkTable::DancingLinkTable(bool should_randomize):
 root(std::make_shared<DancingLink>()),
-colHeaders(std::make_shared<DancingLinkColumn[]>(Sudoku::eConstraints)),
-buffer(std::make_shared<DancingLink[]>(Sudoku::eBufferSize)){
+colHeaders(std::make_shared<std::array<DancingLinkColumn,eConstraints>>()),
+buffer(std::make_shared<std::array<DancingLink, eBufferSize>>()){
     generateLinks(should_randomize);
 }
 
@@ -71,9 +71,10 @@ void Sudoku::DancingLinkTable::generateLinks(bool should_randomize) {
 
         // linking colummn headers
         current = (DancingLinkColumn *)root.get();
-        //for (auto &i : table->colHeaders) {
-        for (auto i = 0; i < Sudoku::eConstraints; i++) {
-            next = &colHeaders.get()[i];
+        for (auto &i : *(colHeaders.get())) {
+        //for (auto i = 0; i < Sudoku::eConstraints; i++) {
+            //next = &colHeaders.get()[i];
+            next = &i;
             current->right = next;
             next->left = current;
             current = next;
@@ -96,24 +97,24 @@ void Sudoku::DancingLinkTable::generateLinks(bool should_randomize) {
             for (auto num = 0; num < eSize; num++) {
                 int constraints[eConstraintTypes];
                 calculateConstraintColumns(constraints, row, col, num);
-                current = &buffer[buffer_idx + 3];
+                current = &(buffer->at(buffer_idx + 3));
                 int constraintType = 0;
                 for (auto &constraint : constraints) {
-                    DancingLink *rowToAddTo = &colHeaders[constraint];
-                    colHeaders[constraint].constraintType = (constraintColTypes)constraintType++;
+                    DancingLink *rowToAddTo = &(colHeaders.get()->at(constraint));
+                    colHeaders->at(constraint).constraintType = (constraintColTypes)constraintType++;
 
                     // Randomize for creating puzzles
-                    if (should_randomize && colHeaders[constraint].count != 0) {
+                    if (should_randomize && colHeaders->at(constraint).count != 0) {
                         std::random_device rd;
                         std::mt19937 gen(rd());
-                        std::uniform_int_distribution<> distrib(0, colHeaders[constraint].count);
+                        std::uniform_int_distribution<> distrib(0, colHeaders->at(constraint).count);
                         auto offset = distrib(gen);
                         for (auto i = 0; i < offset; i++) {
                             rowToAddTo = rowToAddTo->up;
                         }
                     }
 
-                    next = &buffer[buffer_idx];
+                    next = &buffer->at(buffer_idx);
                     current->right = next;
                     next->left = current;
 
@@ -125,8 +126,8 @@ void Sudoku::DancingLinkTable::generateLinks(bool should_randomize) {
 
                     current->count = (row * eBoardSize) + (col * eSize) + num;
 
-                    current->colHeader = &colHeaders[constraint];
-                    colHeaders[constraint].count++;
+                    current->colHeader = &colHeaders->at(constraint);
+                    colHeaders->at(constraint).count++;
                     buffer_idx++;
                 }
             }

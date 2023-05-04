@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include <array>
 
 namespace Sudoku {
 
@@ -13,6 +14,15 @@ namespace Sudoku {
         eConstraintBox,
         eConstraintTypes
     };
+
+    enum {
+        eSize = 9,
+        eBoxSize = 3,
+        eBoardSize = eSize * eSize,
+        eConstraints = eBoardSize * eConstraintTypes,
+        eBufferSize = eConstraints * eSize,
+    };
+
 
     /**
      * @brief Dancing link which is a quadruply linked list
@@ -46,8 +56,8 @@ namespace Sudoku {
         DancingLinkTable(bool should_randomize);
         void generateLinks(bool should_randomize);
         std::shared_ptr<DancingLink> root;
-        std::shared_ptr<DancingLinkColumn[]> colHeaders;
-        std::shared_ptr<DancingLink[]> buffer;
+        std::shared_ptr<std::array<DancingLinkColumn, eConstraints>> colHeaders;
+        std::shared_ptr<std::array<DancingLink, eBufferSize>> buffer;
         DancingLinkContainer current;
         DancingLinkContainer solution;
     };

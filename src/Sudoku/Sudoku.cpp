@@ -82,7 +82,7 @@ void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
     Sudoku::calculateConstraintColumns(constraints, row, col, num - '1');
     for (auto loop = 0; loop < 2; loop++) {
         for (const auto &i : constraints) {
-            auto colHeader = &constraintTable.colHeaders[i];
+            auto colHeader = &constraintTable.colHeaders->at(i);
             if ((Sudoku::isUncovered(colHeader)) || (loop > 0)) {
                 for (auto r = colHeader->down; r != colHeader; r = r->down) {
                     if (Sudoku::isLinkValues(r, row, col, num - '1')) {
@@ -162,8 +162,8 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
     int constraints[eConstraintTypes];
     Sudoku::calculateConstraintColumns(constraints, row, col, num - '1');
     for (auto i : constraints) {
-        if (Sudoku::isUncovered(&constraintTable.colHeaders[i])) {
-            for (auto link = constraintTable.colHeaders[i].down; link != &constraintTable.colHeaders[i]; link = link->down) {
+        if (Sudoku::isUncovered(&constraintTable.colHeaders->at(i))) {
+            for (auto link = constraintTable.colHeaders->at(i).down; link != &constraintTable.colHeaders->at(i); link = link->down) {
                 if (Sudoku::isLinkValues(link, row, col, num - '1')) {
                     link->colHeader->cover();
                     Sudoku::cover_link(link);
@@ -178,7 +178,7 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
 
     // Could not find uncovered, force one from buffer
     for (auto i = 0; i < Sudoku::eBufferSize; i += eConstraintTypes) {
-        auto current = &constraintTable.buffer[i];
+        auto current = &constraintTable.buffer->at(i);
         if (Sudoku::isLinkValues(current, row, col, num - '1')) {
             wrong_inputs.push_back(current);
             return;

@@ -234,10 +234,13 @@ void Tui::Tui::runLoop() {
     /* Help text renderer */
     auto help_renderer = Renderer([&]{
         FlexboxConfig outer, inner;
+        int width = 80;
+        int height = 57;
         return window(text("Tuidoku") | bold, vbox(
-            text("Tuidoku, Sudoku for the terminal") | bold,
+            text("Sudoku for the terminal") | bold,
             separatorEmpty(),
-            text("Key binds") | bold,
+            hbox(
+            vbox(text("Keys") | bold,
             separatorLight(),
             hbox(text("0-9"), filler(), text("Insert or remove")),
             hbox(text("h"), filler(), text("Move left")),
@@ -249,23 +252,24 @@ void Tui::Tui::runLoop() {
             hbox(text("p"), filler(), text("Pencil mode")),
             hbox(text("P"), filler(), text("Fill pencil marks")),
             hbox(text("q"), filler(), text("Quit")),
-            hbox(text("?"), filler(), text("Show this page")),
-            separatorEmpty(),
-            text("Mouse") | bold,
+            hbox(text("?"), filler(), text("Show this page"))) | size(WIDTH, EQUAL, (width / 3) + 5),
+            filler(),
+            vbox(text("Mouse") | bold,
             separatorLight(),
             hbox(text("Click"), filler(), text("Move to cell")),
-            hbox(text("Right-click"), filler(), text("Insert or pencil")),
+            hbox(text("Right-click"), filler(), text("Insert or pencil"))) | size(WIDTH, EQUAL, (width / 3) + 5)
+            ),
             separatorEmpty(),
             text("Behaviour") | bold,
             separatorLight(),
             flexbox({
-                flexbox({text("Insert") | bold, filler(), paragraph(R"(Insert mode can be identified by the cursor being a block. If a number is selected and you have right-clicked on a cell with that number visible as a pencil-mark the number will be inserted.)"),}, inner),
-                flexbox({text("Pencil") | bold, filler(), paragraph(R"(Pencil mode can be identified by the cursor being a bar. If a number is selected and you have right-clicked on a cell with that number visible as a pencil-mark the pencil-mark will be removed, if it is not visible the pencil-mark will be added.)"),}, inner),
-                flexbox({text("Select") | bold, filler(), paragraph(R"(To select a number simply press the number key. To avoid changing the board unintentionally it is useful to insert on an underlined number or pencil on any filled cell.)"),}, inner),
-                flexbox({text("Mistakes") | bold, filler(), paragraph(R"(Pencil-marks or inputs that are illogical are shown, i.e. they already appear in that unit. Simply incorrect moves are not shown unless hints are visible)"),}, inner),
-                flexbox({text("Hints") | bold, filler(), paragraph(R"(The green cells in a hint make up a truth, one of them must be true. None of the red cells in a hint can be true because of the green cells)")}, inner),
+                flexbox({text("Insert") | bold, filler(), paragraph(R"(When in insert mode the cursor should be block shaped. Pressing on a digit 0-9 in this mode inserts that digit in the cell if the cell is not a clue. Illogical inputs are highlighted, note that merely incorrect inputs will not be highlighted. Right-clicking on a cell when in input mode will insert the highlighted number into that cell if that number appears as a pencil-mark there.)"),}, inner),
+                flexbox({text("Pencil") | bold, filler(), paragraph(R"(When in pencil mode the cursor should be bar shaped. Pressing on a digit 1-9 in this mode will either mark or unmark that digit in the selected cell as long as that cell is empty. Illogical marks are highlighted, note that merely incorrect marks will not be highlighted. Right-clicking on an empty cell in this mode will either mark or unmark the highlighted number into that cell.)"),}, inner),
+                flexbox({text("Highlight") | bold, filler(), paragraph(R"(To select a number simply press the number key. To avoid changing the board unintentionally it is useful to insert on an underlined number or pencil on any filled cell. All occurences of that number will be highlighted.)"),}, inner),
+                flexbox({text("Mistakes") | bold, filler(), paragraph(R"(Pencil-marks or inputs that are illogical are shown. Illogical inputs or marks are inputs or marks that already appear in that row, column or box. Simply incorrect moves are not shown unless hints are visible.)"),}, inner),
+                flexbox({text("Hints") | bold, filler(), paragraph(R"(If There are any mistakes on the board they will be shown by showing hints. Pencil marks that are possible but that have yet to be added are also shown as hints. The green cells in a hint make up a truth, one or more of them must be true. None of the red cells in a hint can be true because of the relationship between the green cells.)")}, inner),
             }, outer)
-        ) | borderEmpty) | size(WIDTH, EQUAL, 74) | size(HEIGHT, EQUAL, 47);
+        )) | size(WIDTH, EQUAL, width) | size(HEIGHT, EQUAL, height);
     });
 
     /* Parse input for everything */
@@ -302,6 +306,9 @@ void Tui::Tui::runLoop() {
         }
         else if (state == eHelp) {
             tab_drawn = 2;
+            Screen::Cursor cursor;
+            cursor.shape = Screen::Cursor::Hidden;
+            screen.SetCursor(cursor);
         }
         else {
             tab_drawn = 0;
@@ -360,6 +367,20 @@ void Tui::Tui::parseMenuChoice(int choice) {
 bool Tui::Tui::parseEvent(Event event, Sudoku::SudokuPuzzle &puzzle) {
     bool key_pressed = false;
     static stateEnum previousState = eInsert;
+    if (state == eHelp) {
+        if (event.is_character()) {
+            state = previousState;
+            return true;
+        }
+        if (event.is_mouse()) {
+            auto m = event.mouse();
+            if (m.button != Mouse::Button::None && m.motion == Mouse::Motion::Pressed) {
+                state = previousState;
+                return true;
+            }
+        }
+        return false;
+    }
     if (event.is_character()) {
         if (puzzleCanvas.parseKeys(event)) {
             key_pressed = true;

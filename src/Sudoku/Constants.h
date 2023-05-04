@@ -4,14 +4,6 @@
 #include "DancingLinkObjects.h"
 
 namespace Sudoku {
-    enum {
-        eSize = 9,
-        eBoxSize = 3,
-        eBoardSize = eSize * eSize,
-        eConstraints = eBoardSize * eConstraintTypes,
-        eBufferSize = eConstraints * eSize,
-    };
-
     /**
      * @brief enums of board difficulties
      * 

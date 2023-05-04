@@ -83,7 +83,7 @@ TEST(dancing_links, each_cell_has_36_links) {
     for (auto i = 0; i < 2; i++) {
         //for (auto &link : tables[i].buffer) {
         for (auto j = 0; j < Sudoku::eBufferSize; j++) {
-            auto link = tables[i].buffer.get() + j;
+            auto link = &tables[i].buffer->at(j);
             results[i][Sudoku::getRowFromLink(link)][Sudoku::getColFromLink(link)]++;
         }
     }
@@ -102,18 +102,18 @@ TEST(dancing_links, all_columns_are_linked) {
     Sudoku::DancingLinkTable table_t(true);
     Sudoku::DancingLink *current;
 
-    current = &table_f.colHeaders[0];
+    current = &table_f.colHeaders->at(0);
     //for (auto &link : table_f.colHeaders) {
     for (auto i = 0; i < Sudoku::eConstraints; i++) {
-        auto link = table_f.colHeaders.get() + i;
+        auto link = &table_f.colHeaders->at(i);
         EXPECT_EQ(link, current);
         current = current->right;
     }
 
-    current = &table_t.colHeaders[0];
+    current = &table_t.colHeaders->at(0);
     //for (auto &link : table_t.colHeaders) {
     for (auto i = 0; i < Sudoku::eConstraints; i++) {
-        auto link = table_t.colHeaders.get() + i;
+        auto link = &table_t.colHeaders->at(i);
         EXPECT_EQ(link, current);
         current = current->right;
     }
@@ -140,11 +140,11 @@ TEST(dancing_links, solve_does_not_uncover_covered) {
     Sudoku::calculateConstraintColumns(constraints, Sudoku::eConstraintTypes, 6, 7);
 
     for (auto c : constraints) {
-        table.colHeaders[c].cover();
+        table.colHeaders->at(c).cover();
     }
     Sudoku::solve(table, false);
     for (auto c : constraints) {
-        EXPECT_NE(table.colHeaders[c].right->left, &table.colHeaders[c]);
+        EXPECT_NE(table.colHeaders->at(c).right->left, &table.colHeaders->at(c));
     }
 }
 
