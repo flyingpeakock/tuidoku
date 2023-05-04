@@ -14,15 +14,20 @@ set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 # Fetch GoogleTest
 FetchContent_Declare(
     googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_REPOSITORY https://github.com/google/googletest
     GIT_TAG v1.13.0
     OVERRIDE_FIND_PACKAGE
 )
+FetchContent_MakeAvailable(googletest)
+IF (NOT googletest_POPULATED)
+    FetchContent_Populate(googletest)
+    add_subdirectory(${GOOGLETEST_SOURCE_DIR} ${GOOGLETEST_BUILD_DIR})
+ENDIF()
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 IF (WIN32)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 ENDIF()
-FetchContent_MakeAvailable(googletest)
+FetchContent_GetProperties(googletest)
 
 # Fetch FTXUI
 FetchContent_Declare(
@@ -49,6 +54,8 @@ set(SOURCES
 )
 
 set(TEST_SOURCES
+
+
     # Add files to be tested here
     src/Sudoku/Solve.cpp
     src/Sudoku/Generate.cpp
@@ -75,7 +82,7 @@ add_executable(${UNIT_TESTS} ${TEST_SOURCES})
 add_compile_definitions(TEST_PUZZLES_ROOT_DIR=\"${PROJECT_SOURCE_DIR}/tests/puzzles/\")
 target_link_libraries(${UNIT_TESTS}
     config++
-    GTest::gtest_main
+    gtest_main
 )
 include(GoogleTest)
 gtest_discover_tests(${UNIT_TESTS})
