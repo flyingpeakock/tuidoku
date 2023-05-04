@@ -20,6 +20,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 IF (NOT googletest_POPULATED)
+    Find_Package(GTest REQUIRED)
     FetchContent_Populate(googletest)
     add_subdirectory(${GOOGLETEST_SOURCE_DIR} ${GOOGLETEST_BUILD_DIR} EXCLUDE_FROM_ALL)
 ENDIF()
@@ -76,7 +77,6 @@ target_link_libraries(${PROJECT_NAME}
 
 enable_testing()
 add_executable(${UNIT_TESTS} ${TEST_SOURCES})
-set_target_properties(${UNIT_TESTS} PROPERTIES EXCLUDE_FROM_ALL True)
 add_compile_definitions(TEST_PUZZLES_ROOT_DIR=\"${PROJECT_SOURCE_DIR}/tests/puzzles/\")
 target_link_libraries(${UNIT_TESTS}
     GTest::gtest_main
