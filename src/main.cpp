@@ -38,10 +38,6 @@ int main(int argc, char *argv[]) {
     Tui::down_key = Conf::keyBind("down");
     Tui::select_key = '\n';
     */
-    //auto table = Sudoku::generate("400270600798156234020840007237468951849531726561792843082015479070024300004087002"); // Naked double
-    //auto table = Sudoku::generate("801006094300009080970080500547062030632000050198375246083620915065198000219500008"); // Hidden double
-    //auto table = Sudoku::generate("009032000000700000162000000010020560000900000050000107000000403026009000005870000"); // Hidden double
-    //auto table = Sudoku::generate("458000793693500214700493685005900006040035070300002450060100007004009060100050840"); // x-wing
     //auto table = Sudoku::generate("240030001590010320000020004352146897400389512189572643020093100600051009900060030"); // triple
     //auto table = Sudoku::generate(Sudoku::eAny);
     //auto table = Sudoku::generate(Sudoku::eHard);

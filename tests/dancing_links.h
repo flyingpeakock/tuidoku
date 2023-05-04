@@ -1,3 +1,3 @@
 #pragma once
 
-#include "../src/Sudoku/Sudoku.h"
+#include <Sudoku/Sudoku.h>

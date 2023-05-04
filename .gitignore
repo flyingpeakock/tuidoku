@@ -4,3 +4,4 @@ tuidoku
 build/*
 Debug/*
 Release/*
+tests/build/*
