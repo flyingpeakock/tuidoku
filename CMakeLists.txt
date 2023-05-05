@@ -39,3 +39,5 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE ftxui::dom
     PRIVATE ftxui::component
 )
+
+install(TARGETS ${PROJECT_NAME})
