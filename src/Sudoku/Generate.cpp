@@ -4,6 +4,9 @@
 #include <cstring>
 #include <algorithm>
 #include <random>
+#include <thread>
+#include <future>
+#include <chrono>
 
 /**
  * @brief Determines the difficulty of a puzzle
@@ -27,19 +30,37 @@ static bool makeMove(const Sudoku::logic::LogicalMove &move, std::vector<Sudoku:
 static void unmakeMove(const Sudoku::Move &move);
 
 Sudoku::DancingLinkTable Sudoku::generate(Sudoku::difficulty diff) {
-    // TODO: Figure out which to remove first, maybe by looking at which column has the most rows in each step during solve and picking one of those
-    bool solve_result = true;
-    int current_index = 0;
-    DancingLinkTable table = generate();
+    const auto processor_count = std::thread::hardware_concurrency();
+    bool found_puzzle = false;
 
-    difficulty generated_difficulty = eAny;
-    while (generated_difficulty != diff) {
-        generated_difficulty = grade(table, diff);
-        if (generated_difficulty != diff) {
-            table = std::move(generate()); // Try again with a new table
+    std::vector<std::future<DancingLinkTable>> future_tables;
+    for (auto i = 0; i < processor_count; i++) {
+        future_tables.emplace_back(std::async(std::launch::async, [&] {
+            Sudoku::DancingLinkTable table = Sudoku::generate();
+
+            Sudoku::difficulty generated_difficulty = Sudoku::eAny;
+            while (generated_difficulty != diff) {
+                generated_difficulty = grade(table, diff);
+                if (generated_difficulty != diff) {
+                    table = std::move(Sudoku::generate());
+                }
+                if (found_puzzle) break;
+            }
+            return table;
+        }));
+    }
+
+    while (true) {
+        using namespace std::chrono_literals;
+        for (auto &table : future_tables) {
+            auto status = table.wait_for(0ms);
+            if (status == std::future_status::ready) {
+                found_puzzle = true;
+                return table.get();
+            }
         }
-    };
-    return table;
+    }
+    return generate(); // Should never get here
 }
 
 Sudoku::DancingLinkTable Sudoku::generate(std::string string) {
