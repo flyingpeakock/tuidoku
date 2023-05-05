@@ -20,7 +20,7 @@ bool Sudoku::solve(DancingLinkTable &table, bool randomize) {
  * @return false if no solution is found
  */
 static bool backTrack(Sudoku::DancingLinkTable &table, Sudoku::DancingLink **current_solution, unsigned int depth, unsigned int *solution_count, bool randomize) {
-    bool should_ret;
+    bool should_ret = false;
     if (table.root->right == table.root.get()) {
         (*solution_count)++;
         
