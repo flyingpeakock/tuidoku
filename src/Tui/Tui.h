@@ -7,6 +7,7 @@
 #include <ftxui/component/component.hpp>
 #include <Sudoku/Sudoku.h>
 #include <Sudoku/Logic.h>
+#include <future>
 
 namespace Tui {
     enum stateEnum {
@@ -41,7 +42,9 @@ namespace Tui {
         stateEnum state;
         ftxui::ScreenInteractive screen;
         PuzzleCanvas puzzleCanvas;
+        bool generating_puzzle;
 
+        std::future<Sudoku::DancingLinkTable> table_promise;
         Sudoku::DancingLinkTable table;
         Sudoku::SudokuPuzzle puzzle;
 

@@ -1,5 +1,6 @@
 #include "Tui.h"
 #include <chrono>
+#include <ctime>
 #include <thread>
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/component/event.hpp>
@@ -175,12 +176,14 @@ Tui::Tui::Tui() :
     difficulty(Sudoku::eAny),
     state(eMenu),
     table(false),
-    puzzle(table)
+    puzzle(table),
+    generating_puzzle(false)
 {
 }
 
 void Tui::Tui::runLoop() {
     int tab_drawn = 0;
+    std::string table_text = "Choose Puzzle";
 
     /* Add new difficulties here */
     std::vector<std::string> difficulties = {
@@ -222,7 +225,7 @@ void Tui::Tui::runLoop() {
     /* Creating menu title and border */
     auto difficulty_menu = Menu(&difficulties, &choice, &option);
     auto menu_renderer = Renderer(difficulty_menu, [&]{
-        return vbox(text("Select difficulty") | bold, separator(), difficulty_menu->Render()) | borderDouble;
+        return vbox(text(table_text) | bold, separator(), difficulty_menu->Render()) | borderDouble;
     });
 
     /* Board renderer */
@@ -279,9 +282,20 @@ void Tui::Tui::runLoop() {
                 puzzleCanvas.selected = 0;
                 puzzle.nextMove.type = Sudoku::logic::eMoveNotFound;
                 state = eExit;
+                return true;
+            }
+            if (generating_puzzle) {
+                using namespace std::chrono_literals;
+                auto status = table_promise.wait_for(0ms);
+                if (status == std::future_status::ready) {
+                    table = table_promise.get();
+                    puzzle = Sudoku::SudokuPuzzle(table);
+                    state = eInsert;
+                    generating_puzzle = false;
+                }
             }
             if (event != Event::Character('?')) {
-                return false; // Use defualt menu keys
+                return generating_puzzle; // Use defualt menu keys
             }
         }
         if (table.root->right == table.root.get()) {
@@ -302,6 +316,20 @@ void Tui::Tui::runLoop() {
     /* Main renderer */
     auto renderer = Renderer(container, [&] {
         if (state == eMenu) {
+            if (generating_puzzle) {
+                table_text = " Generating Puzzle";
+                auto now = std::time(nullptr);
+                for (auto i = 0; i < (now % 4); i++) {
+                    table_text = table_text + '.';
+                }
+            }
+            else {
+                table_text = " Choose Puzzle";
+            }
+
+            while (table_text.size() < std::string(" Generating Puzzle...").size()) {
+                table_text = table_text + ' ';
+            }
             tab_drawn = 1;
         }
         else if (state == eHelp) {
@@ -318,49 +346,58 @@ void Tui::Tui::runLoop() {
         if (state == eExit) {
             screen.ExitLoopClosure()();
         }
+
         return container->Render();
     });
 
-    screen.Loop(renderer);
+    //screen.Loop(renderer);
+    Loop loop(&screen, renderer);
+    while (!loop.HasQuitted()) {
+        loop.RunOnce();
+        if (generating_puzzle) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            screen.PostEvent(Event::Home); // Random unused key to refresh screen
+        }
+    }
+    Sudoku::kill_threads = true;
 }
 
 void Tui::Tui::parseMenuChoice(int choice) {
+    if (choice == 7) {
+        state = eExit;
+        return;
+    }
+    if (generating_puzzle) {
+        return;
+    }
     switch (choice) {
         case 0:
             difficulty = Sudoku::eBeginner;
-            state = eInsert;
             break;
         case 1:
             difficulty = Sudoku::eEasy;
-            state = eInsert;
             break;
         case 2:
             difficulty = Sudoku::eMedium;
-            state = eInsert;
             break;
         case 3:
             difficulty = Sudoku::eHard;
-            state = eInsert;
             break;
         case 4:
             difficulty = Sudoku::eExpert;
-            state = eInsert;
             break;
         case 5:
             difficulty = Sudoku::ePro;
-            state = eInsert;
             break;
         case 6:
             difficulty = Sudoku::eAny;
-            state = eInsert;
-            break;
-        case 7:
-            state = eExit;
             break;
     }
-    if (state == eInsert) {
-        table = Sudoku::generate(difficulty);
-        puzzle = Sudoku::SudokuPuzzle(table);
+    if (choice <= 6) {
+        table_promise = std::async(std::launch::async, [&]{
+            return Sudoku::generate(difficulty);
+        });
+        generating_puzzle = true;
     }
 }
 

@@ -6,8 +6,11 @@
 #include "SudokuPuzzle.h"
 #include "Logic.h"
 #include <random>
+#include <thread>
 
 namespace Sudoku {
+
+    extern std::atomic<bool> kill_threads;
 
     /**
      * @brief solves a sudoku puzzle

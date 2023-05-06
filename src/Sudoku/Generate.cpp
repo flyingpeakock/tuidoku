@@ -4,9 +4,10 @@
 #include <cstring>
 #include <algorithm>
 #include <random>
-#include <thread>
 #include <future>
 #include <chrono>
+
+std::atomic<bool> Sudoku::kill_threads = false;
 
 /**
  * @brief Determines the difficulty of a puzzle
@@ -31,7 +32,8 @@ static void unmakeMove(const Sudoku::Move &move);
 
 Sudoku::DancingLinkTable Sudoku::generate(Sudoku::difficulty diff) {
     const auto processor_count = std::thread::hardware_concurrency();
-    bool found_puzzle = false;
+    std::atomic<bool> found_puzzle = false;
+    kill_threads = false;
 
     std::vector<std::future<DancingLinkTable>> future_tables;
     for (auto i = 0; i < processor_count; i++) {
@@ -44,7 +46,7 @@ Sudoku::DancingLinkTable Sudoku::generate(Sudoku::difficulty diff) {
                 if (generated_difficulty != diff) {
                     table = std::move(Sudoku::generate());
                 }
-                if (found_puzzle) break;
+                if (found_puzzle || kill_threads) break;
             }
             return table;
         }));
@@ -205,6 +207,9 @@ static Sudoku::difficulty grade(Sudoku::DancingLinkTable &table, Sudoku::difficu
     std::vector<Sudoku::Move> moveHistory;
     Sudoku::DancingLinkContainer toBeAdded;
     while (table.root.get() != table.root->right) {
+        if (Sudoku::kill_threads) {
+            return Sudoku::eAny;
+        }
         auto move = Sudoku::logic::getNextMove(Sudoku::SudokuPuzzle(table), true);
         if (move.type == Sudoku::logic::eMoveNotFound) {
             move = forceMove(table);
