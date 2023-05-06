@@ -353,10 +353,13 @@ void Tui::Tui::runLoop() {
     //screen.Loop(renderer);
     Loop loop(&screen, renderer);
     while (!loop.HasQuitted()) {
-        loop.RunOnce();
         if (generating_puzzle) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            loop.RunOnce();
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
             screen.PostEvent(Event::Home); // Random unused key to refresh screen
+        }
+        else {
+            loop.RunOnceBlocking();
         }
     }
     Sudoku::kill_threads = true;
