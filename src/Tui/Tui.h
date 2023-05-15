@@ -18,6 +18,7 @@ namespace Tui {
         eHelp,
     };
 
+    /*
     struct PuzzleCanvas : public ftxui::Canvas {
         PuzzleCanvas();
         void DrawPuzzle(const Sudoku::SudokuPuzzle &puzzle);
@@ -31,6 +32,7 @@ namespace Tui {
         char selected;
         bool showNextMove;
     };
+    */
 
     class Tui {
         public:
@@ -38,10 +40,14 @@ namespace Tui {
         void runLoop();
 
         private:
+        int row;
+        int col;
+        char selected;
+
         Sudoku::difficulty difficulty;
         stateEnum state;
         ftxui::ScreenInteractive screen;
-        PuzzleCanvas puzzleCanvas;
+        //PuzzleCanvas puzzleCanvas;
         bool generating_puzzle;
 
         std::future<Sudoku::DancingLinkTable> table_promise;

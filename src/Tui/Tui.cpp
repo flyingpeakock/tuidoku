@@ -15,7 +15,7 @@ using namespace ftxui;
  * 
  * @param c Canvas to draw on, where the dimentions are at least width = 73 * 2, height = 37 * 4
  */
-static void drawPuzzleTable(Tui::PuzzleCanvas &c);
+static void drawPuzzleTable(Canvas &c);
 
 /**
  * @brief Draw a DancingLink * on the board
@@ -24,7 +24,7 @@ static void drawPuzzleTable(Tui::PuzzleCanvas &c);
  * @param link which link to draw
  * @param style which style to use
  */
-static void drawFilledCell(Tui::PuzzleCanvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style);
+static void drawFilledCell(Canvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style);
 
 /**
  * @brief Draws a DancingLink * as a pencil mark on the board
@@ -33,7 +33,7 @@ static void drawFilledCell(Tui::PuzzleCanvas &c, Sudoku::DancingLink *link, cons
  * @param link which link to draw
  * @param style which style to use
  */
-static void drawPencil(Tui::PuzzleCanvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style);
+static void drawPencil(Canvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style);
 
 /**
  * @brief Draws all the visible pencilMarks
@@ -44,7 +44,7 @@ static void drawPencil(Tui::PuzzleCanvas &c, Sudoku::DancingLink *link, const Ca
  * @param pencilError vector containing links of pencilmarks that are illogical
  * @param wrong_inputs vector containing links of inputs that are illogical
  */
-static void drawAllPencils(Tui::PuzzleCanvas &c,
+static void drawAllPencils(Canvas &c,
                            const char selected,
                            const Sudoku::DancingLinkContainer &pencils,
                            const Sudoku::DancingLinkContainer &pencilError,
@@ -59,7 +59,7 @@ static void drawAllPencils(Tui::PuzzleCanvas &c,
  * @param errors vector containing links of illogical inputs
  * @param current_start_index index where inputs turn from clues to guesses
  */
-static void drawAllFilled(Tui::PuzzleCanvas &c, 
+static void drawAllFilled(Canvas &c, 
                           const char selected,
                           const Sudoku::DancingLinkContainer &inputs,
                           const Sudoku::DancingLinkContainer &errors,
@@ -71,7 +71,7 @@ static void drawAllFilled(Tui::PuzzleCanvas &c,
  * @param c Canvas to draw on
  * @param move Sudoku::logic::Move object to draw
  */
-static void drawNextMove(Tui::PuzzleCanvas &c, const Sudoku::logic::LogicalMove &move);
+static void drawNextMove(Canvas &c, const Sudoku::logic::LogicalMove &move);
 
 /**
  * @brief Set the Cursor shape and position
@@ -104,22 +104,24 @@ static inline bool isPlaying(Sudoku::DancingLink *root) {
  */
 static void setMouseRowCol(int &row, int &col, int m_row, int m_col);
 
+/*
 Tui::PuzzleCanvas::PuzzleCanvas() :
     Canvas(146, 148),
     selected(0), row(0), col(0)
 {
 }
+*/
 
-void Tui::PuzzleCanvas::DrawPuzzle(const Sudoku::SudokuPuzzle &puzzle) {
-    drawPuzzleTable(*this);
-    drawAllPencils(*this, selected, puzzle.pencilMarks, puzzle.wrong_marks, puzzle.wrong_inputs);
-    drawAllFilled(*this, selected, puzzle.constraintTable.current, puzzle.wrong_inputs, puzzle.current_start_index);
+void DrawPuzzle(Canvas &puzzleCanvas, const Sudoku::SudokuPuzzle &puzzle, char selected) {
+    drawPuzzleTable(puzzleCanvas);
+    drawAllPencils(puzzleCanvas, selected, puzzle.pencilMarks, puzzle.wrong_marks, puzzle.wrong_inputs);
+    drawAllFilled(puzzleCanvas, selected, puzzle.constraintTable.current, puzzle.wrong_inputs, puzzle.current_start_index);
     if (puzzle.nextMove.type != Sudoku::logic::eMoveNotFound) {
-        drawNextMove(*this, puzzle.nextMove);
+        drawNextMove(puzzleCanvas, puzzle.nextMove);
     }
 }
 
-bool Tui::PuzzleCanvas::parseMouse(Event event) {
+bool parseMouse(Event event, int &row, int &col) {
     auto m = event.mouse();
     if (m.button == Mouse::Button::None) {
         return false;
@@ -131,7 +133,7 @@ bool Tui::PuzzleCanvas::parseMouse(Event event) {
     return true;
 }
 
-bool Tui::PuzzleCanvas::parseKeys(Event event) {
+bool parseKeys(Event event, int &row, int &col) {
     bool key_pressed = false;
     if ((event == Event::Character("h")) || (event == Event::ArrowLeft)) {
         col--;
@@ -167,9 +169,11 @@ bool Tui::PuzzleCanvas::parseKeys(Event event) {
     return key_pressed;
 }
 
+/*
 ftxui::Element Tui::PuzzleCanvas::getCanvas() {
     return canvas(static_cast<ftxui::Canvas>(*this));
 }
+*/
 
 Tui::Tui::Tui() :
     screen(ScreenInteractive::FitComponent()),
@@ -177,7 +181,10 @@ Tui::Tui::Tui() :
     state(eMenu),
     table(false),
     puzzle(table),
-    generating_puzzle(false)
+    generating_puzzle(false),
+    row(0),
+    col(0),
+    selected(0)
 {
 }
 
@@ -222,16 +229,22 @@ void Tui::Tui::runLoop() {
         parseMenuChoice(choice);
     };
 
+    /* Board renderer */
+    auto board_renderer = Renderer([&]{
+        Canvas puzzleCanvas(146, 148);
+        DrawPuzzle(puzzleCanvas, puzzle, selected);
+        return canvas(std::move(puzzleCanvas));
+    });
+
     /* Creating menu title and border */
     auto difficulty_menu = Menu(&difficulties, &choice, &option);
     auto menu_renderer = Renderer(difficulty_menu, [&]{
-        return vbox(text(table_text) | bold, separator(), difficulty_menu->Render()) | borderDouble;
-    });
-
-    /* Board renderer */
-    auto board_renderer = Renderer([&]{
-        puzzleCanvas.DrawPuzzle(puzzle);
-        return canvas(std::move(puzzleCanvas));
+        return dbox(board_renderer->Render(),
+                    gridbox({
+                        {filler() | size(HEIGHT, EQUAL, 6)},
+                        {filler() | size(WIDTH, EQUAL, 12), vbox(text(table_text) | bold, separator(), difficulty_menu->Render()) | borderDouble | clear_under},
+                    })
+                   );
     });
 
     /* Help text renderer */
@@ -279,7 +292,7 @@ void Tui::Tui::runLoop() {
     parseInput = CatchEvent([&](Event event){
         if (state == eMenu) {
             if (event == Event::Character('q')) {
-                puzzleCanvas.selected = 0;
+                selected = 0;
                 puzzle.nextMove.type = Sudoku::logic::eMoveNotFound;
                 state = eExit;
                 return true;
@@ -300,7 +313,7 @@ void Tui::Tui::runLoop() {
         }
         if (table.root->right == table.root.get()) {
             state = eExit;
-            puzzleCanvas.selected = 0;
+            selected = 0;
             puzzle.nextMove.type = Sudoku::logic::eMoveNotFound;
             return true;
         }
@@ -340,7 +353,7 @@ void Tui::Tui::runLoop() {
         }
         else {
             tab_drawn = 0;
-            setCursor(screen, puzzleCanvas.row, puzzleCanvas.col, state == ePencil);
+            setCursor(screen, row, col, state == ePencil);
         }
 
         if (state == eExit) {
@@ -422,11 +435,11 @@ bool Tui::Tui::parseEvent(Event event, Sudoku::SudokuPuzzle &puzzle) {
         return false;
     }
     if (event.is_character()) {
-        if (puzzleCanvas.parseKeys(event)) {
+        if (parseKeys(event, row, col)) {
             key_pressed = true;
         }
         else if (event == Event::Character("q")) {
-            puzzleCanvas.selected = 0;
+            selected = 0;
             if (state != eMenu) {
                 state = eMenu;
             }
@@ -470,30 +483,27 @@ bool Tui::Tui::parseEvent(Event event, Sudoku::SudokuPuzzle &puzzle) {
             ((event == Event::Character(" "))
             || (event == Event::Delete)
             || (event == Event::Backspace))) {
-                Sudoku::removeFromPuzzle(&puzzle, puzzleCanvas.row, puzzleCanvas.col);
+                Sudoku::removeFromPuzzle(&puzzle, row, col);
                 key_pressed = true;
             }
         if (!key_pressed) {
             char pressed = event.character()[0];
             if ((pressed >= '0') && (pressed <= '9')) {
                 if (state == eInsert) {
-                    puzzle.insert(puzzleCanvas.row, puzzleCanvas.col, pressed);
+                    puzzle.insert(row, col, pressed);
                 }
                 else {
-                    puzzle.pencil(puzzleCanvas.row, puzzleCanvas.col, pressed);
+                    puzzle.pencil(row, col, pressed);
                 }
 
-                puzzleCanvas.selected = pressed;
+                selected = pressed;
                 key_pressed = true;
             }
         }
     }
     else if (event.is_mouse()) {
-        key_pressed = puzzleCanvas.parseMouse(event);
+        key_pressed = parseMouse(event, row, col);
         if (key_pressed && event.mouse().button == Mouse::Button::Left) {
-            auto row = puzzleCanvas.row;
-            auto col = puzzleCanvas.col;
-            auto selected = puzzleCanvas.selected;
 
             auto found = Sudoku::containsLinkEquivalent(row, col, puzzle.constraintTable.current.begin(), puzzle.constraintTable.current.end());
             if (found != puzzle.constraintTable.current.end()) {
@@ -537,7 +547,7 @@ bool Tui::Tui::parseEvent(Event event, Sudoku::SudokuPuzzle &puzzle) {
     return key_pressed;
 }
 
-static void drawPuzzleTable(Tui::PuzzleCanvas &c) {
+static void drawPuzzleTable(Canvas &c) {
         const std::string toprow   = "╔═══════╤═══════╤═══════╦═══════╤═══════╤═══════╦═══════╤═══════╤═══════╗";
         const std::string rowtype1 = "║       │       │       ║       │       │       ║       │       │       ║";
         const std::string rowtype2 = "╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢";
@@ -566,7 +576,7 @@ static void drawPuzzleTable(Tui::PuzzleCanvas &c) {
         c.DrawText(0, (++height) * 4, botrow, style);
 }
 
-static void drawFilledCell(Tui::PuzzleCanvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style){
+static void drawFilledCell(Canvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style){
     int row = Sudoku::getRowFromLink(link);
     int col = Sudoku::getColFromLink(link);
     int num = Sudoku::getNumFromLink(link);
@@ -578,7 +588,7 @@ static void drawFilledCell(Tui::PuzzleCanvas &c, Sudoku::DancingLink *link, cons
     c.DrawText(x, y, num_char, style);
 }
 
-static void drawPencil(Tui::PuzzleCanvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style) {
+static void drawPencil(Canvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style) {
     int row = Sudoku::getRowFromLink(link);
     int col = Sudoku::getColFromLink(link);
     int num = Sudoku::getNumFromLink(link);
@@ -597,7 +607,7 @@ static void drawPencil(Tui::PuzzleCanvas &c, Sudoku::DancingLink *link, const Ca
 }
 
 
-static void drawAllPencils(Tui::PuzzleCanvas &c,
+static void drawAllPencils(Canvas &c,
                            const char selected,
                            const Sudoku::DancingLinkContainer &pencils,
                            const Sudoku::DancingLinkContainer &pencilError,
@@ -652,7 +662,7 @@ static void drawAllPencils(Tui::PuzzleCanvas &c,
     }
 }
 
-static void drawAllFilled(Tui::PuzzleCanvas &c, 
+static void drawAllFilled(Canvas &c, 
                           const char selected,
                           const Sudoku::DancingLinkContainer &inputs,
                           const Sudoku::DancingLinkContainer &errors,
@@ -731,7 +741,7 @@ static void setMouseRowCol(int &row, int &col, int m_row, int m_col) {
     }
 }
 
-static void drawNextMove(Tui::PuzzleCanvas &c, const Sudoku::logic::LogicalMove &move) {
+static void drawNextMove(Canvas &c, const Sudoku::logic::LogicalMove &move) {
     const Canvas::Stylizer style_truth = [&](Pixel &pixel) {
         pixel.dim = true;
         pixel.bold = false;
