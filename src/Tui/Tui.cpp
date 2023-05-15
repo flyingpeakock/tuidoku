@@ -184,7 +184,8 @@ Tui::Tui::Tui() :
     generating_puzzle(false),
     row(0),
     col(0),
-    selected(0)
+    selected(0),
+    focus_y(0.0f)
 {
 }
 
@@ -250,10 +251,11 @@ void Tui::Tui::runLoop() {
     /* Help text renderer */
     auto help_renderer = Renderer([&]{
         FlexboxConfig outer, inner;
-        int width = 80;
-        int height = 57;
-        return window(text("Tuidoku") | bold, vbox(
-            text("Sudoku for the terminal") | bold,
+        int width = 73;
+        int height = 37;
+        return
+            vbox(
+            text("Tuidoku, Sudoku for the terminal") | bold,
             separatorEmpty(),
             hbox(
             vbox(text("Keys") | bold,
@@ -278,14 +280,18 @@ void Tui::Tui::runLoop() {
             separatorEmpty(),
             text("Behaviour") | bold,
             separatorLight(),
-            flexbox({
+            vbox({
                 flexbox({text("Insert") | bold, filler(), paragraph(R"(When in insert mode the cursor should be block shaped. Pressing on a digit 0-9 in this mode inserts that digit in the cell if the cell is not a clue. Illogical inputs are highlighted, note that merely incorrect inputs will not be highlighted. Right-clicking on a cell when in input mode will insert the highlighted number into that cell if that number appears as a pencil-mark there.)"),}, inner),
+                separatorEmpty(),
                 flexbox({text("Pencil") | bold, filler(), paragraph(R"(When in pencil mode the cursor should be bar shaped. Pressing on a digit 1-9 in this mode will either mark or unmark that digit in the selected cell as long as that cell is empty. Illogical marks are highlighted, note that merely incorrect marks will not be highlighted. Right-clicking on an empty cell in this mode will either mark or unmark the highlighted number into that cell.)"),}, inner),
+                separatorEmpty(),
                 flexbox({text("Highlight") | bold, filler(), paragraph(R"(To select a number simply press the number key. To avoid changing the board unintentionally it is useful to insert on an underlined number or pencil on any filled cell. All occurences of that number will be highlighted.)"),}, inner),
+                separatorEmpty(),
                 flexbox({text("Mistakes") | bold, filler(), paragraph(R"(Pencil-marks or inputs that are illogical are shown. Illogical inputs or marks are inputs or marks that already appear in that row, column or box. Simply incorrect moves are not shown unless hints are visible.)"),}, inner),
+                separatorEmpty(),
                 flexbox({text("Hints") | bold, filler(), paragraph(R"(If There are any mistakes on the board they will be shown by showing hints. Pencil marks that are possible but that have yet to be added are also shown as hints. The green cells in a hint make up a truth, one or more of them must be true. None of the red cells in a hint can be true because of the relationship between the green cells.)")}, inner),
-            }, outer)
-        )) | size(WIDTH, EQUAL, width) | size(HEIGHT, EQUAL, height);
+            })
+        ) | borderEmpty | vscroll_indicator | focusPositionRelative(0, focus_y) | yframe | borderDouble | size(WIDTH, EQUAL, width) | size(HEIGHT, EQUAL, height) ;
     });
 
     /* Parse input for everything */
@@ -422,7 +428,18 @@ bool Tui::Tui::parseEvent(Event event, Sudoku::SudokuPuzzle &puzzle) {
     static stateEnum previousState = eInsert;
     if (state == eHelp) {
         if (event.is_character()) {
-            state = previousState;
+            if (event == Event::Character('k')) {
+                focus_y -= 0.1f;
+                if (focus_y > 0.7f) { focus_y = 0.6f; }
+            }
+            else if (event == Event::Character('j')) {
+                focus_y += 0.1f;
+                if (focus_y < 0.3f) {focus_y = 0.4f; };
+            }
+            else {
+                focus_y = 0.0f;
+                state = previousState;
+            }
             return true;
         }
         if (event.is_mouse()) {

@@ -43,6 +43,7 @@ namespace Tui {
         int row;
         int col;
         char selected;
+        float focus_y;
 
         Sudoku::difficulty difficulty;
         stateEnum state;
