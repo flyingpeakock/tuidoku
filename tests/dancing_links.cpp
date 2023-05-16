@@ -1,5 +1,13 @@
-#include "dancing_links.h"
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>                // for Test, EXPECT_EQ, TestInfo (pt...
+#include <array>                        // for array
+#include <memory>                       // for shared_ptr, __shared_ptr_access
+#include <string>                       // for basic_string, string
+
+#include "gtest/gtest.h"                // for Message, TestPartResult, Asse...
+#include "sudoku/Constants.h"           // for difficulty
+#include "sudoku/DancingLink.h"         // for calculateConstraintColumns
+#include "sudoku/DancingLinkObjects.h"  // for DancingLinkTable, DancingLink
+#include "sudoku/sudoku.h"              // for generate, solve
 
 TEST(dancing_links, calculate_constraint_columns) {
     using namespace sudoku;
