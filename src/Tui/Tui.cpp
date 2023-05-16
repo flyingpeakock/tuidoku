@@ -318,7 +318,7 @@ void Tui::Tui::runLoop() {
             }
         }
         if (table.root->right == table.root.get()) {
-            state = eExit;
+            state = eMenu;
             selected = 0;
             puzzle.nextMove.type = Sudoku::logic::eMoveNotFound;
             return true;
