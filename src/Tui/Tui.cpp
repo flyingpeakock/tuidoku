@@ -281,8 +281,8 @@ bool Tui::Tui::parseEvent(Event event, Sudoku::SudokuPuzzle &puzzle) {
                     puzzle = Sudoku::SudokuPuzzle(table);
                     state = eInsert;
                     generating_puzzle = false;
-                    key_pressed = true;
                 }
+                key_pressed = true;
             }
             break;
         
