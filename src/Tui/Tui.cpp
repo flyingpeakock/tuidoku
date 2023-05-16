@@ -4,7 +4,7 @@
 #include <ftxui/component/event.hpp>              // for Event
 #include <ftxui/component/mouse.hpp>              // for Mouse
 #include <ftxui/component/loop.hpp>               // for Loop
-#include <chrono>                                 // for operator""ms, chron...
+#include <bits/chrono.h>                          // for operator""ms, chron...
 #include <cxxabi.h>                               // for __forced_unwind
 #include <ftxui/component/component_options.hpp>  // for EntryState, MenuOption
 #include <ftxui/dom/canvas.hpp>                   // for Canvas
