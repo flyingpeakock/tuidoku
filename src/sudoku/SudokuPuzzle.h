@@ -4,7 +4,7 @@
 #include "DancingLink.h"
 #include "Constants.h"
 
-namespace Sudoku {
+namespace sudoku {
 
     struct Move {
         enum moveType {
@@ -16,13 +16,13 @@ namespace Sudoku {
     };
 
     struct SudokuPuzzle {
-        SudokuPuzzle(Sudoku::DancingLinkTable &table);
-        Sudoku::DancingLinkTable constraintTable;
+        SudokuPuzzle(sudoku::DancingLinkTable &table);
+        sudoku::DancingLinkTable constraintTable;
         int current_start_index;
-        Sudoku::DancingLinkContainer wrong_inputs;
-        Sudoku::DancingLinkContainer pencilMarks;   // contains visible marks
-        Sudoku::DancingLinkContainer wrong_marks;   // contains visible marks that are wrong
-        Sudoku::DancingLinkContainer removed_marks; // contains marks that have been visible but no longer are
+        sudoku::DancingLinkContainer wrong_inputs;
+        sudoku::DancingLinkContainer pencilMarks;   // contains visible marks
+        sudoku::DancingLinkContainer wrong_marks;   // contains visible marks that are wrong
+        sudoku::DancingLinkContainer removed_marks; // contains marks that have been visible but no longer are
         std::vector<Move> moves;
         logic::LogicalMove nextMove;
 
@@ -31,7 +31,7 @@ namespace Sudoku {
         void autoPencil();
         void getNextMove();
 
-        void recheckMistakes(Sudoku::DancingLink *link);
+        void recheckMistakes(sudoku::DancingLink *link);
     };
 }
 

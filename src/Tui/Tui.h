@@ -6,15 +6,15 @@
 #include <ftxui/component/component_base.hpp>      // for Component
 #include <future>                                  // for future
 
-#include "Sudoku/Constants.h"                      // for difficulty
-#include "Sudoku/DancingLinkObjects.h"             // for DancingLinkTable
-#include "Sudoku/SudokuPuzzle.h"                   // for SudokuPuzzle
+#include "sudoku/Constants.h"                      // for difficulty
+#include "sudoku/DancingLinkObjects.h"             // for DancingLinkTable
+#include "sudoku/SudokuPuzzle.h"                   // for SudokuPuzzle
 
 namespace ftxui {
 struct Event;
 }  // namespace ftxui
 
-namespace Tui {
+namespace tui {
     enum stateEnum {
         eInsert,
         ePencil,
@@ -35,21 +35,21 @@ namespace Tui {
         int col;
         char selected;
         float focus_y;
-        Sudoku::difficulty difficulty;
+        sudoku::difficulty difficulty;
         stateEnum state;
         bool generating_puzzle;
 
         ftxui::ScreenInteractive screen;
 
-        /* Sudoku Puzzle */
-        std::future<Sudoku::DancingLinkTable> table_promise;
-        Sudoku::DancingLinkTable table;
-        Sudoku::SudokuPuzzle puzzle;
+        /* sudoku Puzzle */
+        std::future<sudoku::DancingLinkTable> table_promise;
+        sudoku::DancingLinkTable table;
+        sudoku::SudokuPuzzle puzzle;
 
         /* Parsers */
         ftxui::ComponentDecorator parseInput;
         void parseMenuChoice(int choice);
-        bool parseEvent(ftxui::Event event, Sudoku::SudokuPuzzle &puzzle);
+        bool parseEvent(ftxui::Event event, sudoku::SudokuPuzzle &puzzle);
 
 
         /* Renderers*/

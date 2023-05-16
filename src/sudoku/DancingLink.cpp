@@ -4,7 +4,7 @@
 
 #include "DancingLink.h"
 
-using namespace Sudoku;
+using namespace sudoku;
 
 void DancingLinkColumn::cover() {
     DancingLink *i;
@@ -37,7 +37,7 @@ void DancingLinkColumn::uncover() {
 }
 
 
-Sudoku::DancingLinkTable::DancingLinkTable(bool should_randomize):
+sudoku::DancingLinkTable::DancingLinkTable(bool should_randomize):
 root(std::make_shared<DancingLink>()),
 colHeaders(std::make_shared<std::array<DancingLinkColumn,eConstraints>>()),
 buffer(std::make_shared<std::array<DancingLink, eBufferSize>>()){
@@ -52,7 +52,7 @@ buffer(std::make_shared<std::array<DancingLink, eBufferSize>>()){
  * @param col 0-(eSize - 1)
  * @param num 0-(eSize - 1)
  */
-void Sudoku::calculateConstraintColumns(int columns[eConstraintTypes], int row, int col, int num) {
+void sudoku::calculateConstraintColumns(int columns[eConstraintTypes], int row, int col, int num) {
     const int box_idx = eBoxSize * (row / eBoxSize) + (col / eBoxSize);
     columns[eConstraintCell] = (row * eSize) + col;
     columns[eConstraintRow] = eBoardSize + (row * eSize) + num;
@@ -60,7 +60,7 @@ void Sudoku::calculateConstraintColumns(int columns[eConstraintTypes], int row, 
     columns[eConstraintBox] = (eBoardSize * 3) + (box_idx * eSize) + num;
 }
 
-void Sudoku::DancingLinkTable::generateLinks(bool should_randomize) {
+void sudoku::DancingLinkTable::generateLinks(bool should_randomize) {
     {
         DancingLinkColumn *current, *next;
 
@@ -74,7 +74,7 @@ void Sudoku::DancingLinkTable::generateLinks(bool should_randomize) {
         // linking colummn headers
         current = (DancingLinkColumn *)root.get();
         for (auto &i : *(colHeaders.get())) {
-        //for (auto i = 0; i < Sudoku::eConstraints; i++) {
+        //for (auto i = 0; i < sudoku::eConstraints; i++) {
             //next = &colHeaders.get()[i];
             next = &i;
             current->right = next;
@@ -137,19 +137,19 @@ void Sudoku::DancingLinkTable::generateLinks(bool should_randomize) {
     }
 }
 
-void Sudoku::cover_link(DancingLink *link) {
+void sudoku::cover_link(DancingLink *link) {
     for (auto col = link->right; col != link; col = col->right) {
         col->colHeader->cover();
     }
 }
 
-void Sudoku::uncover_link(DancingLink *link) {
+void sudoku::uncover_link(DancingLink *link) {
     for (auto col = link->left; col != link; col = col->left) {
         col->colHeader->uncover();
     }
 }
 
-void Sudoku::cover_row(DancingLink *link) {
+void sudoku::cover_row(DancingLink *link) {
     link->up->down = link->down;
     link->down->up = link->up;
     link->colHeader->count--;
@@ -160,7 +160,7 @@ void Sudoku::cover_row(DancingLink *link) {
     }
 }
 
-void Sudoku::uncover_row(DancingLink *link) {
+void sudoku::uncover_row(DancingLink *link) {
     for (auto l = link->left; l != link; l = l->left) {
         l->down->up = l;
         l->up->down = l;

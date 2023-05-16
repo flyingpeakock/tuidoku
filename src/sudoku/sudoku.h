@@ -9,7 +9,7 @@
 #include "Constants.h"           // for difficulty
 #include "DancingLinkObjects.h"  // for DancingLinkColumn, DancingLinkTable
 
-namespace Sudoku {
+namespace sudoku {
 struct SudokuPuzzle;
 
     extern std::atomic<bool> kill_threads;
@@ -54,12 +54,12 @@ struct SudokuPuzzle;
     * 
     * @return ColHeader 
     */
-    static DancingLinkColumn *smallestColumn(Sudoku::DancingLink *root, bool randomize) {
-        Sudoku::DancingLinkColumn *current;
-        Sudoku::DancingLinkColumn *ret;
+    static DancingLinkColumn *smallestColumn(sudoku::DancingLink *root, bool randomize) {
+        sudoku::DancingLinkColumn *current;
+        sudoku::DancingLinkColumn *ret;
         int min = 0xFFFF;
         if (!randomize) {
-            for (current = (Sudoku::DancingLinkColumn *)root->right; (Sudoku::DancingLink *)current != root; current = (Sudoku::DancingLinkColumn*)current->right) {
+            for (current = (sudoku::DancingLinkColumn *)root->right; (sudoku::DancingLink *)current != root; current = (sudoku::DancingLinkColumn*)current->right) {
                 if (current->count < min) {
                     min = current->count;
                     ret = current;
@@ -67,8 +67,8 @@ struct SudokuPuzzle;
             }
         }
         else {
-            std::vector<Sudoku::DancingLinkColumn *> potentialColumns;
-            for (current = (Sudoku::DancingLinkColumn *)root->right; (Sudoku::DancingLink *)current != root; current = (Sudoku::DancingLinkColumn *)current->right) {
+            std::vector<sudoku::DancingLinkColumn *> potentialColumns;
+            for (current = (sudoku::DancingLinkColumn *)root->right; (sudoku::DancingLink *)current != root; current = (sudoku::DancingLinkColumn *)current->right) {
                 if (current->count < min) {
                     potentialColumns.clear();
                     potentialColumns.push_back(current);

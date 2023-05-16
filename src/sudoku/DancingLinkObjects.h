@@ -5,7 +5,7 @@
 #include <memory>
 #include <array>
 
-namespace Sudoku {
+namespace sudoku {
 
     enum constraintColTypes {
         eConstraintCell = 0,

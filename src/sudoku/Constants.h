@@ -3,7 +3,7 @@
 
 #include "DancingLinkObjects.h"
 
-namespace Sudoku {
+namespace sudoku {
     /**
      * @brief enums of board difficulties
      * 
@@ -58,6 +58,6 @@ namespace Sudoku {
         };
     }
 
-} // namespace Sudoku
+} // namespace sudoku
 
 #endif // SUDOKU_CONSTANTS_H

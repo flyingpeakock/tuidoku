@@ -12,14 +12,14 @@
 #include <utility>               // for move
 #include <vector>                // for vector
 
-#include "Sudoku.h"              // for solve, generate, smallestColumn
+#include "sudoku.h"              // for solve, generate, smallestColumn
 #include "DancingLinkObjects.h"  // for DancingLinkContainer, DancingLinkTable
 #include "Logic.h"               // for getNextMove
 #include "Constants.h"           // for LogicalMove, difficulty, moveType
 #include "DancingLink.h"         // for cover_link, containsLinkEqual, uncov...
 #include "SudokuPuzzle.h"        // for Move, SudokuPuzzle
 
-std::atomic<bool> Sudoku::kill_threads = false;
+std::atomic<bool> sudoku::kill_threads = false;
 
 /**
  * @brief Determines the difficulty of a puzzle
@@ -29,20 +29,20 @@ std::atomic<bool> Sudoku::kill_threads = false;
  * @param table constraint table containing the puzzle.
  *              The cells which are filled need to be covered
  * @param requested_difficulty the difficulty which has been requested to create. Will fill in cells above this difficulty
- * @return Sudoku::difficulty 
+ * @return sudoku::difficulty 
  */
-static Sudoku::difficulty grade(Sudoku::DancingLinkTable &table, Sudoku::difficulty requested_difficulty);
+static sudoku::difficulty grade(sudoku::DancingLinkTable &table, sudoku::difficulty requested_difficulty);
 
 /**
  * @brief makes a move found using logic
  * 
  * @param move move found
  */
-static bool makeMove(const Sudoku::logic::LogicalMove &move, std::vector<Sudoku::Move> &moveHistory);
+static bool makeMove(const sudoku::logic::LogicalMove &move, std::vector<sudoku::Move> &moveHistory);
 
-static void unmakeMove(const Sudoku::Move &move);
+static void unmakeMove(const sudoku::Move &move);
 
-Sudoku::DancingLinkTable Sudoku::generate(Sudoku::difficulty diff) {
+sudoku::DancingLinkTable sudoku::generate(sudoku::difficulty diff) {
     const auto processor_count = std::thread::hardware_concurrency();
     std::atomic<bool> found_puzzle = false;
     kill_threads = false;
@@ -50,13 +50,13 @@ Sudoku::DancingLinkTable Sudoku::generate(Sudoku::difficulty diff) {
     std::vector<std::future<DancingLinkTable>> future_tables;
     for (auto i = 0; i < processor_count; i++) {
         future_tables.emplace_back(std::async(std::launch::async, [&] {
-            Sudoku::DancingLinkTable table = Sudoku::generate();
+            sudoku::DancingLinkTable table = sudoku::generate();
 
-            Sudoku::difficulty generated_difficulty = Sudoku::eAny;
+            sudoku::difficulty generated_difficulty = sudoku::eAny;
             while (generated_difficulty != diff) {
                 generated_difficulty = grade(table, diff);
                 if (generated_difficulty != diff) {
-                    table = std::move(Sudoku::generate());
+                    table = std::move(sudoku::generate());
                 }
                 if (found_puzzle || kill_threads) break;
             }
@@ -77,7 +77,7 @@ Sudoku::DancingLinkTable Sudoku::generate(Sudoku::difficulty diff) {
     return generate(); // Should never get here
 }
 
-Sudoku::DancingLinkTable Sudoku::generate(std::string string) {
+sudoku::DancingLinkTable sudoku::generate(std::string string) {
     if (string.size() != eBoardSize) {
         throw std::invalid_argument("Received wrong amount of characters for a sudoku puzzle");
     }
@@ -90,8 +90,8 @@ Sudoku::DancingLinkTable Sudoku::generate(std::string string) {
         }
         int num = c - '1';
         if (num >= 0) {
-            int count = (row * Sudoku::eBoardSize) + (col * Sudoku::eSize) + num;
-            int constraints[Sudoku::eConstraintTypes];
+            int count = (row * sudoku::eBoardSize) + (col * sudoku::eSize) + num;
+            int constraints[sudoku::eConstraintTypes];
             calculateConstraintColumns(constraints, row, col, num);
             DancingLinkColumn *colHeader = &ret.colHeaders->at(constraints[0]);
             for (auto row = colHeader->down; row != colHeader; row = row->down) {
@@ -114,14 +114,14 @@ Sudoku::DancingLinkTable Sudoku::generate(std::string string) {
         cover_link(link);
     }
 
-    if (!Sudoku::solve(ret, false)) {
+    if (!sudoku::solve(ret, false)) {
         throw std::invalid_argument("Not a valid sudoku puzzle");
     }
     return ret;
 }
 
-Sudoku::DancingLinkTable Sudoku::generate(){
-    //return Sudoku::generate(eAny);
+sudoku::DancingLinkTable sudoku::generate(){
+    //return sudoku::generate(eAny);
     bool solve_result = true;
     int current_index = 0;
     DancingLinkTable ret(true);
@@ -174,33 +174,33 @@ Sudoku::DancingLinkTable Sudoku::generate(){
     return ret;
 } 
 
-static Sudoku::logic::LogicalMove forceMove(Sudoku::DancingLinkTable &table) {
-    Sudoku::logic::LogicalMove move;
-    auto colToCover = Sudoku::smallestColumn(table.root.get(), true);
+static sudoku::logic::LogicalMove forceMove(sudoku::DancingLinkTable &table) {
+    sudoku::logic::LogicalMove move;
+    auto colToCover = sudoku::smallestColumn(table.root.get(), true);
     for (auto row = colToCover->down; row != colToCover; row = row->down) {
-        auto found = Sudoku::containsLinkEqual(row, table.solution.begin(), table.solution.end());
+        auto found = sudoku::containsLinkEqual(row, table.solution.begin(), table.solution.end());
         if (found == table.solution.end()) {
             continue;
         }
 
-        move.diff = (colToCover->count * 2) > (Sudoku::eDifficulties - 1) ? (Sudoku::difficulty)(Sudoku::eDifficulties - 1) : (Sudoku::difficulty)(colToCover->count * 2);
-        move.type = Sudoku::logic::eLogicInsert;
+        move.diff = (colToCover->count * 2) > (sudoku::eDifficulties - 1) ? (sudoku::difficulty)(sudoku::eDifficulties - 1) : (sudoku::difficulty)(colToCover->count * 2);
+        move.type = sudoku::logic::eLogicInsert;
         move.truths.push_back(row);
         break;
     }
     return move;
 }
 
-static Sudoku::DancingLink * getTrueLink(Sudoku::DancingLinkTable &table, Sudoku::logic::LogicalMove move) {
-    Sudoku::DancingLink *ret;
+static sudoku::DancingLink * getTrueLink(sudoku::DancingLinkTable &table, sudoku::logic::LogicalMove move) {
+    sudoku::DancingLink *ret;
     switch (move.type) {
-        case Sudoku::logic::eLogicInsert:
+        case sudoku::logic::eLogicInsert:
             ret = move.truths[0];
             break;
 
-        case Sudoku::logic::eLogicPencil:
+        case sudoku::logic::eLogicPencil:
             for (auto *link : move.truths) {
-                auto found = Sudoku::containsLinkEqual(link, table.solution.begin(), table.solution.end());
+                auto found = sudoku::containsLinkEqual(link, table.solution.begin(), table.solution.end());
                 if (found  == table.solution.end()) {
                     continue;
                 }
@@ -214,16 +214,16 @@ static Sudoku::DancingLink * getTrueLink(Sudoku::DancingLinkTable &table, Sudoku
     return ret;
 }
 
-static Sudoku::difficulty grade(Sudoku::DancingLinkTable &table, Sudoku::difficulty requested_difficulty) {
-    Sudoku::difficulty highestDifficulty = (Sudoku::difficulty)0;
-    std::vector<Sudoku::Move> moveHistory;
-    Sudoku::DancingLinkContainer toBeAdded;
+static sudoku::difficulty grade(sudoku::DancingLinkTable &table, sudoku::difficulty requested_difficulty) {
+    sudoku::difficulty highestDifficulty = (sudoku::difficulty)0;
+    std::vector<sudoku::Move> moveHistory;
+    sudoku::DancingLinkContainer toBeAdded;
     while (table.root.get() != table.root->right) {
-        if (Sudoku::kill_threads) {
-            return Sudoku::eAny;
+        if (sudoku::kill_threads) {
+            return sudoku::eAny;
         }
-        auto move = Sudoku::logic::getNextMove(Sudoku::SudokuPuzzle(table), true);
-        if (move.type == Sudoku::logic::eMoveNotFound) {
+        auto move = sudoku::logic::getNextMove(sudoku::SudokuPuzzle(table), true);
+        if (move.type == sudoku::logic::eMoveNotFound) {
             move = forceMove(table);
         }
 
@@ -247,7 +247,7 @@ static Sudoku::difficulty grade(Sudoku::DancingLinkTable &table, Sudoku::difficu
         table.current.insert(table.current.end(), toBeAdded.begin(), toBeAdded.end());
         for (const auto &link : toBeAdded) {
             link->colHeader->cover();
-            Sudoku::cover_link(link);
+            sudoku::cover_link(link);
         }
         // Need to recalculate since we added some to current
         return grade(table, requested_difficulty);
@@ -256,23 +256,23 @@ static Sudoku::difficulty grade(Sudoku::DancingLinkTable &table, Sudoku::difficu
     return highestDifficulty;
 }
 
-static bool makeMove(const Sudoku::logic::LogicalMove &move, std::vector<Sudoku::Move> &moveHistory) {
+static bool makeMove(const sudoku::logic::LogicalMove &move, std::vector<sudoku::Move> &moveHistory) {
     bool ret = false;
     switch (move.type) {
-        case Sudoku::logic::eLogicPencil: // Remove all pencilmarks that are false
+        case sudoku::logic::eLogicPencil: // Remove all pencilmarks that are false
             for (auto *f : move.falses) {
-                Sudoku::cover_row(f);
+                sudoku::cover_row(f);
                 ret = true;
-                moveHistory.push_back({Sudoku::Move::eCoverRow, f});
+                moveHistory.push_back({sudoku::Move::eCoverRow, f});
             }
             break;
 
-        case Sudoku::logic::eLogicInsert: // Insert all cells found in true
+        case sudoku::logic::eLogicInsert: // Insert all cells found in true
             for (auto *t : move.truths) {
                 t->colHeader->cover();
-                Sudoku::cover_link(t);
+                sudoku::cover_link(t);
                 ret = true;
-                moveHistory.push_back({Sudoku::Move::eCoverFull, t});
+                moveHistory.push_back({sudoku::Move::eCoverFull, t});
             }
             break;
 
@@ -282,14 +282,14 @@ static bool makeMove(const Sudoku::logic::LogicalMove &move, std::vector<Sudoku:
     return ret;
 }
 
-static void unmakeMove(const Sudoku::Move &move) {
+static void unmakeMove(const sudoku::Move &move) {
     switch (move.type) {
-        case Sudoku::Move::eCoverRow:
-            Sudoku::uncover_row(move.link);
+        case sudoku::Move::eCoverRow:
+            sudoku::uncover_row(move.link);
             break;
         
-        case Sudoku::Move::eCoverFull:
-            Sudoku::uncover_link(move.link);
+        case sudoku::Move::eCoverFull:
+            sudoku::uncover_link(move.link);
             move.link->colHeader->uncover();
             break;
 

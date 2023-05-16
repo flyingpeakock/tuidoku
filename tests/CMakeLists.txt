@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.20)
 set(CMAKE_CXX_STANDARD 20)
 
 set(UNIT_TESTS tuidoku_unit_tests)
-set(SUDOKU_LIBRARY Sudoku)
+set(SUDOKU_LIBRARY sudoku)
 
 set(MAIN_SRC_DIR ../src/)
 
@@ -17,7 +17,7 @@ set(TEST_SOURCES
     logic.cpp
 )
 
-add_subdirectory(${MAIN_SRC_DIR}/Sudoku main_src/Sudoku)
+add_subdirectory(${MAIN_SRC_DIR}/sudoku main_src/sudoku)
 
 enable_testing()
 add_executable(${UNIT_TESTS} ${TEST_SOURCES})

@@ -6,7 +6,7 @@
 
 #include "DancingLinkObjects.h"  // for DancingLinkContainer, DancingLink
 
-namespace Sudoku {
+namespace sudoku {
 
     /**
      * @brief Get the Row index of DancingLink

@@ -12,15 +12,15 @@
  * @brief vector containing all the methods used to find wrong moves
  * 
  */
-static std::vector<bool (*)(const Sudoku::SudokuPuzzle &puzzle, Sudoku::logic::LogicalMove &move)> mistakes = {
-    &Sudoku::logic::foundIllogicalInput,
-    &Sudoku::logic::foundIllogicalPencil,
-    &Sudoku::logic::foundWrongRemovedPencil,
-    &Sudoku::logic::foundMissingPencilMark,
-    &Sudoku::logic::foundWrongInput,
+static std::vector<bool (*)(const sudoku::SudokuPuzzle &puzzle, sudoku::logic::LogicalMove &move)> mistakes = {
+    &sudoku::logic::foundIllogicalInput,
+    &sudoku::logic::foundIllogicalPencil,
+    &sudoku::logic::foundWrongRemovedPencil,
+    &sudoku::logic::foundMissingPencilMark,
+    &sudoku::logic::foundWrongInput,
 };
 
-bool Sudoku::logic::foundIllogicalInput(const SudokuPuzzle &puzzle, LogicalMove &move) {
+bool sudoku::logic::foundIllogicalInput(const SudokuPuzzle &puzzle, LogicalMove &move) {
     if (puzzle.wrong_inputs.size() == 0) return false;
     move.type = eLogicErrorInsert;
     move.diff = eBeginner;
@@ -28,7 +28,7 @@ bool Sudoku::logic::foundIllogicalInput(const SudokuPuzzle &puzzle, LogicalMove 
     return true;
 }
 
-bool Sudoku::logic::foundIllogicalPencil(const SudokuPuzzle &puzzle, LogicalMove &move) {
+bool sudoku::logic::foundIllogicalPencil(const SudokuPuzzle &puzzle, LogicalMove &move) {
     if (puzzle.wrong_marks.size() == 0) return false;
     move.type = eLogicErrorPencil;
     move.diff = eBeginner;
@@ -36,7 +36,7 @@ bool Sudoku::logic::foundIllogicalPencil(const SudokuPuzzle &puzzle, LogicalMove
     return true;
 }
 
-bool Sudoku::logic::foundWrongRemovedPencil(const SudokuPuzzle &puzzle, LogicalMove &move) {
+bool sudoku::logic::foundWrongRemovedPencil(const SudokuPuzzle &puzzle, LogicalMove &move) {
     for (const auto &i : puzzle.removed_marks) {
         auto found = false;
         for (auto link : puzzle.constraintTable.solution) {
@@ -55,7 +55,7 @@ bool Sudoku::logic::foundWrongRemovedPencil(const SudokuPuzzle &puzzle, LogicalM
     return false;
 }
 
-bool Sudoku::logic::foundMissingPencilMark(const SudokuPuzzle &puzzle, LogicalMove &move) {
+bool sudoku::logic::foundMissingPencilMark(const SudokuPuzzle &puzzle, LogicalMove &move) {
     for (auto col = puzzle.constraintTable.root->right; col != puzzle.constraintTable.root.get(); col = col->right) {
         for (auto row = col->down; row != col; row = row->down) {
             bool foundInMarks = false;
@@ -77,7 +77,7 @@ bool Sudoku::logic::foundMissingPencilMark(const SudokuPuzzle &puzzle, LogicalMo
     return false;
 }
 
-bool Sudoku::logic::foundWrongInput(const SudokuPuzzle &puzzle, LogicalMove &move) {
+bool sudoku::logic::foundWrongInput(const SudokuPuzzle &puzzle, LogicalMove &move) {
     for (auto i = puzzle.constraintTable.current.begin() + puzzle.current_start_index; i < puzzle.constraintTable.current.end(); i++) {
         auto found = false;
         for (const auto &link : puzzle.constraintTable.solution) {
@@ -96,8 +96,8 @@ bool Sudoku::logic::foundWrongInput(const SudokuPuzzle &puzzle, LogicalMove &mov
     return false;
 }
 
-Sudoku::logic::LogicalMove Sudoku::logic::foundMistake(const SudokuPuzzle &puzzle) {
-    Sudoku::logic::LogicalMove move;
+sudoku::logic::LogicalMove sudoku::logic::foundMistake(const SudokuPuzzle &puzzle) {
+    sudoku::logic::LogicalMove move;
     move.type = eMoveNotFound;
     for (auto &method : mistakes) {
         if (method(puzzle, move)) {
@@ -107,7 +107,7 @@ Sudoku::logic::LogicalMove Sudoku::logic::foundMistake(const SudokuPuzzle &puzzl
     return move;
 }
 
-static int cumm_count(const Sudoku::DancingLink *col) {
+static int cumm_count(const sudoku::DancingLink *col) {
     int ret = 0;
     for (auto row = col->down; row != col; row = row->down) {
         for (auto next = row->right; next != row; next = next->right) {
@@ -117,7 +117,7 @@ static int cumm_count(const Sudoku::DancingLink *col) {
     return ret;
 }
 
-Sudoku::logic::LogicalMove Sudoku::logic::getNextMove(const Sudoku::SudokuPuzzle &puzzle, bool ignore_mistakes) {
+sudoku::logic::LogicalMove sudoku::logic::getNextMove(const sudoku::SudokuPuzzle &puzzle, bool ignore_mistakes) {
     if (!ignore_mistakes) {
         auto mistakes = foundMistake(puzzle);
         if (mistakes.type != eMoveNotFound) {
@@ -149,7 +149,7 @@ Sudoku::logic::LogicalMove Sudoku::logic::getNextMove(const Sudoku::SudokuPuzzle
     return move;
 }
 
-bool Sudoku::logic::foundSingle(const DancingLink *column, LogicalMove &move) {
+bool sudoku::logic::foundSingle(const DancingLink *column, LogicalMove &move) {
     move.diff = eBeginner;
     move.type = eLogicInsert;
     move.truths.push_back(column->down);
@@ -161,17 +161,17 @@ bool Sudoku::logic::foundSingle(const DancingLink *column, LogicalMove &move) {
  *        matching links are constraint columns that contain all the rows in candidates
  *
  * @param candidates vector of candidates all in the same constraint column
- * @return std::vector<Sudoku::DancingLinkColumn *> vector of all columns
+ * @return std::vector<sudoku::DancingLinkColumn *> vector of all columns
  */
-static Sudoku::DancingLinkContainer getMatchingLinks(Sudoku::DancingLinkContainer &candidates) {
-    Sudoku::DancingLinkContainer ret;
+static sudoku::DancingLinkContainer getMatchingLinks(sudoku::DancingLinkContainer &candidates) {
+    sudoku::DancingLinkContainer ret;
     int count = candidates.size();
 
     for (auto curr_col = candidates[0]->right; curr_col != candidates[0]; curr_col = curr_col->right) {
         int this_count = 1; // start at one since we aren't counting curr_col
         for (auto curr_row = curr_col->down; curr_row != curr_col; curr_row = curr_row->down) {
             if (curr_row == curr_row->colHeader) continue;
-            auto found = Sudoku::containsLinkEqual(curr_row, candidates.begin() + 1, candidates.end());
+            auto found = sudoku::containsLinkEqual(curr_row, candidates.begin() + 1, candidates.end());
             if (found != candidates.end()) {
                 this_count++;
             }
@@ -183,7 +183,7 @@ static Sudoku::DancingLinkContainer getMatchingLinks(Sudoku::DancingLinkContaine
     return ret;
 }
 
-bool Sudoku::logic::foundLockedCandidates(const DancingLink *column, const DancingLinkContainer &candidates, const DancingLinkContainer &links, LogicalMove &move) {
+bool sudoku::logic::foundLockedCandidates(const DancingLink *column, const DancingLinkContainer &candidates, const DancingLinkContainer &links, LogicalMove &move) {
     bool ret = false;
 
     move.type = eLogicPencil; // Found pencil marks to remove
@@ -212,10 +212,10 @@ bool Sudoku::logic::foundLockedCandidates(const DancingLink *column, const Danci
     return ret;
 }
 
-static bool foundLinks(Sudoku::DancingLinkContainer &candidates,
-                      std::vector<Sudoku::DancingLinkContainer> &intersections,
-                      const Sudoku::DancingLinkContainer::const_iterator &begin,
-                      const Sudoku::DancingLinkContainer::const_iterator &end,
+static bool foundLinks(sudoku::DancingLinkContainer &candidates,
+                      std::vector<sudoku::DancingLinkContainer> &intersections,
+                      const sudoku::DancingLinkContainer::const_iterator &begin,
+                      const sudoku::DancingLinkContainer::const_iterator &end,
                       int depth,
                       int count)
 {
@@ -227,17 +227,17 @@ static bool foundLinks(Sudoku::DancingLinkContainer &candidates,
         while (candidates.size() > size) {
             candidates.pop_back();
         }
-        std::vector<Sudoku::DancingLinkContainer> seen;
+        std::vector<sudoku::DancingLinkContainer> seen;
         auto seen_idx = 0;
         bool invalid_column = false;
         for (auto cand = column->down; cand != column; cand = cand->down) {
-            auto found = Sudoku::containsLinkEqual(cand, candidates.begin(), candidates.end());
+            auto found = sudoku::containsLinkEqual(cand, candidates.begin(), candidates.end());
             if (found != candidates.end()) {
                 invalid_column = true;
                 break;
             }
             candidates.push_back(cand);
-            seen.push_back(Sudoku::DancingLinkContainer());
+            seen.push_back(sudoku::DancingLinkContainer());
             for (auto seen_con = cand->right; seen_con != cand; seen_con = seen_con->right) {
                 seen[seen_idx].push_back(seen_con->colHeader);
             }
@@ -249,11 +249,11 @@ static bool foundLinks(Sudoku::DancingLinkContainer &candidates,
         }
 
         auto copy = intersections;
-        std::vector<Sudoku::DancingLinkContainer> new_intersections;
+        std::vector<sudoku::DancingLinkContainer> new_intersections;
         for (auto i = copy.begin(); i < copy.end(); i++) {
-            Sudoku::DancingLinkContainer new_intersections_inner = *i;
+            sudoku::DancingLinkContainer new_intersections_inner = *i;
             for (auto j = seen.begin(); j < seen.end(); j++) {
-                Sudoku::DancingLinkContainer temp; // An intersection between a row in this column and in previous column
+                sudoku::DancingLinkContainer temp; // An intersection between a row in this column and in previous column
                 std::set_intersection(std::begin(new_intersections_inner),
                                       std::end(new_intersections_inner),
                                       std::begin(*j),
@@ -286,7 +286,7 @@ static bool foundLinks(Sudoku::DancingLinkContainer &candidates,
     return false;
 }
 
-void getAllSeenHelper(Sudoku::DancingLinkContainer &vec, const Sudoku::DancingLink *column, int count, int depth) {
+void getAllSeenHelper(sudoku::DancingLinkContainer &vec, const sudoku::DancingLink *column, int count, int depth) {
     for (auto row = column->down; row != column; row = row->down) {
         if (row->colHeader == row) continue;
         for (auto col = row->right; col != row; col = col->right) {
@@ -300,8 +300,8 @@ void getAllSeenHelper(Sudoku::DancingLinkContainer &vec, const Sudoku::DancingLi
     }
 }
 
-Sudoku::DancingLinkContainer getAllSeen(const Sudoku::DancingLinkColumn *column, int count) {
-    Sudoku::DancingLinkContainer ret;
+sudoku::DancingLinkContainer getAllSeen(const sudoku::DancingLinkColumn *column, int count) {
+    sudoku::DancingLinkContainer ret;
     getAllSeenHelper(ret, column, count, 1);
     if (ret.size() > 1) {
         std::sort(ret.begin(), ret.end());
@@ -311,7 +311,7 @@ Sudoku::DancingLinkContainer getAllSeen(const Sudoku::DancingLinkColumn *column,
     return ret;
 }
 
-bool Sudoku::logic::xlogic(const DancingLink *column, LogicalMove &move) {
+bool sudoku::logic::xlogic(const DancingLink *column, LogicalMove &move) {
     auto count = column->count;
 
     if (count > 4) return false;
@@ -382,9 +382,9 @@ bool Sudoku::logic::xlogic(const DancingLink *column, LogicalMove &move) {
                 && ((move.truths.back()->colHeader->constraintType == eConstraintRow)
                     || (move.truths.back()->colHeader->constraintType == eConstraintCol)))
             {
-                auto func = &Sudoku::getColFromLink;
+                auto func = &sudoku::getColFromLink;
                 if (move.truths.front()->colHeader->constraintType == eConstraintRow) {
-                    func = &Sudoku::getRowFromLink;
+                    func = &sudoku::getRowFromLink;
                 }
 
                 if (func(move.truths.front()) != func(move.truths.back())) {

@@ -1,4 +1,4 @@
 #pragma once
 
-#include "../src/Sudoku/Sudoku.h"
+#include "../src/sudoku/sudoku.h"
 

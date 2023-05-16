@@ -1,12 +1,12 @@
 #include <memory>                // for shared_ptr, __shared_ptr_access
 
-#include "Sudoku.h"              // for smallestColumn, solve
+#include "sudoku.h"              // for smallestColumn, solve
 #include "DancingLink.h"         // for cover_link, uncover_link
 #include "DancingLinkObjects.h"  // for DancingLinkColumn, DancingLinkTable
 
-static bool backTrack(Sudoku::DancingLinkTable &table, Sudoku::DancingLink **current_solution, unsigned int depth, unsigned int *solution_count, bool randomize);
+static bool backTrack(sudoku::DancingLinkTable &table, sudoku::DancingLink **current_solution, unsigned int depth, unsigned int *solution_count, bool randomize);
 
-bool Sudoku::solve(DancingLinkTable &table, bool randomize) {
+bool sudoku::solve(DancingLinkTable &table, bool randomize) {
     unsigned int solution_count = 0;
     DancingLink *solution[eBoardSize];
     backTrack(table, solution, 0, &solution_count, randomize);
@@ -22,7 +22,7 @@ bool Sudoku::solve(DancingLinkTable &table, bool randomize) {
  * @return true if a solution is found
  * @return false if no solution is found
  */
-static bool backTrack(Sudoku::DancingLinkTable &table, Sudoku::DancingLink **current_solution, unsigned int depth, unsigned int *solution_count, bool randomize) {
+static bool backTrack(sudoku::DancingLinkTable &table, sudoku::DancingLink **current_solution, unsigned int depth, unsigned int *solution_count, bool randomize) {
     bool should_ret = false;
     if (table.root->right == table.root.get()) {
         (*solution_count)++;
@@ -35,14 +35,14 @@ static bool backTrack(Sudoku::DancingLinkTable &table, Sudoku::DancingLink **cur
         return true;
     }
 
-    Sudoku::DancingLinkColumn *col = smallestColumn(table.root.get(), randomize);
+    sudoku::DancingLinkColumn *col = smallestColumn(table.root.get(), randomize);
 
     col->cover();
-    for (Sudoku::DancingLink *row = col->down; row != col; row = row->down) {
+    for (sudoku::DancingLink *row = col->down; row != col; row = row->down) {
         current_solution[depth] = row;
-        Sudoku::cover_link(row);
+        sudoku::cover_link(row);
         should_ret = backTrack(table, current_solution, depth+1, solution_count, randomize) && *solution_count > 1;
-        Sudoku::uncover_link(row);
+        sudoku::uncover_link(row);
         if (should_ret) {
             col->uncover();
             return should_ret;

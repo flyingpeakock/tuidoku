@@ -1,4 +1,4 @@
-#include "Sudoku.h"
+#include "sudoku.h"
 
 #include <array>           // for array
 #include <compare>         // for operator<, __synth3way_t
@@ -8,24 +8,24 @@
 #include "Logic.h"         // for getNextMove
 #include "SudokuPuzzle.h"  // for SudokuPuzzle, Move
 
-static void uncoverInVector(std::vector<Sudoku::Move> &vector, Sudoku::DancingLink *link);
+static void uncoverInVector(std::vector<sudoku::Move> &vector, sudoku::DancingLink *link);
 
-Sudoku::SudokuPuzzle::SudokuPuzzle(Sudoku::DancingLinkTable &table) :
+sudoku::SudokuPuzzle::SudokuPuzzle(sudoku::DancingLinkTable &table) :
     constraintTable(table),
     current_start_index(table.current.size()) {
 }
 
-void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
+void sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
     if ((num < '1') || num > '9') {
         // invalid input
         return;
     }
 
-    auto found = Sudoku::containsLinkEquivalent(row, col, constraintTable.current.begin(), constraintTable.current.end());
+    auto found = sudoku::containsLinkEquivalent(row, col, constraintTable.current.begin(), constraintTable.current.end());
     if (found != constraintTable.current.end()) {
         return; // filled in square
     }
-    found = Sudoku::containsLinkEquivalent(row, col, wrong_inputs.begin(), wrong_inputs.end());
+    found = sudoku::containsLinkEquivalent(row, col, wrong_inputs.begin(), wrong_inputs.end());
     if (found != wrong_inputs.end()) {
         return; // filled in square
     }
@@ -56,19 +56,19 @@ void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
      * auto pencil should be handled in another function
      */
 
-    found = Sudoku::containsLinkEqual(row, col, num - '1', wrong_marks.begin(), wrong_marks.end());
+    found = sudoku::containsLinkEqual(row, col, num - '1', wrong_marks.begin(), wrong_marks.end());
     if (found != wrong_marks.end()) {
         wrong_marks.erase(found);
         return;
     }
 
-    found = Sudoku::containsLinkEqual(row, col, num - '1', pencilMarks.begin(), pencilMarks.end());
-    if ((found != pencilMarks.end()) && (!Sudoku::isUncovered(*found))) {
+    found = sudoku::containsLinkEqual(row, col, num - '1', pencilMarks.begin(), pencilMarks.end());
+    if ((found != pencilMarks.end()) && (!sudoku::isUncovered(*found))) {
         wrong_marks.push_back(*found);
         return;
     }
 
-    found = Sudoku::containsLinkEqual(row, col, num - '1', removed_marks.begin(), removed_marks.end());
+    found = sudoku::containsLinkEqual(row, col, num - '1', removed_marks.begin(), removed_marks.end());
     if (found != removed_marks.end()) {
         // Putting back a mark that was removed
         uncoverInVector(moves, *found);
@@ -77,9 +77,9 @@ void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
         return;
     }
 
-    found = Sudoku::containsLinkEqual(row, col, num - '1', pencilMarks.begin(), pencilMarks.end());
+    found = sudoku::containsLinkEqual(row, col, num - '1', pencilMarks.begin(), pencilMarks.end());
     if (found != pencilMarks.end()) {
-        Sudoku::cover_row(*found);
+        sudoku::cover_row(*found);
         removed_marks.push_back(*found);
         moves.push_back({Move::eCoverRow, *found});
         pencilMarks.erase(found);
@@ -87,13 +87,13 @@ void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
     }
 
     int constraints[eConstraintTypes];
-    Sudoku::calculateConstraintColumns(constraints, row, col, num - '1');
+    sudoku::calculateConstraintColumns(constraints, row, col, num - '1');
     for (auto loop = 0; loop < 2; loop++) {
         for (const auto &i : constraints) {
             auto colHeader = &constraintTable.colHeaders->at(i);
-            if ((Sudoku::isUncovered(colHeader)) || (loop > 0)) {
+            if ((sudoku::isUncovered(colHeader)) || (loop > 0)) {
                 for (auto r = colHeader->down; r != colHeader; r = r->down) {
-                    if (Sudoku::isLinkValues(r, row, col, num - '1')) {
+                    if (sudoku::isLinkValues(r, row, col, num - '1')) {
                         if (loop == 0) {
                             pencilMarks.push_back(r);
                         }
@@ -108,9 +108,9 @@ void Sudoku::SudokuPuzzle::pencil(int row, int col, char num) {
     }
 }
 
-void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
+void sudoku::SudokuPuzzle::insert(int row, int col, char num) {
     // Checking if position is a clue
-    auto found = Sudoku::containsLinkEquivalent(row, col, constraintTable.current.begin(), constraintTable.current.begin() + current_start_index);
+    auto found = sudoku::containsLinkEquivalent(row, col, constraintTable.current.begin(), constraintTable.current.begin() + current_start_index);
     if (found != constraintTable.current.begin() + current_start_index) {
         return;
     }
@@ -135,23 +135,23 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
 
     // Checking if position already filled
     // in wrong input
-    found = Sudoku::containsLinkEquivalent(row, col, wrong_inputs.begin(), wrong_inputs.end());
+    found = sudoku::containsLinkEquivalent(row, col, wrong_inputs.begin(), wrong_inputs.end());
     if (found != wrong_inputs.end()) {
         wrong_inputs.erase(found);
         recheckMistakes(*found);
-        if ((num - '1') == Sudoku::getNumFromLink(*found)) {
+        if ((num - '1') == sudoku::getNumFromLink(*found)) {
             // Removed if number already there
             return;
         }
     }
     else {
         // checking in current
-        found = Sudoku::containsLinkEquivalent(row, col, constraintTable.current.begin() + current_start_index, constraintTable.current.end());
+        found = sudoku::containsLinkEquivalent(row, col, constraintTable.current.begin() + current_start_index, constraintTable.current.end());
         if (found != constraintTable.current.end()) {
             uncoverInVector(moves, *found);
             constraintTable.current.erase(found);
             recheckMistakes(*found);
-            if ((num - '1') == Sudoku::getNumFromLink(*found)) {
+            if ((num - '1') == sudoku::getNumFromLink(*found)) {
                 // Removed if number is already there
                 return;
             }
@@ -160,7 +160,7 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
 
     // The cell at row col is now empty
     // Check if it is missing from constraint table because of removed pencil
-    found = Sudoku::containsLinkEqual(row, col, num - '1', removed_marks.begin(), removed_marks.end());
+    found = sudoku::containsLinkEqual(row, col, num - '1', removed_marks.begin(), removed_marks.end());
     if (found != removed_marks.end()) {
         uncoverInVector(moves, *found);
         removed_marks.erase(found);
@@ -168,13 +168,13 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
 
     // Add chosen link to current and cover
     int constraints[eConstraintTypes];
-    Sudoku::calculateConstraintColumns(constraints, row, col, num - '1');
+    sudoku::calculateConstraintColumns(constraints, row, col, num - '1');
     for (auto i : constraints) {
-        if (Sudoku::isUncovered(&constraintTable.colHeaders->at(i))) {
+        if (sudoku::isUncovered(&constraintTable.colHeaders->at(i))) {
             for (auto link = constraintTable.colHeaders->at(i).down; link != &constraintTable.colHeaders->at(i); link = link->down) {
-                if (Sudoku::isLinkValues(link, row, col, num - '1')) {
+                if (sudoku::isLinkValues(link, row, col, num - '1')) {
                     link->colHeader->cover();
-                    Sudoku::cover_link(link);
+                    sudoku::cover_link(link);
                     constraintTable.current.push_back(link);
                     moves.push_back({Move::eCoverFull, link});
                     recheckMistakes(link);
@@ -185,9 +185,9 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
     }
 
     // Could not find uncovered, force one from buffer
-    for (auto i = 0; i < Sudoku::eBufferSize; i += eConstraintTypes) {
+    for (auto i = 0; i < sudoku::eBufferSize; i += eConstraintTypes) {
         auto current = &constraintTable.buffer->at(i);
-        if (Sudoku::isLinkValues(current, row, col, num - '1')) {
+        if (sudoku::isLinkValues(current, row, col, num - '1')) {
             wrong_inputs.push_back(current);
             return;
         }
@@ -195,12 +195,12 @@ void Sudoku::SudokuPuzzle::insert(int row, int col, char num) {
 }
 
 
-void Sudoku::SudokuPuzzle::recheckMistakes(Sudoku::DancingLink *link) {
-    if (Sudoku::isUncovered(link)) {
+void sudoku::SudokuPuzzle::recheckMistakes(sudoku::DancingLink *link) {
+    if (sudoku::isUncovered(link)) {
         // Has removed
         /* if pencil mark is now uncovered it is valid, add to pencil marks*/
         for (auto i = wrong_marks.begin(), end = wrong_marks.end(); i < end; ) {
-            if (Sudoku::isUncovered(*i)) {
+            if (sudoku::isUncovered(*i)) {
                 pencilMarks.push_back(*i);
                 i = wrong_marks.erase(i);
                 end = wrong_marks.end();
@@ -225,10 +225,10 @@ void Sudoku::SudokuPuzzle::recheckMistakes(Sudoku::DancingLink *link) {
         }
     }
     for (auto i = wrong_inputs.begin(), end = wrong_inputs.end(); i < end; ){
-        if (Sudoku::isUncovered(*i)) {
+        if (sudoku::isUncovered(*i)) {
             // Cover instead of just putting in mistakes
             (*i)->colHeader->cover();
-            Sudoku::cover_link(*i);
+            sudoku::cover_link(*i);
             // No longer wrong so add to current
             constraintTable.current.push_back(*i);
             moves.push_back({Move::eCoverFull, *i});
@@ -242,7 +242,7 @@ void Sudoku::SudokuPuzzle::recheckMistakes(Sudoku::DancingLink *link) {
     }
 }
 
-void Sudoku::SudokuPuzzle::autoPencil() {
+void sudoku::SudokuPuzzle::autoPencil() {
     pencilMarks.clear();
     wrong_marks.clear();
     for (auto col = constraintTable.root->right; col != constraintTable.root.get(); col = col->right) {
@@ -256,22 +256,22 @@ void Sudoku::SudokuPuzzle::autoPencil() {
     }
 }
 
-void Sudoku::SudokuPuzzle::getNextMove() {
-    nextMove = Sudoku::logic::getNextMove(*this, false);
+void sudoku::SudokuPuzzle::getNextMove() {
+    nextMove = sudoku::logic::getNextMove(*this, false);
 }
 
-void Sudoku::removeFromPuzzle(Sudoku::SudokuPuzzle *puzzle, int row, int col) {
+void sudoku::removeFromPuzzle(sudoku::SudokuPuzzle *puzzle, int row, int col) {
     int cur_row, cur_col;
 
     // Checking if exists in wrong_inputs
-    auto found = Sudoku::containsLinkEquivalent(row, col, puzzle->wrong_inputs.begin(), puzzle->wrong_inputs.end());
+    auto found = sudoku::containsLinkEquivalent(row, col, puzzle->wrong_inputs.begin(), puzzle->wrong_inputs.end());
     if (found != puzzle->wrong_inputs.end()) {
         puzzle->wrong_inputs.erase(found);
         return;
     }
 
     // Checking if exists in current
-    found = Sudoku::containsLinkEquivalent(row, col, puzzle->constraintTable.current.begin() + puzzle->current_start_index, puzzle->constraintTable.current.end());
+    found = sudoku::containsLinkEquivalent(row, col, puzzle->constraintTable.current.begin() + puzzle->current_start_index, puzzle->constraintTable.current.end());
     if (found == puzzle->constraintTable.current.end()) {
         // Does not exist
         return;
@@ -281,17 +281,17 @@ void Sudoku::removeFromPuzzle(Sudoku::SudokuPuzzle *puzzle, int row, int col) {
     puzzle->recheckMistakes(*found);
 }
 
-bool Sudoku::canSee(Sudoku::DancingLink *link_l, Sudoku::DancingLink *link_r) {
-    int row[2] = {Sudoku::getRowFromLink(link_l), Sudoku::getRowFromLink(link_r)};
-    int col[2] = {Sudoku::getColFromLink(link_l), Sudoku::getColFromLink(link_r)};
-    int num[2] = {Sudoku::getNumFromLink(link_l), Sudoku::getNumFromLink(link_r)};
+bool sudoku::canSee(sudoku::DancingLink *link_l, sudoku::DancingLink *link_r) {
+    int row[2] = {sudoku::getRowFromLink(link_l), sudoku::getRowFromLink(link_r)};
+    int col[2] = {sudoku::getColFromLink(link_l), sudoku::getColFromLink(link_r)};
+    int num[2] = {sudoku::getNumFromLink(link_l), sudoku::getNumFromLink(link_r)};
 
-    int constraints[2][Sudoku::eConstraintTypes];
+    int constraints[2][sudoku::eConstraintTypes];
     for (auto i = 0; i < 2; i++) {
-        Sudoku::calculateConstraintColumns(constraints[i], row[i], col[i], num[i]);
+        sudoku::calculateConstraintColumns(constraints[i], row[i], col[i], num[i]);
     }
 
-    for (auto i = 0; i < Sudoku::eConstraintTypes; i++) {
+    for (auto i = 0; i < sudoku::eConstraintTypes; i++) {
         if (constraints[0][i] == constraints[1][i]) {
             return true;
         }
@@ -299,7 +299,7 @@ bool Sudoku::canSee(Sudoku::DancingLink *link_l, Sudoku::DancingLink *link_r) {
     return false;
 }
 
-static void uncoverInVector(std::vector<Sudoku::Move> &vector, Sudoku::DancingLink *link) {
+static void uncoverInVector(std::vector<sudoku::Move> &vector, sudoku::DancingLink *link) {
     /*
      * We need to uncover everything behind link and store the links
      * then we need to uncover link
@@ -307,13 +307,13 @@ static void uncoverInVector(std::vector<Sudoku::Move> &vector, Sudoku::DancingLi
      * when covering and uncovering remove and append to current
      */
 
-    std::vector<Sudoku::Move> uncovered;
+    std::vector<sudoku::Move> uncovered;
 
     while(true) {
         auto current = vector.back();
         vector.pop_back();
-        if (current.type == Sudoku::Move::moveType::eCoverFull) {
-            Sudoku::uncover_link(current.link);
+        if (current.type == sudoku::Move::moveType::eCoverFull) {
+            sudoku::uncover_link(current.link);
             current.link->colHeader->uncover();
             if (current.link == link) {
                 // Dont add to uncovered
@@ -321,7 +321,7 @@ static void uncoverInVector(std::vector<Sudoku::Move> &vector, Sudoku::DancingLi
             }
         }
         else {
-            Sudoku::uncover_row(current.link);
+            sudoku::uncover_row(current.link);
             if (current.link == link) {
                 // Don't add to covered
                 break;
@@ -331,12 +331,12 @@ static void uncoverInVector(std::vector<Sudoku::Move> &vector, Sudoku::DancingLi
     }
 
     for (auto l : uncovered) {
-        if (l.type == Sudoku::Move::moveType::eCoverFull) {
+        if (l.type == sudoku::Move::moveType::eCoverFull) {
             l.link->colHeader->cover();
             cover_link(l.link);
         }
         else {
-            Sudoku::cover_row(l.link);
+            sudoku::cover_row(l.link);
         }
         vector.push_back(l);
     }

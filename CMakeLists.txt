@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 20)
 
 set(PROJECT_NAME tuidoku)
-set(SUDOKU_LIBRARY Sudoku)
+set(SUDOKU_LIBRARY sudoku)
 
 project(${PROJECT_NAME} CXX)
 
@@ -29,7 +29,7 @@ set(SOURCES
     src/Tui/Tui.cpp
 )
 
-add_subdirectory(src/Sudoku)
+add_subdirectory(src/sudoku)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE src)

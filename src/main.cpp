@@ -2,38 +2,38 @@
 #include <vector>                       // for vector
 
 #include "Tui/Tui.h"                    // for Tui
-#include "Sudoku/DancingLinkObjects.h"  // for eSize, DancingLinkContainer
+#include "sudoku/DancingLinkObjects.h"  // for eSize, DancingLinkContainer
 
-void printPuzzle(Sudoku::DancingLinkTable *table) {
-    int array[Sudoku::eSize][Sudoku::eSize] = {0};
+void printPuzzle(sudoku::DancingLinkTable *table) {
+    int array[sudoku::eSize][sudoku::eSize] = {0};
 
-    Sudoku::DancingLinkContainer innertable = table->solution;
+    sudoku::DancingLinkContainer innertable = table->solution;
     int index = 0;
     for (auto &current : innertable) {
         int count = current->count;
-        int i = count / (Sudoku::eBoardSize);
-        int j = (count % Sudoku::eBoardSize) / Sudoku::eSize;
-        int num = (count % Sudoku::eSize) + 1;
+        int i = count / (sudoku::eBoardSize);
+        int j = (count % sudoku::eBoardSize) / sudoku::eSize;
+        int num = (count % sudoku::eSize) + 1;
         array[i][j] = num;
     }
 
-    char text[Sudoku::eBoardSize + 1] = {'\0'};
-    for (auto i = 0; i < Sudoku::eSize; i++) {
-        for (auto j = 0; j < Sudoku::eSize; j++) {
-            text[(i * Sudoku::eSize) + j] = array[i][j] + '0';
+    char text[sudoku::eBoardSize + 1] = {'\0'};
+    for (auto i = 0; i < sudoku::eSize; i++) {
+        for (auto j = 0; j < sudoku::eSize; j++) {
+            text[(i * sudoku::eSize) + j] = array[i][j] + '0';
         }
     }
     std::cout << (const char *)text << '\n';
 }
 
 int main(int argc, char *argv[]) {
-    //Tui::Board(Sudoku::generate());
+    //Tui::Board(sudoku::generate());
     //Tui::test();
     /*
     for (auto i = 0; i < 100; i++) {
-        //Sudoku::DancingLinkTable table(true);
-        //Sudoku::solve(&table, true);
-        auto table = Sudoku::generate();
+        //sudoku::DancingLinkTable table(true);
+        //sudoku::solve(&table, true);
+        auto table = sudoku::generate();
         printPuzzle(&table);
     }
     Conf::init();
@@ -41,11 +41,11 @@ int main(int argc, char *argv[]) {
     Tui::down_key = Conf::keyBind("down");
     Tui::select_key = '\n';
     */
-    //auto table = Sudoku::generate("240030001590010320000020004352146897400389512189572643020093100600051009900060030"); // triple
-    //auto table = Sudoku::generate(Sudoku::eAny);
-    //auto table = Sudoku::generate(Sudoku::eHard);
+    //auto table = sudoku::generate("240030001590010320000020004352146897400389512189572643020093100600051009900060030"); // triple
+    //auto table = sudoku::generate(sudoku::eAny);
+    //auto table = sudoku::generate(sudoku::eHard);
 
-    Tui::Tui tui;
+    tui::Tui tui;
     tui.runLoop();
     return 0;
 }
