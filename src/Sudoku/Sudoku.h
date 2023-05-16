@@ -1,14 +1,16 @@
 #ifndef SUDOKU_H
 #define SUDOKU_H
 
-#include "Constants.h"
-#include "DancingLink.h"
-#include "SudokuPuzzle.h"
-#include "Logic.h"
-#include <random>
-#include <thread>
+#include <random>                // for mt19937, random_device, uniform_int_...
+#include <atomic>                // for atomic
+#include <string>                // for string
+#include <vector>                // for vector
+
+#include "Constants.h"           // for difficulty
+#include "DancingLinkObjects.h"  // for DancingLinkColumn, DancingLinkTable
 
 namespace Sudoku {
+struct SudokuPuzzle;
 
     extern std::atomic<bool> kill_threads;
 

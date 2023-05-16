@@ -1,11 +1,23 @@
-#include "Sudoku.h"
-#include "DancingLinkObjects.h"
-#include "Logic.h"
-#include <cstring>
-#include <algorithm>
-#include <random>
-#include <future>
-#include <chrono>
+#include <bits/chrono.h>         // for operator""ms, chrono_literals
+#include <cxxabi.h>              // for __forced_unwind
+#include <future>                // for future, async, future_status, launch
+#include <array>                 // for array
+#include <atomic>                // for atomic
+#include <compare>               // for operator<, compare_three_way_result_t
+#include <memory>                // for shared_ptr, __shared_ptr_access
+#include <stdexcept>             // for invalid_argument
+#include <string>                // for basic_string, string
+#include <system_error>          // for system_error
+#include <thread>                // for thread
+#include <utility>               // for move
+#include <vector>                // for vector
+
+#include "Sudoku.h"              // for solve, generate, smallestColumn
+#include "DancingLinkObjects.h"  // for DancingLinkContainer, DancingLinkTable
+#include "Logic.h"               // for getNextMove
+#include "Constants.h"           // for LogicalMove, difficulty, moveType
+#include "DancingLink.h"         // for cover_link, containsLinkEqual, uncov...
+#include "SudokuPuzzle.h"        // for Move, SudokuPuzzle
 
 std::atomic<bool> Sudoku::kill_threads = false;
 

@@ -1,9 +1,10 @@
 #ifndef DANCING_LINK_H
 #define DANCING_LINK_H
 
-#include "Constants.h"
-#include "DancingLinkObjects.h"
-#include <array>
+#include <compare>               // for operator<, __synth3way_t
+#include <vector>                // for vector
+
+#include "DancingLinkObjects.h"  // for DancingLinkContainer, DancingLink
 
 namespace Sudoku {
 

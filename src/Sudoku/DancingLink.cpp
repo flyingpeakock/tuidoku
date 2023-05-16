@@ -1,5 +1,7 @@
-#include "Sudoku.h"
-#include <random>
+#include <random>  // for mt19937, random_device, uniform_int_distribution
+#include <array>   // for array
+#include <memory>  // for shared_ptr, __shared_ptr_access, make_shared
+
 #include "DancingLink.h"
 
 using namespace Sudoku;

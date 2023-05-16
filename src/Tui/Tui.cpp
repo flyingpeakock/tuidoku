@@ -1,12 +1,30 @@
 #include "Tui.h"
-#include <chrono>
-#include <ctime>
-#include <thread>
-#include <ftxui/dom/elements.hpp>
-#include <ftxui/component/event.hpp>
-#include <ftxui/component/captured_mouse.hpp>
-#include <ftxui/component/mouse.hpp>
-#include <ftxui/component/loop.hpp>
+
+#include <ftxui/dom/elements.hpp>                 // for operator|, text
+#include <ftxui/component/event.hpp>              // for Event
+#include <ftxui/component/mouse.hpp>              // for Mouse
+#include <ftxui/component/loop.hpp>               // for Loop
+#include <bits/chrono.h>                          // for operator""ms, chron...
+#include <cxxabi.h>                               // for __forced_unwind
+#include <ftxui/component/component_options.hpp>  // for EntryState, MenuOption
+#include <ftxui/dom/canvas.hpp>                   // for Canvas
+#include <ftxui/dom/flexbox_config.hpp>           // for FlexboxConfig
+#include <ftxui/screen/box.hpp>                   // for ftxui
+#include <ftxui/screen/color.hpp>                 // for Color
+#include <ftxui/screen/screen.hpp>                // for Pixel, Screen
+#include <ctime>                                  // for time
+#include <thread>                                 // for sleep_for
+#include <atomic>                                 // for atomic
+#include <functional>                             // for function
+#include <memory>                                 // for allocator, __shared...
+#include <string>                                 // for string, char_traits
+#include <system_error>                           // for system_error
+#include <utility>                                // for move
+#include <vector>                                 // for vector
+
+#include "Sudoku/DancingLink.h"                   // for getNumFromLink, isU...
+#include "Sudoku/Sudoku.h"                        // for canSee, generate
+#include "ftxui/dom/elements.hpp"                 // for hbox, vbox, dbox
 
 using namespace ftxui;
 
@@ -95,7 +113,7 @@ void Tui::Tui::runLoop() {
     };
 
     /* Gets set to the chosen index in menu */
-    int choice = 0;
+    static int choice = 0;
 
     /* Setting menu style */
     MenuOption option = MenuOption::Vertical();

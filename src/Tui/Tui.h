@@ -1,13 +1,18 @@
 #ifndef TUI_H
 #define TUI_H
 
-#include <ftxui/screen/screen.hpp>
-#include <ftxui/dom/canvas.hpp>
-#include <ftxui/component/screen_interactive.hpp>
-#include <ftxui/component/component.hpp>
-#include <Sudoku/Sudoku.h>
-#include <Sudoku/Logic.h>
-#include <future>
+#include <ftxui/component/screen_interactive.hpp>  // for ScreenInteractive
+#include <ftxui/component/component.hpp>           // for ComponentDecorator
+#include <ftxui/component/component_base.hpp>      // for Component
+#include <future>                                  // for future
+
+#include "Sudoku/Constants.h"                      // for difficulty
+#include "Sudoku/DancingLinkObjects.h"             // for DancingLinkTable
+#include "Sudoku/SudokuPuzzle.h"                   // for SudokuPuzzle
+
+namespace ftxui {
+struct Event;
+}  // namespace ftxui
 
 namespace Tui {
     enum stateEnum {

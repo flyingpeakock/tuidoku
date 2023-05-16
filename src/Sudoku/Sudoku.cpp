@@ -1,5 +1,13 @@
 #include "Sudoku.h"
 
+#include <array>           // for array
+#include <compare>         // for operator<, __synth3way_t
+#include <memory>          // for shared_ptr, __shared_ptr_access
+
+#include "DancingLink.h"   // for containsLinkEqual, containsLinkEquivalent
+#include "Logic.h"         // for getNextMove
+#include "SudokuPuzzle.h"  // for SudokuPuzzle, Move
+
 static void uncoverInVector(std::vector<Sudoku::Move> &vector, Sudoku::DancingLink *link);
 
 Sudoku::SudokuPuzzle::SudokuPuzzle(Sudoku::DancingLinkTable &table) :

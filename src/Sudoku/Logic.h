@@ -2,9 +2,9 @@
 #define SUDOKU_LOGIC_H
 
 //#include "Sudoku.h"
-#include "Constants.h"
-#include "SudokuPuzzle.h"
-#include <array>
+#include "Constants.h"           // for LogicalMove
+#include "SudokuPuzzle.h"        // for SudokuPuzzle
+#include "DancingLinkObjects.h"  // for DancingLinkContainer
 
 namespace Sudoku {
     namespace logic {

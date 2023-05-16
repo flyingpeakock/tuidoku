@@ -1,5 +1,8 @@
-#include "Tui/Tui.h"
-#include <iostream>
+#include <iostream>                     // for operator<<, basic_ostream, cout
+#include <vector>                       // for vector
+
+#include "Tui/Tui.h"                    // for Tui
+#include "Sudoku/DancingLinkObjects.h"  // for eSize, DancingLinkContainer
 
 void printPuzzle(Sudoku::DancingLinkTable *table) {
     int array[Sudoku::eSize][Sudoku::eSize] = {0};

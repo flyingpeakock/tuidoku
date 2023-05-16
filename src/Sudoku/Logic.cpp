@@ -1,6 +1,12 @@
 #include "Logic.h"
-#include <algorithm>
-#include <iterator>
+
+#include <algorithm>      // for sort, set_intersection, unique
+#include <iterator>       // for back_insert_iterator, begin, end, back_inse...
+#include <compare>        // for operator<, __synth3way_t
+#include <memory>         // for shared_ptr, __shared_ptr_access
+#include <vector>         // for vector
+
+#include "DancingLink.h"  // for containsLinkEqual, getColFromLink, getRowFr...
 
 /**
  * @brief vector containing all the methods used to find wrong moves

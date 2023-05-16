@@ -1,5 +1,8 @@
-#include "Sudoku.h"
-#include <random>
+#include <memory>                // for shared_ptr, __shared_ptr_access
+
+#include "Sudoku.h"              // for smallestColumn, solve
+#include "DancingLink.h"         // for cover_link, uncover_link
+#include "DancingLinkObjects.h"  // for DancingLinkColumn, DancingLinkTable
 
 static bool backTrack(Sudoku::DancingLinkTable &table, Sudoku::DancingLink **current_solution, unsigned int depth, unsigned int *solution_count, bool randomize);
 
