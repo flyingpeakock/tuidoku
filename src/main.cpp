@@ -1,6 +1,3 @@
-#include <iostream>                     // for operator<<, basic_ostream, cout
-#include <vector>                       // for vector
-
 #include "Tui/Tui.h"                    // for Tui
 #include "sudoku/DancingLinkObjects.h"  // for eSize, DancingLinkContainer
 
