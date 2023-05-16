@@ -57,8 +57,23 @@ static void setMouseRowCol(int &row, int &col, int m_row, int m_col);
  */
 static Element sudokuFrame(Element inner, float focus);
 
+/**
+ * @brief Create element that contains help text
+ *
+ * @param focus_y where the focus is on the frame
+ * @return Element 
+ */
 static Element helpElement(float focus_y);
 
+/**
+ * @brief parse mouse inputs
+ * 
+ * @param event mouse event
+ * @param row row to set
+ * @param col col to set
+ * @return true if parsed
+ * @return false if not parsed
+ */
 bool parseMouse(Event event, int &row, int &col) {
     auto m = event.mouse();
     if (m.button == Mouse::Button::None) {
@@ -71,6 +86,10 @@ bool parseMouse(Event event, int &row, int &col) {
     return true;
 }
 
+/**
+ * @brief Construct a new Tui:: Tui:: Tui object
+ * 
+ */
 Tui::Tui::Tui() :
     screen(ScreenInteractive::FitComponent()),
     difficulty(Sudoku::eAny),
@@ -96,6 +115,10 @@ Tui::Tui::Tui() :
 {
 }
 
+/**
+ * @brief Main tui loop
+ * 
+ */
 void Tui::Tui::runLoop() {
     int tab_drawn = 0;
     std::string table_text = "Choose Puzzle";
