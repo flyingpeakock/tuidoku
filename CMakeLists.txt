@@ -24,6 +24,14 @@ IF(NOT ftxui_POPULATED)
     add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
 ENDIF()
 
+# Fetch libconfig++
+FetchContent_Declare(
+    libconfig++
+    GIT_REPOSITORY https://github.com/hyperrealm/libconfig
+    GIT_TAG v1.7.3
+)
+find_package(libconfig++)
+
 set(SOURCES
     src/main.cpp
     src/Tui/Tui.cpp
@@ -38,6 +46,7 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE ftxui::screen
     PRIVATE ftxui::dom
     PRIVATE ftxui::component
+    PRIVATE ${LIBCONFIG++_LIBRARIES}
 )
 
 install(TARGETS ${PROJECT_NAME})
