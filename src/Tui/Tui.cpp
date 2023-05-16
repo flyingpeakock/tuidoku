@@ -144,12 +144,12 @@ void tui::Tui::runLoop() {
         Element e = hbox(text(state.label), filler());
         if (state.label.find("Exit") != std::string::npos) {
             if (state.active) {
-                e = e | bold | bgcolor(Color::Red);
+                e = e | bold | blink | bgcolor(Color::Red);
             }
             e = vbox(separator(), e);
         }
         else if (state.active) {
-            e = e | bold | bgcolor(Color::DarkOrange);
+            e = e | bold | blink | bgcolor(Color::DarkOrange);
         }
         return e;
     };
