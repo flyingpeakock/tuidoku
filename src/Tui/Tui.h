@@ -18,47 +18,39 @@ namespace Tui {
         eHelp,
     };
 
-    /*
-    struct PuzzleCanvas : public ftxui::Canvas {
-        PuzzleCanvas();
-        void DrawPuzzle(const Sudoku::SudokuPuzzle &puzzle);
-
-        ftxui::Element getCanvas();
-        bool parseMouse(ftxui::Event event);
-        bool parseKeys(ftxui::Event event);
-
-        int row;
-        int col;
-        char selected;
-        bool showNextMove;
-    };
-    */
-
     class Tui {
         public:
         Tui();
         void runLoop();
 
         private:
+
+        /* States */
         int row;
         int col;
         char selected;
         float focus_y;
-
         Sudoku::difficulty difficulty;
         stateEnum state;
-        ftxui::ScreenInteractive screen;
-        //PuzzleCanvas puzzleCanvas;
         bool generating_puzzle;
 
+        ftxui::ScreenInteractive screen;
+
+        /* Sudoku Puzzle */
         std::future<Sudoku::DancingLinkTable> table_promise;
         Sudoku::DancingLinkTable table;
         Sudoku::SudokuPuzzle puzzle;
 
+        /* Parsers */
         ftxui::ComponentDecorator parseInput;
         void parseMenuChoice(int choice);
-
         bool parseEvent(ftxui::Event event, Sudoku::SudokuPuzzle &puzzle);
+
+
+        /* Renderers*/
+        ftxui::Component board_renderer;
+        ftxui::Component help_renderer;
+        void setCursor();
     };
 }
 

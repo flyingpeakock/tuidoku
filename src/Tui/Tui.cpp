@@ -11,88 +11,14 @@
 using namespace ftxui;
 
 /**
- * @brief Draw the puzzle table, a puzzle with no filled in numbers
+ * @brief Draws a sudoku puzzzle on a canvas
  * 
- * @param c Canvas to draw on, where the dimentions are at least width = 73 * 2, height = 37 * 4
+ * @param puzzleCanvas canvas to draw on
+ * @param puzzle constraint table
+ * @param selected value to highlight
  */
-static void drawPuzzleTable(Canvas &c);
+void DrawPuzzle(Canvas &puzzleCanvas, const Sudoku::SudokuPuzzle &puzzle, char selected);
 
-/**
- * @brief Draw a DancingLink * on the board
- * 
- * @param c canvas to draw on
- * @param link which link to draw
- * @param style which style to use
- */
-static void drawFilledCell(Canvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style);
-
-/**
- * @brief Draws a DancingLink * as a pencil mark on the board
- * 
- * @param c canvas to draw on
- * @param link which link to draw
- * @param style which style to use
- */
-static void drawPencil(Canvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style);
-
-/**
- * @brief Draws all the visible pencilMarks
- * 
- * @param c Canvas to draw on
- * @param selected character that is currently selected '1' - '9'
- * @param pencils vector containing links of pencilmarks
- * @param pencilError vector containing links of pencilmarks that are illogical
- * @param wrong_inputs vector containing links of inputs that are illogical
- */
-static void drawAllPencils(Canvas &c,
-                           const char selected,
-                           const Sudoku::DancingLinkContainer &pencils,
-                           const Sudoku::DancingLinkContainer &pencilError,
-                           const Sudoku::DancingLinkContainer &wrong_inputs);
-
-/**
- * @brief Draws all the visiable inputs
- * 
- * @param c Canvas to draw on
- * @param selected Character that is currenly is selected '1' - '9'
- * @param inputs vector containing link of inputs
- * @param errors vector containing links of illogical inputs
- * @param current_start_index index where inputs turn from clues to guesses
- */
-static void drawAllFilled(Canvas &c, 
-                          const char selected,
-                          const Sudoku::DancingLinkContainer &inputs,
-                          const Sudoku::DancingLinkContainer &errors,
-                          const int current_start_index);
-
-/**
- * @brief Print the next move on the board
- * 
- * @param c Canvas to draw on
- * @param move Sudoku::logic::Move object to draw
- */
-static void drawNextMove(Canvas &c, const Sudoku::logic::LogicalMove &move);
-
-/**
- * @brief Set the Cursor shape and position
- * 
- * @param s screen to draw cursor on
- * @param row row in puzzle
- * @param col column in puzzle
- * @param isPencil is in pencil mode
- */
-static void setCursor(Screen &s, const int row, const int col, bool isPencil);
-
-/**
- * @brief checks if the puzzle is completed
- * 
- * @param root root of the contraint table
- * @return true if not done
- * @return false if done
- */
-static inline bool isPlaying(Sudoku::DancingLink *root) {
-    return root->right != root;
-}
 
 /**
  * @brief Set the row and column on mouse clicks
@@ -104,22 +30,16 @@ static inline bool isPlaying(Sudoku::DancingLink *root) {
  */
 static void setMouseRowCol(int &row, int &col, int m_row, int m_col);
 
-/*
-Tui::PuzzleCanvas::PuzzleCanvas() :
-    Canvas(146, 148),
-    selected(0), row(0), col(0)
-{
-}
-*/
+/**
+ * @brief Create a frame with a double border the same size as a sudoku puzzle
+ * 
+ * @param inner element that should be in the frame
+ * @param focus where the focus is on the frame
+ * @return Element frame
+ */
+static Element sudokuFrame(Element inner, float focus);
 
-void DrawPuzzle(Canvas &puzzleCanvas, const Sudoku::SudokuPuzzle &puzzle, char selected) {
-    drawPuzzleTable(puzzleCanvas);
-    drawAllPencils(puzzleCanvas, selected, puzzle.pencilMarks, puzzle.wrong_marks, puzzle.wrong_inputs);
-    drawAllFilled(puzzleCanvas, selected, puzzle.constraintTable.current, puzzle.wrong_inputs, puzzle.current_start_index);
-    if (puzzle.nextMove.type != Sudoku::logic::eMoveNotFound) {
-        drawNextMove(puzzleCanvas, puzzle.nextMove);
-    }
-}
+static Element helpElement(float focus_y);
 
 bool parseMouse(Event event, int &row, int &col) {
     auto m = event.mouse();
@@ -133,48 +53,6 @@ bool parseMouse(Event event, int &row, int &col) {
     return true;
 }
 
-bool parseKeys(Event event, int &row, int &col) {
-    bool key_pressed = false;
-    if ((event == Event::Character("h")) || (event == Event::ArrowLeft)) {
-        col--;
-        key_pressed = true;
-    }
-    else if ((event == Event::Character("j")) || (event == Event::ArrowDown)) {
-        row++;
-        key_pressed = true;
-    }
-    else if ((event == Event::Character("k")) || (event == Event::ArrowUp)) {
-        row--;
-        key_pressed = true;
-    }
-    else if ((event == Event::Character("l")) || (event == Event::ArrowRight)) {
-        col++;
-        key_pressed = true;
-    }
-    if (key_pressed) {
-        if (col == 9) {
-            col = 0;
-        }
-        else if (col < 0) {
-            col = 8;
-        }
-
-        if (row == 9) {
-            row = 0;
-        }
-        else if (row < 0) {
-            row = 8;
-        }
-    }
-    return key_pressed;
-}
-
-/*
-ftxui::Element Tui::PuzzleCanvas::getCanvas() {
-    return canvas(static_cast<ftxui::Canvas>(*this));
-}
-*/
-
 Tui::Tui::Tui() :
     screen(ScreenInteractive::FitComponent()),
     difficulty(Sudoku::eAny),
@@ -185,7 +63,18 @@ Tui::Tui::Tui() :
     row(0),
     col(0),
     selected(0),
-    focus_y(0.0f)
+    focus_y(0.0f),
+    parseInput(CatchEvent([&](Event event){
+        return parseEvent(event, puzzle);
+    })),
+    board_renderer(Renderer([&]{
+        Canvas puzzleCanvas(146, 148);
+        DrawPuzzle(puzzleCanvas, puzzle, selected);
+        return canvas(std::move(puzzleCanvas));
+    })),
+    help_renderer(Renderer([&]{
+        return helpElement(focus_y);
+    }))
 {
 }
 
@@ -230,13 +119,6 @@ void Tui::Tui::runLoop() {
         parseMenuChoice(choice);
     };
 
-    /* Board renderer */
-    auto board_renderer = Renderer([&]{
-        Canvas puzzleCanvas(146, 148);
-        DrawPuzzle(puzzleCanvas, puzzle, selected);
-        return canvas(std::move(puzzleCanvas));
-    });
-
     /* Creating menu title and border */
     auto difficulty_menu = Menu(&difficulties, &choice, &option);
     auto menu_renderer = Renderer(difficulty_menu, [&]{
@@ -247,85 +129,6 @@ void Tui::Tui::runLoop() {
                     })
                    );
     });
-
-    /* Help text renderer */
-    auto help_renderer = Renderer([&]{
-        FlexboxConfig outer, inner;
-        int width = 73;
-        int height = 37;
-        return
-            vbox(
-            text("Tuidoku, Sudoku for the terminal") | bold,
-            separatorEmpty(),
-            hbox(
-            vbox(text("Keys") | bold,
-            separatorLight(),
-            hbox(text("0-9"), filler(), text("Insert or remove")),
-            hbox(text("h"), filler(), text("Move left")),
-            hbox(text("H"), filler(), text("Show hint")),
-            hbox(text("i"), filler(), text("Insert mode")),
-            hbox(text("j"), filler(), text("Move down")),
-            hbox(text("k"), filler(), text("Move up")),
-            hbox(text("l"), filler(), text("Move right")),
-            hbox(text("p"), filler(), text("Pencil mode")),
-            hbox(text("P"), filler(), text("Fill pencil marks")),
-            hbox(text("q"), filler(), text("Quit")),
-            hbox(text("?"), filler(), text("Show this page"))) | size(WIDTH, EQUAL, (width / 3) + 5),
-            filler(),
-            vbox(text("Mouse") | bold,
-            separatorLight(),
-            hbox(text("Click"), filler(), text("Move to cell")),
-            hbox(text("Right-click"), filler(), text("Insert or pencil"))) | size(WIDTH, EQUAL, (width / 3) + 5)
-            ),
-            separatorEmpty(),
-            text("Behaviour") | bold,
-            separatorLight(),
-            vbox({
-                flexbox({text("Insert") | bold, filler(), paragraph(R"(When in insert mode the cursor should be block shaped. Pressing on a digit 0-9 in this mode inserts that digit in the cell if the cell is not a clue. Illogical inputs are highlighted, note that merely incorrect inputs will not be highlighted. Right-clicking on a cell when in input mode will insert the highlighted number into that cell if that number appears as a pencil-mark there.)"),}, inner),
-                separatorEmpty(),
-                flexbox({text("Pencil") | bold, filler(), paragraph(R"(When in pencil mode the cursor should be bar shaped. Pressing on a digit 1-9 in this mode will either mark or unmark that digit in the selected cell as long as that cell is empty. Illogical marks are highlighted, note that merely incorrect marks will not be highlighted. Right-clicking on an empty cell in this mode will either mark or unmark the highlighted number into that cell.)"),}, inner),
-                separatorEmpty(),
-                flexbox({text("Highlight") | bold, filler(), paragraph(R"(To select a number simply press the number key. To avoid changing the board unintentionally it is useful to insert on an underlined number or pencil on any filled cell. All occurences of that number will be highlighted.)"),}, inner),
-                separatorEmpty(),
-                flexbox({text("Mistakes") | bold, filler(), paragraph(R"(Pencil-marks or inputs that are illogical are shown. Illogical inputs or marks are inputs or marks that already appear in that row, column or box. Simply incorrect moves are not shown unless hints are visible.)"),}, inner),
-                separatorEmpty(),
-                flexbox({text("Hints") | bold, filler(), paragraph(R"(If There are any mistakes on the board they will be shown by showing hints. Pencil marks that are possible but that have yet to be added are also shown as hints. The green cells in a hint make up a truth, one or more of them must be true. None of the red cells in a hint can be true because of the relationship between the green cells.)")}, inner),
-            })
-        ) | borderEmpty | vscroll_indicator | focusPositionRelative(0, focus_y) | yframe | borderDouble | size(WIDTH, EQUAL, width) | size(HEIGHT, EQUAL, height) ;
-    });
-
-    /* Parse input for everything */
-    parseInput = CatchEvent([&](Event event){
-        if (state == eMenu) {
-            if (event == Event::Character('q')) {
-                selected = 0;
-                puzzle.nextMove.type = Sudoku::logic::eMoveNotFound;
-                state = eExit;
-                return true;
-            }
-            if (generating_puzzle) {
-                using namespace std::chrono_literals;
-                auto status = table_promise.wait_for(0ms);
-                if (status == std::future_status::ready) {
-                    table = table_promise.get();
-                    puzzle = Sudoku::SudokuPuzzle(table);
-                    state = eInsert;
-                    generating_puzzle = false;
-                }
-            }
-            if (event != Event::Character('?')) {
-                return generating_puzzle; // Use defualt menu keys
-            }
-        }
-        if (table.root->right == table.root.get()) {
-            state = eMenu;
-            selected = 0;
-            puzzle.nextMove.type = Sudoku::logic::eMoveNotFound;
-            return true;
-        }
-        return parseEvent(event, puzzle);
-    });
-
 
     /* Tab to choose which renderer to render */
     auto container = Container::Tab({
@@ -353,23 +156,19 @@ void Tui::Tui::runLoop() {
         }
         else if (state == eHelp) {
             tab_drawn = 2;
-            Screen::Cursor cursor;
-            cursor.shape = Screen::Cursor::Hidden;
-            screen.SetCursor(cursor);
         }
         else {
             tab_drawn = 0;
-            setCursor(screen, row, col, state == ePencil);
         }
 
         if (state == eExit) {
             screen.ExitLoopClosure()();
         }
+        setCursor();
 
         return container->Render();
     });
 
-    //screen.Loop(renderer);
     Loop loop(&screen, renderer);
     while (!loop.HasQuitted()) {
         if (generating_puzzle) {
@@ -426,171 +225,221 @@ void Tui::Tui::parseMenuChoice(int choice) {
 bool Tui::Tui::parseEvent(Event event, Sudoku::SudokuPuzzle &puzzle) {
     bool key_pressed = false;
     static stateEnum previousState = eInsert;
-    if (state == eHelp) {
-        if (event.is_character()) {
-            if (event == Event::Character('k')) {
-                focus_y -= 0.1f;
-                if (focus_y > 0.7f) { focus_y = 0.6f; }
-            }
-            else if (event == Event::Character('j')) {
-                focus_y += 0.1f;
-                if (focus_y < 0.3f) {focus_y = 0.4f; };
-            }
-            else {
-                focus_y = 0.0f;
-                state = previousState;
-            }
-            return true;
+    if (event == Event::Character('?')) {
+        if (state == eHelp) {
+            state = previousState;
         }
-        if (event.is_mouse()) {
-            auto m = event.mouse();
-            if (m.button != Mouse::Button::None && m.motion == Mouse::Motion::Pressed) {
-                state = previousState;
-                return true;
-            }
+        else {
+            previousState = state;
+            state = eHelp;
         }
-        return false;
+        return true;
     }
-    if (event.is_character()) {
-        if (parseKeys(event, row, col)) {
-            key_pressed = true;
+
+    if (event == Event::Character("q")) {
+        selected = 0;
+        if (state != eMenu) {
+            state = eMenu;
         }
-        else if (event == Event::Character("q")) {
-            selected = 0;
-            if (state != eMenu) {
-                state = eMenu;
-            }
-            else {
-                state = eExit;
-            }
-            key_pressed = true;
+        else {
+            state = eExit;
         }
-        else if (event == Event::Character("p")) {
-            state = ePencil;
-            key_pressed = true;
-        }
-        else if (event == Event::Character("i")) {
-            state = eInsert;
-            key_pressed = true;
-        }
-        else if (event == Event::Character("P")) {
-            puzzle.autoPencil();
-            key_pressed = true;
-        }
-        else if (event == Event::Character("H")) {
-            if (puzzle.nextMove.type == Sudoku::logic::eMoveNotFound) {
-                puzzle.getNextMove();
-                key_pressed = true;
-            }
-            else {
+        return true;
+    }
+
+    switch (state) {
+        case eMenu:
+            if (event == Event::Character('q')) {
+                selected = 0;
                 puzzle.nextMove.type = Sudoku::logic::eMoveNotFound;
-            }
-        }
-        else if (event == Event::Character("?")) {
-            if (state == eHelp) {
-                state = previousState;
-            }
-            else {
-                previousState = state;
-                state = eHelp;
-            }
-            key_pressed = true;
-        }
-        else if ((state == eInsert) &&
-            ((event == Event::Character(" "))
-            || (event == Event::Delete)
-            || (event == Event::Backspace))) {
-                Sudoku::removeFromPuzzle(&puzzle, row, col);
+                state = eExit;
                 key_pressed = true;
             }
-        if (!key_pressed) {
-            char pressed = event.character()[0];
-            if ((pressed >= '0') && (pressed <= '9')) {
-                if (state == eInsert) {
-                    puzzle.insert(row, col, pressed);
+            else if (generating_puzzle) {
+                using namespace std::chrono_literals;
+                auto status = table_promise.wait_for(0ms);
+                if (status == std::future_status::ready) {
+                    table = table_promise.get();
+                    puzzle = Sudoku::SudokuPuzzle(table);
+                    state = eInsert;
+                    generating_puzzle = false;
+                    key_pressed = true;
+                }
+            }
+            break;
+        
+        case eHelp:
+            if (event.is_character()) {
+                if (event == Event::Character('k')) {
+                    focus_y -= 0.1f;
+                    if (focus_y > 0.7f) { focus_y = 0.6f; }
+                }
+                else if (event == Event::Character('j')) {
+                    focus_y += 0.1f;
+                    if (focus_y < 0.3f) {focus_y = 0.4f; }
                 }
                 else {
-                    puzzle.pencil(row, col, pressed);
+                    focus_y = 0.0f;
+                    state = previousState;
                 }
-
-                selected = pressed;
                 key_pressed = true;
             }
-        }
-    }
-    else if (event.is_mouse()) {
-        key_pressed = parseMouse(event, row, col);
-        if (key_pressed && event.mouse().button == Mouse::Button::Left) {
+            else if (event.is_mouse()) {
+                auto m = event.mouse();
+                if (m.button == Mouse::Button::WheelUp) {
+                    focus_y -= 0.1f;
+                    if (focus_y > 0.7f) { focus_y = 0.6f; }
+                    key_pressed = true;
+                }
+                else if (m.button == Mouse::Button::WheelDown) {
+                    focus_y += 0.1f;
+                    if (focus_y < 0.3f) {focus_y = 0.4f; }
+                    key_pressed = true;
+                }
+                else if (m.button != Mouse::Button::None && m.motion == Mouse::Motion::Pressed) {
+                    focus_y = 0.0f;
+                    state = previousState;
+                    key_pressed = true;
+                }
+            }
+            break;
 
-            auto found = Sudoku::containsLinkEquivalent(row, col, puzzle.constraintTable.current.begin(), puzzle.constraintTable.current.end());
-            if (found != puzzle.constraintTable.current.end()) {
-                selected = Sudoku::getNumFromLink(*found) + '1';
-                return true; // This cell is filled
-            }
-            found = Sudoku::containsLinkEquivalent(row, col, puzzle.wrong_inputs.begin(), puzzle.wrong_inputs.end());
-            if (found != puzzle.wrong_inputs.end()) {
-                selected = Sudoku::getNumFromLink(*found) + '1';
-                return true; // This cell is filled
+        case eInsert: // Fallthrough
+            if (event.is_character()) {
+                if ((event == Event::Character(" "))
+                    || (event == Event::Delete)
+                    || (event == Event::Backspace)) {
+
+                        Sudoku::removeFromPuzzle(&puzzle, row, col);
+                        key_pressed = true;
+                        break;
+                }
             }
 
-            // If made it here pressed on an empty cell
-            if (selected < '1' || selected > '9') {
-                return true; // No number selected
+        case ePencil:
+            // Games is done
+            if (table.root->right == table.root.get()) {
+                state = eMenu;
+                selected = 0;
+                puzzle.nextMove.type = Sudoku::logic::eMoveNotFound;
+                key_pressed = true;
+                break;
             }
 
-            if (state == ePencil) {
-                puzzle.pencil(row, col, selected);
-                return true;
-            }
+            if (event.is_character()) {
+                if (event == Event::Character("h")) {
+                    col--;
+                    key_pressed = true;
+                }
+                else if (event == Event::Character("j")) {
+                    row++;
+                    key_pressed = true;
+                }
+                else if (event == Event::Character("k")) {
+                    row--;
+                    key_pressed = true;
+                }
+                else if (event == Event::Character("l")) {
+                    col++;
+                    key_pressed = true;
+                }
 
-            // only insert if visible pencilmark
-            found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.pencilMarks.begin(), puzzle.pencilMarks.end());
-            if (found != puzzle.pencilMarks.end() && Sudoku::isUncovered(*found)) {
-                puzzle.insert(row, col, selected);
-                return true;
-            }
-            found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.wrong_marks.begin(), puzzle.wrong_marks.end());
-            if (found != puzzle.wrong_marks.end()) {
-                for (auto &l : puzzle.wrong_inputs) {
-                    if (Sudoku::canSee(l, *found)) {
-                        return true; // Not a visible mark
+                if (key_pressed) {
+                    if (col == 9) {
+                        col = 0;
+                    }
+                    else if (col < 0) {
+                        col = 8;
+                    }
+
+                    if (row == 9) {
+                        row = 0;
+                    }
+                    else if (row < 0) {
+                        row = 8;
                     }
                 }
-                puzzle.insert(row, col, selected);
-                return true;
+                else if (event == Event::Character("p")) {
+                    state = ePencil;
+                    key_pressed = true;
+                }
+                else if (event == Event::Character("i")) {
+                    state = eInsert;
+                    key_pressed = true;
+                }
+                else if (event == Event::Character("P")) {
+                    puzzle.autoPencil();
+                    key_pressed = true;
+                }
+                else if (event == Event::Character("H")) {
+                    if (puzzle.nextMove.type == Sudoku::logic::eMoveNotFound) {
+                        puzzle.getNextMove();
+                    }
+                    else {
+                        puzzle.nextMove.type = Sudoku::logic::eMoveNotFound;
+                    }
+                    key_pressed = true;
+                }
+
+                if (!key_pressed) {
+                    char pressed = event.character()[0];
+                    if ((pressed >= '0') && (pressed <= '9')) {
+                        if (state == eInsert) {
+                            puzzle.insert(row, col, pressed);
+                        }
+                        else if (state == ePencil) {
+                            puzzle.pencil(row, col, pressed);
+                        }
+                        selected = pressed;
+                        key_pressed = true;
+                    }
+                }
             }
-        }
+            else if (event.is_mouse()) {
+                key_pressed = parseMouse(event, row, col);
+                if (key_pressed && event.mouse().button == Mouse::Button::Left) {
+                    // Insert or pencil as well
+                    auto found = Sudoku::containsLinkEquivalent(row, col, puzzle.constraintTable.current.begin(), puzzle.constraintTable.current.end());
+                    if (found != puzzle.constraintTable.current.end()) {
+                        selected = Sudoku::getNumFromLink(*found) + '1';
+                        break;
+                    }
+                    found = Sudoku::containsLinkEquivalent(row, col, puzzle.wrong_inputs.begin(), puzzle.wrong_inputs.end());
+                    if (found != puzzle.wrong_inputs.end()) {
+                        selected = Sudoku::getNumFromLink(*found) + '1';
+                        break;
+                    }
+
+                    if (selected < '1' || selected > '9') {
+                        break;
+                    }
+
+                    if (state == ePencil) {
+                        puzzle.pencil(row, col, selected);
+                    }
+                    else if (state == eInsert) {
+                        found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.pencilMarks.begin(), puzzle.pencilMarks.end());
+                        if (found != puzzle.pencilMarks.end() && Sudoku::isUncovered(*found)) {
+                            puzzle.insert(row, col, selected);
+                            return true;
+                        }
+                        found = Sudoku::containsLinkEqual(row, col, selected - '1', puzzle.wrong_marks.begin(), puzzle.wrong_marks.end());
+                        if (found != puzzle.wrong_marks.end()) {
+                            for (auto &l : puzzle.wrong_inputs) {
+                                if (Sudoku::canSee(l, *found)) {
+                                    return true; // Not a visible mark
+                                }
+                            }
+                            puzzle.insert(row, col, selected);
+                            return true;
+                        }
+                    }
+                }
+            }
+            break;
     }
+
     return key_pressed;
-}
-
-static void drawPuzzleTable(Canvas &c) {
-        const std::string toprow   = "╔═══════╤═══════╤═══════╦═══════╤═══════╤═══════╦═══════╤═══════╤═══════╗";
-        const std::string rowtype1 = "║       │       │       ║       │       │       ║       │       │       ║";
-        const std::string rowtype2 = "╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢";
-        const std::string rowtype3 = "╠═══════╪═══════╪═══════╬═══════╪═══════╪═══════╬═══════╪═══════╪═══════╣";
-        const std::string botrow   = "╚═══════╧═══════╧═══════╩═══════╧═══════╧═══════╩═══════╧═══════╧═══════╝";
-
-        auto style = [&] (Pixel &pixel) {
-            pixel.bold = true;
-        };
-
-        int height = 0;
-        c.DrawText(0, height, toprow, style);
-        for (auto i = 0; i < 3; i++) {
-            for (auto j = 0; j < 3; j++)
-                c.DrawText(0, (++height) * 4, rowtype1, style);
-            c.DrawText(0, (++height) * 4, rowtype2, style);
-            for (auto j = 0; j < 3; j++)
-                c.DrawText(0, (++height) * 4, rowtype1, style);
-            c.DrawText(0, (++height) * 4, rowtype2, style);
-            for (auto j = 0; j < 3; j++)
-                c.DrawText(0, (++height) * 4, rowtype1, style);
-            if (i != 2) {
-                c.DrawText(0, (++height) * 4, rowtype3, style);
-            }
-        }
-        c.DrawText(0, (++height) * 4, botrow, style);
 }
 
 static void drawFilledCell(Canvas &c, Sudoku::DancingLink *link, const Canvas::Stylizer &style){
@@ -727,17 +576,20 @@ static void drawAllFilled(Canvas &c,
     }
 }
 
-static void setCursor(Screen &s, const int row, const int col, bool isPencil) {
+void Tui::Tui::setCursor() {
     static Screen::Cursor cursor;
-    if (!isPencil) {
+    if (state == eInsert) {
         cursor.shape = Screen::Cursor::Shape::Block;
     }
-    else {
+    else if (state == ePencil) {
         cursor.shape = Screen::Cursor::Shape::Bar;
+    }
+    else {
+        cursor.shape = Screen::Cursor::Shape::Hidden;
     }
     cursor.x = 4 + (col * 8);
     cursor.y = 2 + (row * 4);
-    s.SetCursor(cursor);
+    screen.SetCursor(cursor);
 }
 
 static void setMouseRowCol(int &row, int &col, int m_row, int m_col) {
@@ -793,4 +645,93 @@ static void drawNextMove(Canvas &c, const Sudoku::logic::LogicalMove &move) {
     for (auto link : move.truths) {
         drawPencil(c, link, style_truth);
     }
+}
+
+static void drawPuzzleTable(Canvas &c) {
+        const std::string toprow   = "╔═══════╤═══════╤═══════╦═══════╤═══════╤═══════╦═══════╤═══════╤═══════╗";
+        const std::string rowtype1 = "║       │       │       ║       │       │       ║       │       │       ║";
+        const std::string rowtype2 = "╟───────┼───────┼───────╫───────┼───────┼───────╫───────┼───────┼───────╢";
+        const std::string rowtype3 = "╠═══════╪═══════╪═══════╬═══════╪═══════╪═══════╬═══════╪═══════╪═══════╣";
+        const std::string botrow   = "╚═══════╧═══════╧═══════╩═══════╧═══════╧═══════╩═══════╧═══════╧═══════╝";
+
+        auto style = [&] (Pixel &pixel) {
+            pixel.bold = false;
+        };
+
+        int height = 0;
+        c.DrawText(0, height, toprow, style);
+        for (auto i = 0; i < 3; i++) {
+            for (auto j = 0; j < 3; j++)
+                c.DrawText(0, (++height) * 4, rowtype1, style);
+            c.DrawText(0, (++height) * 4, rowtype2, style);
+            for (auto j = 0; j < 3; j++)
+                c.DrawText(0, (++height) * 4, rowtype1, style);
+            c.DrawText(0, (++height) * 4, rowtype2, style);
+            for (auto j = 0; j < 3; j++)
+                c.DrawText(0, (++height) * 4, rowtype1, style);
+            if (i != 2) {
+                c.DrawText(0, (++height) * 4, rowtype3, style);
+            }
+        }
+        c.DrawText(0, (++height) * 4, botrow, style);
+}
+
+void DrawPuzzle(Canvas &puzzleCanvas, const Sudoku::SudokuPuzzle &puzzle, char selected) {
+    drawPuzzleTable(puzzleCanvas);
+    drawAllPencils(puzzleCanvas, selected, puzzle.pencilMarks, puzzle.wrong_marks, puzzle.wrong_inputs);
+    drawAllFilled(puzzleCanvas, selected, puzzle.constraintTable.current, puzzle.wrong_inputs, puzzle.current_start_index);
+    if (puzzle.nextMove.type != Sudoku::logic::eMoveNotFound) {
+        drawNextMove(puzzleCanvas, puzzle.nextMove);
+    }
+}
+
+static Element sudokuFrame(Element inner, float focus) {
+    return borderDouble(
+        inner | vscroll_indicator | focusPositionRelative(0, focus) | yframe
+    ) | size(WIDTH, EQUAL, 73) | size(HEIGHT, EQUAL, 37);
+}
+
+static Element helpElement(float focus_y) {
+    FlexboxConfig inner;
+    int width = 73;
+    int height = 37;
+    return sudokuFrame(
+        vbox(
+        text("Tuidoku, Sudoku for the terminal") | bold,
+        separatorEmpty(),
+        hbox(
+        vbox(text("Keys") | bold,
+        separatorLight(),
+        hbox(text("0-9"), filler(), text("Insert or remove")),
+        hbox(text("h"), filler(), text("Move left")),
+        hbox(text("H"), filler(), text("Show hint")),
+        hbox(text("i"), filler(), text("Insert mode")),
+        hbox(text("j"), filler(), text("Move down")),
+        hbox(text("k"), filler(), text("Move up")),
+        hbox(text("l"), filler(), text("Move right")),
+        hbox(text("p"), filler(), text("Pencil mode")),
+        hbox(text("P"), filler(), text("Fill pencil marks")),
+        hbox(text("q"), filler(), text("Quit")),
+        hbox(text("?"), filler(), text("Show this page"))) | size(WIDTH, EQUAL, (width / 3) + 5),
+        filler(),
+        vbox(text("Mouse") | bold,
+        separatorLight(),
+        hbox(text("Click"), filler(), text("Move to cell")),
+        hbox(text("Right-click"), filler(), text("Insert or pencil"))) | size(WIDTH, EQUAL, (width / 3) + 5)
+        ),
+        separatorEmpty(),
+        text("Behaviour") | bold,
+        separatorLight(),
+        vbox({
+            flexbox({text("Insert") | bold, filler(), paragraph(R"(When in insert mode the cursor should be block shaped. Pressing on a digit 0-9 in this mode inserts that digit in the cell if the cell is not a clue. Illogical inputs are highlighted, note that merely incorrect inputs will not be highlighted. Right-clicking on a cell when in input mode will insert the highlighted number into that cell if that number appears as a pencil-mark there.)"),}, inner),
+            separatorEmpty(),
+            flexbox({text("Pencil") | bold, filler(), paragraph(R"(When in pencil mode the cursor should be bar shaped. Pressing on a digit 1-9 in this mode will either mark or unmark that digit in the selected cell as long as that cell is empty. Illogical marks are highlighted, note that merely incorrect marks will not be highlighted. Right-clicking on an empty cell in this mode will either mark or unmark the highlighted number into that cell.)"),}, inner),
+            separatorEmpty(),
+            flexbox({text("Highlight") | bold, filler(), paragraph(R"(To select a number simply press the number key. To avoid changing the board unintentionally it is useful to insert on an underlined number or pencil on any filled cell. All occurences of that number will be highlighted.)"),}, inner),
+            separatorEmpty(),
+            flexbox({text("Mistakes") | bold, filler(), paragraph(R"(Pencil-marks or inputs that are illogical are shown. Illogical inputs or marks are inputs or marks that already appear in that row, column or box. Simply incorrect moves are not shown unless hints are visible.)"),}, inner),
+            separatorEmpty(),
+            flexbox({text("Hints") | bold, filler(), paragraph(R"(If There are any mistakes on the board they will be shown by showing hints. Pencil marks that are possible but that have yet to be added are also shown as hints. The green cells in a hint make up a truth, one or more of them must be true. None of the red cells in a hint can be true because of the relationship between the green cells.)")}, inner),
+        })
+    ) | borderEmpty, focus_y);
 }
